@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Live smoke-check output (test/smoke), regenerated on each run.
+test/smoke/.last-result.json
