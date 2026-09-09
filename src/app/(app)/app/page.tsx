@@ -1,22 +1,12 @@
-import type { Metadata } from "next";
-import { requireUser } from "@/lib/auth/dal";
+import { redirect } from "next/navigation";
+import { requireProfile } from "@/lib/auth/dal";
 
-export const metadata: Metadata = {
-  title: "Discover",
-};
-
+/**
+ * The role router. Sign-in and the proxy both land here rather than hard-coding
+ * a destination, so each account arrives in the flow that belongs to it.
+ */
 export default async function AppPage() {
-  const user = await requireUser();
+  const profile = await requireProfile();
 
-  return (
-    <div className="mx-auto w-full max-w-md">
-      <h1 className="mb-1 text-2xl font-semibold tracking-tight">
-        You&rsquo;re signed in
-      </h1>
-      <p className="text-sm opacity-70">
-        Signed in as {user.email}. The swipe feed lands here next — like or skip
-        pieces and ArtSwipe starts learning what you&rsquo;re drawn to.
-      </p>
-    </div>
-  );
+  redirect(profile.role === "artist" ? "/studio" : "/discover");
 }
