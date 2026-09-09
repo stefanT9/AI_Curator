@@ -38,6 +38,41 @@ describe("createArtwork", () => {
     expect(result?.errors?.title).toBeDefined();
     expect(result?.errors?.image).toBeDefined();
   });
+
+  it("rejects an image key that is not a valid object path", async () => {
+    const result = await createArtwork(
+      undefined,
+      form({
+        title: "Valid",
+        description: "",
+        tags: "",
+        image: "../../etc/passwd",
+      }),
+    );
+
+    expect(result?.errors?.image).toBeDefined();
+  });
+
+  // The bucket is public, so without the folder check an artist could publish a
+  // row pointing at another artist's object. Rejected before Storage is reached
+  // — `createClient` is mocked to throw, so getting this far would blow up.
+  it("rejects a well-formed key belonging to another artist", async () => {
+    const artistId = "00000000-0000-4000-8000-000000000001";
+    const otherId = "00000000-0000-4000-8000-000000000002";
+    requireArtist.mockResolvedValue({ id: artistId });
+
+    const result = await createArtwork(
+      undefined,
+      form({
+        title: "Valid",
+        description: "",
+        tags: "",
+        image: `${otherId}/00000000-0000-4000-8000-0000000000ff.jpg`,
+      }),
+    );
+
+    expect(result?.errors?.image).toBeDefined();
+  });
 });
 
 describe("updateArtwork", () => {

@@ -1,17 +1,25 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { createArtwork, updateArtwork } from "@/app/actions/artworks";
 import { Field, submitButtonClass } from "@/components/ui/Field";
 import { MAX_TAGS } from "@/lib/artworks/tags";
+import {
+  ArtworkUploadError,
+  removeArtworkImage,
+  uploadArtworkImage,
+} from "@/lib/artworks/upload";
 import type { Artwork } from "@/types/domain";
 
 /**
  * Upload and edit share every field except the image, which is set once at
  * upload time — replacing a piece's image means deleting it and uploading
  * again, which keeps the storage key stable for as long as the row lives.
+ *
+ * On create, the image goes to Storage from here rather than through the
+ * Server Action, and only its key is submitted — see `@/lib/artworks/upload`.
  */
 export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
   const isEdit = Boolean(artwork);
@@ -20,6 +28,12 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
     undefined,
   );
   const [preview, setPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // The key of an object that is in the bucket but has no row yet. Held in a
+  // ref rather than state because writing it must not re-render mid-submit.
+  const orphanRef = useRef<string | null>(null);
 
   // Object URLs are leaked memory until revoked.
   useEffect(() => {
@@ -28,16 +42,72 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
     };
   }, [preview]);
 
+  // A rejected publish leaves the already-uploaded object unreferenced. Clear
+  // it so a retry cannot accumulate one orphan per attempt. On success the
+  // action redirects and this component unmounts, so the ref is never read.
+  useEffect(() => {
+    const orphan = orphanRef.current;
+
+    if (orphan && (state?.errors || state?.message)) {
+      orphanRef.current = null;
+      void removeArtworkImage(orphan);
+    }
+  }, [state]);
+
   const onImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    setUploadError(null);
     setPreview((current) => {
       if (current) URL.revokeObjectURL(current);
       return file ? URL.createObjectURL(file) : null;
     });
   };
 
+  /**
+   * Swap the selected file for its object key before the action is dispatched.
+   * The `delete` is what keeps the bytes off the wire — Server Action bodies
+   * are capped at 1 MB, well under a real photograph.
+   */
+  const submit = async (formData: FormData) => {
+    if (isEdit) {
+      action(formData);
+      return;
+    }
+
+    const file = formData.get("image");
+    setUploadError(null);
+
+    if (!(file instanceof File)) {
+      setUploadError("Choose an image to upload.");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const imagePath = await uploadArtworkImage(file);
+      orphanRef.current = imagePath;
+      formData.delete("image");
+      formData.set("image", imagePath);
+    } catch (error) {
+      setUploadError(
+        error instanceof ArtworkUploadError
+          ? error.message
+          : "Could not upload the image. Try again.",
+      );
+      return;
+    } finally {
+      setUploading(false);
+    }
+
+    action(formData);
+  };
+
+  const busy = pending || uploading;
+  const imageErrors = uploadError ? [uploadError] : state?.errors?.image;
+
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form action={submit} className="flex flex-col gap-4">
       {artwork ? (
         <input type="hidden" name="artworkId" value={artwork.id} />
       ) : null}
@@ -50,7 +120,7 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
             type="file"
             accept="image/png,image/jpeg,image/webp"
             hint="PNG, JPEG or WebP, up to 10 MB."
-            errors={state?.errors?.image}
+            errors={imageErrors}
             onChange={onImageChange}
           />
           {preview ? (
@@ -101,14 +171,16 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
       ) : null}
 
       <div className="flex items-center gap-3">
-        <button type="submit" disabled={pending} className={submitButtonClass}>
-          {pending
-            ? isEdit
-              ? "Saving…"
-              : "Uploading…"
-            : isEdit
-              ? "Save changes"
-              : "Upload artwork"}
+        <button type="submit" disabled={busy} className={submitButtonClass}>
+          {uploading
+            ? "Uploading image…"
+            : pending
+              ? isEdit
+                ? "Saving…"
+                : "Uploading…"
+              : isEdit
+                ? "Save changes"
+                : "Upload artwork"}
         </button>
         <Link href="/studio" className="text-sm underline opacity-70">
           Cancel

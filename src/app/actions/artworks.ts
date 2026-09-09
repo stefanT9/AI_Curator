@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { requireArtist } from "@/lib/auth/dal";
 import { createClient } from "@/utils/supabase/server";
-import { ARTWORKS_BUCKET } from "@/lib/artworks/images";
+import { ARTWORKS_BUCKET, IMAGE_PATH_PATTERN } from "@/lib/artworks/images";
 import { MAX_TAGS, MAX_TAG_LENGTH } from "@/lib/artworks/tags";
 
 export type ArtworkFormState =
@@ -19,15 +19,6 @@ export type ArtworkFormState =
       message?: string;
     }
   | undefined;
-
-/** Mirrors the bucket's own limits, so a rejection happens before the upload. */
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-const ALLOWED_MIME_TYPES = ["image/png", "image/jpeg", "image/webp"];
-const EXTENSIONS: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-};
 
 const asString = (value: FormDataEntryValue | null) =>
   typeof value === "string" ? value : "";
@@ -67,21 +58,21 @@ const TagsSchema = z
       .max(MAX_TAGS, { error: `Use at most ${MAX_TAGS} tags.` }),
   );
 
-const ImageSchema = z
-  .instanceof(File, { error: "Choose an image to upload." })
-  .refine((file) => file.size > 0, { error: "Choose an image to upload." })
-  .refine((file) => file.size <= MAX_IMAGE_BYTES, {
-    error: "Image must be 10 MB or smaller.",
-  })
-  .refine((file) => ALLOWED_MIME_TYPES.includes(file.type), {
-    error: "Image must be a PNG, JPEG or WebP.",
-  });
+/**
+ * The browser uploads the image and submits its object key, so what arrives
+ * here is a string, not a `File` — see `src/lib/artworks/upload.ts` for why.
+ * The pattern proves the key's shape only; ownership and existence are checked
+ * against the authenticated artist below.
+ */
+const ImagePathSchema = z
+  .string()
+  .regex(IMAGE_PATH_PATTERN, { error: "Choose an image to upload." });
 
 const CreateArtworkSchema = z.object({
   title: TitleSchema,
   description: DescriptionSchema,
   tags: TagsSchema,
-  image: ImageSchema,
+  image: ImagePathSchema,
 });
 
 /** Editing metadata only — swapping the image is a delete-and-reupload for now. */
@@ -101,26 +92,32 @@ export async function createArtwork(
     title: asString(formData.get("title")),
     description: asString(formData.get("description")),
     tags: asString(formData.get("tags")),
-    image: formData.get("image"),
+    image: asString(formData.get("image")),
   });
 
   if (!validatedFields.success) {
     return { errors: z.flattenError(validatedFields.error).fieldErrors };
   }
 
-  const { title, description, tags, image } = validatedFields.data;
+  const { title, description, tags, image: imagePath } = validatedFields.data;
+
+  // The key came from the client, so neither of these can be assumed. The
+  // folder check is the security one: the bucket is public, so without it an
+  // artist could point their row at someone else's object.
+  if (!imagePath.startsWith(`${artist.id}/`)) {
+    return { errors: { image: ["Choose an image to upload."] } };
+  }
+
   const supabase = await createClient();
 
-  // Folder-per-artist is what the storage policy keys off; the random filename
-  // keeps two uploads of the same photo from colliding.
-  const imagePath = `${artist.id}/${crypto.randomUUID()}.${EXTENSIONS[image.type]}`;
-
-  const { error: uploadError } = await supabase.storage
+  const { data: uploaded } = await supabase.storage
     .from(ARTWORKS_BUCKET)
-    .upload(imagePath, image, { contentType: image.type, upsert: false });
+    .exists(imagePath);
 
-  if (uploadError) {
-    return { message: `Could not upload the image: ${uploadError.message}` };
+  if (!uploaded) {
+    return {
+      errors: { image: ["The image upload did not finish. Try again."] },
+    };
   }
 
   const { error: insertError } = await supabase.from("artworks").insert({
