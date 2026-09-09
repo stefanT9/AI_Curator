@@ -6,6 +6,7 @@ import * as z from "zod";
 import { requireArtist } from "@/lib/auth/dal";
 import { createClient } from "@/utils/supabase/server";
 import { ARTWORKS_BUCKET } from "@/lib/artworks/images";
+import { MAX_TAGS, MAX_TAG_LENGTH } from "@/lib/artworks/tags";
 
 export type ArtworkFormState =
   | {
@@ -59,11 +60,11 @@ const TagsSchema = z
   .pipe(
     z
       .array(
-        z
-          .string()
-          .max(30, { error: "Each tag must be 30 characters or fewer." }),
+        z.string().max(MAX_TAG_LENGTH, {
+          error: `Each tag must be ${MAX_TAG_LENGTH} characters or fewer.`,
+        }),
       )
-      .max(10, { error: "Use at most 10 tags." }),
+      .max(MAX_TAGS, { error: `Use at most ${MAX_TAGS} tags.` }),
   );
 
 const ImageSchema = z

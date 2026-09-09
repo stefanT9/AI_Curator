@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createArtwork, updateArtwork } from "@/app/actions/artworks";
 import { Field, submitButtonClass } from "@/components/ui/Field";
+import { MAX_TAGS } from "@/lib/artworks/tags";
 import type { Artwork } from "@/types/domain";
 
 /**
@@ -88,7 +89,7 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
         name="tags"
         label="Tags"
         placeholder="abstract, oil, warm"
-        hint="Comma-separated, up to 10. These are what collectors get matched on."
+        hint={`Comma-separated, up to ${MAX_TAGS}. These are what collectors get matched on.`}
         defaultValue={artwork?.tags.join(", ")}
         errors={state?.errors?.tags}
       />

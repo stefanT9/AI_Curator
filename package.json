@@ -11,6 +11,7 @@
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:smoke": "node --env-file-if-exists=.env.local ./node_modules/vitest/vitest.mjs run --config vitest.smoke.config.mts",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -19,9 +20,11 @@
     "db:types:local": "supabase gen types typescript --local > src/types/database.ts.tmp && mv src/types/database.ts.tmp src/types/database.ts"
   },
   "dependencies": {
+    "@openrouter/ai-sdk-provider": "^3.0.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "@vercel/analytics": "^2.0.1",
+    "ai": "^7.0.96",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
