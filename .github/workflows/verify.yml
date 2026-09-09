@@ -13,6 +13,13 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # `next typegen` and `next build` both evaluate next.config.ts, which needs
+    # NEXT_PUBLIC_SUPABASE_URL to be a parseable URL. CI never talks to Supabase
+    # (tests mock it), so placeholders are enough — the real values come from
+    # Vercel's project env at deploy time.
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
