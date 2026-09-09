@@ -7,6 +7,7 @@ import { requireArtist } from "@/lib/auth/dal";
 import { createClient } from "@/utils/supabase/server";
 import { ARTWORKS_BUCKET, IMAGE_PATH_PATTERN } from "@/lib/artworks/images";
 import { MAX_TAGS, MAX_TAG_LENGTH } from "@/lib/artworks/tags";
+import { enrichFromImage } from "@/lib/ai";
 
 export type ArtworkFormState =
   | {
@@ -100,6 +101,7 @@ export async function createArtwork(
   }
 
   const { title, description, tags, image: imagePath } = validatedFields.data;
+  const enrichment = await enrichFromImage(imagePath);
 
   // The key came from the client, so neither of these can be assumed. The
   // folder check is the security one: the bucket is public, so without it an
@@ -123,8 +125,14 @@ export async function createArtwork(
   const { error: insertError } = await supabase.from("artworks").insert({
     artist_id: artist.id,
     title,
-    description,
-    tags,
+    description:
+      description?.length || enrichment.ok === false
+        ? description
+        : enrichment.data.description,
+    tags: [
+      ...tags,
+      ...(enrichment.ok === true ? (enrichment.data.tags ?? []) : []),
+    ].slice(0, 20),
     image_path: imagePath,
   });
 
