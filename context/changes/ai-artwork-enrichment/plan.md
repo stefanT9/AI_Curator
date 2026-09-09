@@ -428,12 +428,12 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Automated
 
-- [x] 1.1 Dependencies install cleanly: `npm install`
-- [x] 1.2 Unit tests pass: `npm run test`
-- [x] 1.3 Type checking passes: `npm run typecheck`
-- [x] 1.4 Linting passes: `npm run lint`
-- [x] 1.5 Formatting is clean: `npm run format:check`
-- [x] 1.6 Build succeeds with `OPENROUTER_API_KEY` unset: `npm run build`
+- [x] 1.1 Dependencies install cleanly: `npm install` — 653c4ca
+- [x] 1.2 Unit tests pass: `npm run test` — 653c4ca
+- [x] 1.3 Type checking passes: `npm run typecheck` — 653c4ca
+- [x] 1.4 Linting passes: `npm run lint` — 653c4ca
+- [x] 1.5 Formatting is clean: `npm run format:check` — 653c4ca
+- [x] 1.6 Build succeeds with `OPENROUTER_API_KEY` unset: `npm run build` — 653c4ca
 - [ ] 1.7 Type regeneration produces no diff: `npm run db:types:local && git diff --exit-code src/types/database.ts`
 
 #### Manual
