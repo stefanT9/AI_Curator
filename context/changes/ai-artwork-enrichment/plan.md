@@ -189,6 +189,90 @@ The prompt must instruct the model to describe the artwork in the artist's regis
 
 ---
 
+## Phase 1.5: Direct-to-Storage Image Upload
+
+### Overview
+
+Move the artwork image out of the Server Action request body. The browser uploads the file straight to Supabase Storage and submits only the resulting object key, so `createArtwork` carries text fields alone.
+
+Added during implementation, not in the original plan. Manual testing of Phase 1 surfaced a pre-existing bug: `createArtwork` validates images up to 10 MiB (`MAX_IMAGE_BYTES`, mirroring the bucket's own `file_size_limit`), but Next.js caps Server Action request bodies at 1 MB by default. Any artwork photo over 1 MB died with a raw 413 before the Zod gate ran, so the friendly field error could never fire. The alternative — raising `serverActions.bodySizeLimit` — was considered and rejected in favour of removing the bytes from the action entirely.
+
+This sits before Phase 2 because Phase 4's top-up contract depends on which side of the boundary the image bytes end up on.
+
+### Changes Required
+
+#### 1. Shared image constants
+
+**File**: `src/lib/artworks/images.ts`
+
+**Intent**: Give the browser uploader and the Server Action one definition of what a valid artwork image and object key look like, instead of the constants living inside the action where a client module cannot reach them.
+
+**Contract**: Move `MAX_IMAGE_BYTES`, `ALLOWED_MIME_TYPES` and `EXTENSIONS` here from `src/app/actions/artworks.ts`. Add `IMAGE_PATH_PATTERN`, matching `<uuid>/<uuid>.<png|jpg|webp>` — the folder-per-artist shape the storage policy keys off. This module is deliberately free of `server-only` already, which is why it is the right home.
+
+#### 2. Browser-side uploader
+
+**File**: `src/lib/artworks/upload.ts` (new)
+
+**Intent**: Put the image in the bucket from the browser, under the artist's own folder, before the form is submitted.
+
+**Contract**: `uploadArtworkImage(file: File): Promise<string>` returning the object key, and `removeArtworkImage(path: string): Promise<void>` for orphan cleanup. Browser-only — uses `createClient` from `src/utils/supabase/client.ts` and must not carry `server-only`.
+
+No signed upload URL is needed: the existing RLS policy "Artists can upload into their own folder" already permits an authenticated artist to insert into `${uid}/`, so the browser client's own session is the authorisation. Read the id from `supabase.auth.getUser()`, build the key with `crypto.randomUUID()`, and upload with `upsert: false`. Validate size and MIME type before the network call so an oversized file fails locally rather than at the bucket.
+
+#### 3. Action takes a key, not a file
+
+**File**: `src/app/actions/artworks.ts`
+
+**Intent**: Accept the object key the browser produced, and verify it before trusting it.
+
+**Contract**: Replace `ImageSchema` with a string schema validating against `IMAGE_PATH_PATTERN`. Keep the form field named `image` so `ArtworkFormState.errors.image` and its existing UI wiring are unchanged.
+
+Two checks the client cannot be trusted to have done, in this order: the key's first path segment must equal `artist.id` — otherwise an artist could point a row at another artist's object, since the bucket is public — and the object must actually exist, via `supabase.storage.from(ARTWORKS_BUCKET).exists(imagePath)`, so a row can never reference a key that was never uploaded. Delete the server-side `upload` call; keep the orphan removal on insert failure exactly as it is.
+
+Do not raise `serverActions.bodySizeLimit` in `next.config.ts`. With the bytes gone, the action carries only text and the 1 MB default is ample — leaving it at the default keeps the protection the limit exists for.
+
+#### 4. Form uploads before dispatch
+
+**File**: `src/components/artworks/ArtworkForm.tsx`
+
+**Intent**: Upload on submit, not on select, and never leave a stray object behind.
+
+**Contract**: Wrap the `useActionState` dispatch in an async form action that, in create mode, reads the `File` out of the `FormData`, uploads it, then **replaces** that entry with the returned key before dispatching — `formData.delete("image")` followed by `formData.set("image", path)` is what keeps the bytes off the wire. Edit mode dispatches unchanged.
+
+Uploading at submit rather than at image-select means an abandoned form uploads nothing. The one orphan window left is a successful upload followed by a rejected publish (a validation error on another field): hold the uploaded key in a ref and delete the object when the action returns an error state, so a retry does not accumulate objects.
+
+Track upload progress in the component's own state and combine it with the action's `pending` for the button label, since `useActionState`'s `pending` does not span the upload. Client-side size and type failures surface through the existing `errors.image` channel.
+
+#### 5. Action tests
+
+**File**: `test/actions/artworks.test.ts`
+
+**Intent**: Cover the two trust boundaries the action gained.
+
+**Contract**: Extend the existing file. Cases: an empty submission still reports an `image` error; a well-formed key whose folder belongs to another artist is rejected without reaching Storage.
+
+### Success Criteria
+
+#### Automated Verification
+
+- Unit tests pass: `npm run test`
+- Type checking passes: `npm run typecheck`
+- Linting passes: `npm run lint`
+- Formatting is clean: `npm run format:check`
+- Build succeeds: `npm run build`
+
+#### Manual Verification
+
+- A photo larger than 1 MB publishes successfully — the original 413 is gone
+- A file over 10 MB is rejected in the browser with a field error, before any network call
+- The uploaded object lands under the artist's own folder in the bucket
+- Publishing with an invalid title after the image uploaded leaves no orphan in the bucket
+- The studio list, artwork detail page and swipe deck render the uploaded image as before
+
+**Implementation Note**: Pause for manual confirmation before proceeding.
+
+---
+
 ## Phase 2: Transport — Server Action and Client Downscale
 
 ### Overview
@@ -434,7 +518,7 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 - [x] 1.4 Linting passes: `npm run lint` — 653c4ca
 - [x] 1.5 Formatting is clean: `npm run format:check` — 653c4ca
 - [x] 1.6 Build succeeds with `OPENROUTER_API_KEY` unset: `npm run build` — 653c4ca
-- [ ] 1.7 Type regeneration produces no diff: `npm run db:types:local && git diff --exit-code src/types/database.ts`
+- [x] 1.7 Type regeneration produces no diff: `npm run db:types:local && git diff --exit-code src/types/database.ts`
 
 #### Manual
 
@@ -442,6 +526,24 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 - [ ] 1.9 An artwork with 20 tags inserts; one with 21 is rejected by `artworks_tags_length`
 - [ ] 1.10 Real key returns a plausible description and 5-12 on-taxonomy tags for a sample image
 - [ ] 1.11 Missing key returns `unconfigured` without a network request
+
+### Phase 1.5: Direct-to-Storage Image Upload
+
+#### Automated
+
+- [x] 1.5.1 Unit tests pass: `npm run test`
+- [x] 1.5.2 Type checking passes: `npm run typecheck`
+- [x] 1.5.3 Linting passes: `npm run lint`
+- [x] 1.5.4 Formatting is clean: `npm run format:check`
+- [x] 1.5.5 Build succeeds: `npm run build`
+
+#### Manual
+
+- [ ] 1.5.6 A photo larger than 1 MB publishes successfully
+- [ ] 1.5.7 A file over 10 MB is rejected in the browser before any network call
+- [ ] 1.5.8 The uploaded object lands under the artist's own folder
+- [ ] 1.5.9 A rejected publish after a successful upload leaves no orphan
+- [ ] 1.5.10 Studio list, artwork detail and swipe deck render uploaded images as before
 
 ### Phase 2: Transport — Server Action and Client Downscale
 
