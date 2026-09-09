@@ -50,7 +50,9 @@ const attachArtists = async (
  * The collector's deck: unrated artworks by other artists, newest first.
  * The anti-join lives in a SQL function because PostgREST cannot express it.
  */
-export const getSwipeDeck = async (limit = 20): Promise<ArtworkWithArtist[]> => {
+export const getSwipeDeck = async (
+  limit = 20,
+): Promise<ArtworkWithArtist[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("swipe_deck", { p_limit: limit });
 

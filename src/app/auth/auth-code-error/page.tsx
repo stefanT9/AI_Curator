@@ -17,10 +17,16 @@ export default function AuthCodeErrorPage() {
           or create your account again to get a fresh link.
         </p>
         <div className="flex justify-center gap-3 text-sm">
-          <Link href="/login" className="font-medium underline underline-offset-4">
+          <Link
+            href="/login"
+            className="font-medium underline underline-offset-4"
+          >
             Sign in
           </Link>
-          <Link href="/signup" className="font-medium underline underline-offset-4">
+          <Link
+            href="/signup"
+            className="font-medium underline underline-offset-4"
+          >
             Create account
           </Link>
         </div>

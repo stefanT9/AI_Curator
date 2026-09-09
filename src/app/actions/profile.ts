@@ -62,7 +62,9 @@ export async function becomeArtist(
     .eq("id", profile.id);
 
   if (error) {
-    return { message: `Could not switch to an artist account: ${error.message}` };
+    return {
+      message: `Could not switch to an artist account: ${error.message}`,
+    };
   }
 
   // "layout" so the nav in (app)/layout.tsx picks up the new Studio link.

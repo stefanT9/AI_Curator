@@ -28,7 +28,10 @@ export function DisplayNameForm({
       ) : null}
 
       {state?.success ? (
-        <p role="status" className="text-sm text-emerald-600 dark:text-emerald-400">
+        <p
+          role="status"
+          className="text-sm text-emerald-600 dark:text-emerald-400"
+        >
           Saved.
         </p>
       ) : null}
