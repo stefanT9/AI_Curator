@@ -1,22 +1,41 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth/dal";
+import { requireProfile } from "@/lib/auth/dal";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   // The proxy already redirected signed-out visitors, but that check is
   // optimistic. This is the one that actually guards the segment.
-  const user = await requireUser();
+  const profile = await requireProfile();
 
   return (
     <>
       <header className="flex items-center justify-between gap-4 border-b border-black/10 px-4 py-3 dark:border-white/15">
-        <Link href="/app" className="font-semibold tracking-tight">
-          ArtSwipe
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link href="/app" className="font-semibold tracking-tight">
+            ArtSwipe
+          </Link>
+          <nav className="flex items-center gap-4 text-sm">
+            <Link href="/discover" className="opacity-70 hover:opacity-100">
+              Discover
+            </Link>
+            <Link href="/liked" className="opacity-70 hover:opacity-100">
+              Liked
+            </Link>
+            {/* The artist flow only exists in the nav once you've opted in. */}
+            {profile.role === "artist" ? (
+              <Link href="/studio" className="opacity-70 hover:opacity-100">
+                Studio
+              </Link>
+            ) : null}
+          </nav>
+        </div>
         <div className="flex items-center gap-3">
-          <span className="hidden text-sm opacity-70 sm:inline">
-            {user.email}
-          </span>
+          <Link
+            href="/account"
+            className="hidden text-sm opacity-70 hover:opacity-100 sm:inline"
+          >
+            {profile.email}
+          </Link>
           <SignOutButton />
         </div>
       </header>
