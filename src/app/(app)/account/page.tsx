@@ -36,7 +36,10 @@ export default async function AccountPage() {
               <Link href="/studio" className="underline">
                 Go to studio
               </Link>
-              <Link href={`/artist/${profile.id}`} className="underline opacity-70">
+              <Link
+                href={`/artist/${profile.id}`}
+                className="underline opacity-70"
+              >
                 View public profile
               </Link>
             </div>
@@ -44,9 +47,9 @@ export default async function AccountPage() {
         ) : (
           <>
             <p className="mb-4 text-sm opacity-70">
-              You&rsquo;re here to discover art. If you make it too, switch on an
-              artist account to upload your own work with descriptions and tags —
-              you keep everything you&rsquo;ve liked.
+              You&rsquo;re here to discover art. If you make it too, switch on
+              an artist account to upload your own work with descriptions and
+              tags — you keep everything you&rsquo;ve liked.
             </p>
             <BecomeArtistForm />
           </>

@@ -1,0 +1,22 @@
+# Build output
+.next/
+out/
+build/
+coverage/
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Generated — owned by `supabase gen types`
+src/types/database.ts
+
+# Local Supabase scratch
+supabase/.temp/
+
+# Vendored agent tooling — not ours to format
+.agents/
+.claude/
+
+# 10x workflow docs — owned by the /10x-* skills
+context/

@@ -32,7 +32,10 @@ export default async function ArtworkPage({
 
   return (
     <div className="mx-auto w-full max-w-md">
-      <Link href="/discover" className="mb-4 inline-block text-sm underline opacity-70">
+      <Link
+        href="/discover"
+        className="mb-4 inline-block text-sm underline opacity-70"
+      >
         ← Back to discover
       </Link>
 

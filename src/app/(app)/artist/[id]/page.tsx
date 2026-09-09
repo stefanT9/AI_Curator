@@ -15,7 +15,9 @@ export async function generateMetadata({
   return { title: artist ? artistLabel(artist) : "Artist" };
 }
 
-export default async function ArtistPage({ params }: PageProps<"/artist/[id]">) {
+export default async function ArtistPage({
+  params,
+}: PageProps<"/artist/[id]">) {
   await requireUser();
 
   const { id } = await params;

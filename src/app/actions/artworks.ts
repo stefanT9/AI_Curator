@@ -59,7 +59,9 @@ const TagsSchema = z
   .pipe(
     z
       .array(
-        z.string().max(30, { error: "Each tag must be 30 characters or fewer." }),
+        z
+          .string()
+          .max(30, { error: "Each tag must be 30 characters or fewer." }),
       )
       .max(10, { error: "Use at most 10 tags." }),
   );

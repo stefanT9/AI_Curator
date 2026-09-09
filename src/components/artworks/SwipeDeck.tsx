@@ -24,26 +24,23 @@ export function SwipeDeck({ deck }: { deck: ArtworkWithArtist[] }) {
   const pointerStartX = useRef<number | null>(null);
   const current = deck[index];
 
-  const decide = useCallback(
-    (artwork: Artwork, action: InteractionAction) => {
-      setError(null);
-      setDragX(0);
+  const decide = useCallback((artwork: Artwork, action: InteractionAction) => {
+    setError(null);
+    setDragX(0);
 
-      // Advance first — waiting on the round trip would make every swipe feel
-      // like a page load. The card comes back if the write fails.
-      setIndex((previous) => previous + 1);
+    // Advance first — waiting on the round trip would make every swipe feel
+    // like a page load. The card comes back if the write fails.
+    setIndex((previous) => previous + 1);
 
-      startTransition(async () => {
-        const result = await recordInteraction(artwork.id, action);
+    startTransition(async () => {
+      const result = await recordInteraction(artwork.id, action);
 
-        if (!result.ok) {
-          setIndex((previous) => Math.max(0, previous - 1));
-          setError(result.message);
-        }
-      });
-    },
-    [],
-  );
+      if (!result.ok) {
+        setIndex((previous) => Math.max(0, previous - 1));
+        setError(result.message);
+      }
+    });
+  }, []);
 
   // Arrow keys are the keyboard equivalent of the drag; the buttons below are
   // the pointer-free path for everyone else.
