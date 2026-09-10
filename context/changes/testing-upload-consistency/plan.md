@@ -370,9 +370,9 @@ The `check` constraint is the only schema change and it lands `not valid` delibe
 
 #### Automated
 
-- [ ] 4.1 Both previously-red tests now pass
-- [ ] 4.2 Full verify gate passes
-- [ ] 4.3 Migration applies cleanly on a reset local stack
+- [x] 4.1 Both previously-red tests now pass
+- [x] 4.2 Full verify gate passes
+- [x] 4.3 Migration applies cleanly on a reset local stack
 
 #### Manual
 

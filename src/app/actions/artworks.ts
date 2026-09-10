@@ -129,9 +129,18 @@ export async function createArtwork(
   });
 
   if (insertError) {
-    // The file is already in the bucket. Without this the bucket would collect
-    // orphans no row ever points at.
-    await supabase.storage.from(ARTWORKS_BUCKET).remove([imagePath]);
+    // The file is already in the bucket. Before removing it, re-query to ensure
+    // the row did not insert despite the error. If a row exists with this key,
+    // the delete would break the card; an orphaned file is the safer failure.
+    const { data: artwork } = await supabase
+      .from("artworks")
+      .select("id")
+      .eq("image_path", imagePath)
+      .maybeSingle();
+
+    if (!artwork) {
+      await supabase.storage.from(ARTWORKS_BUCKET).remove([imagePath]);
+    }
     return { message: `Could not save the artwork: ${insertError.message}` };
   }
 

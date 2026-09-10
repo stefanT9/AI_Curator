@@ -16,11 +16,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { publicImageUrl } from "@/lib/artworks/images";
 import { requireLocalRunningStack } from "./setup";
-import {
-  createTestArtist,
-  TINY_PNG,
-  type TestArtist,
-} from "./helpers";
+import { createTestArtist, TINY_PNG, type TestArtist } from "./helpers";
 
 // Hoist fixtures so they can be shared with the mocked modules.
 let artistForMock: TestArtist | undefined;
@@ -171,36 +167,32 @@ describe("createArtwork with real Supabase (Phase 3)", () => {
   });
 
   describe("Risk P6: unrenderable rows", () => {
-    it("accepts an empty image_path (EXPECTED TO FAIL)", async () => {
+    it("rejects an empty image_path (Phase 4 constraint)", async () => {
       // Insert a row directly with an empty image_path, bypassing the Server
-      // Action that would reject it. The action validates with IMAGE_PATH_PATTERN,
-      // but the database has no constraint, so direct inserts can violate it.
+      // Action that would reject it. Phase 4 adds a check constraint that
+      // prevents new/updated rows with bad image_path.
 
       const rowData = {
         artist_id: artist.userId,
         title: "Unrenderable",
         description: "No valid image",
         tags: [],
-        image_path: "", // Empty — violates IMAGE_PATH_PATTERN but DB accepts it.
+        image_path: "", // Empty — violates IMAGE_PATH_PATTERN and now the DB constraint.
       };
 
-      const { error } = await artist.client
-        .from("artworks")
-        .insert(rowData);
+      const { error } = await artist.client.from("artworks").insert(rowData);
 
-      // Currently the DB accepts this with no constraint.
-      expect(error).toBeNull();
+      // The constraint now prevents this insert.
+      expect(error).not.toBeNull();
+      expect(error?.code).toBe("23514"); // PostgreSQL check constraint violation
 
-      // Verify the row was created.
+      // Verify no row was created.
       const { data: rows } = await artist.client
         .from("artworks")
         .select("image_path")
         .eq("image_path", "");
 
-      expect(rows).toHaveLength(1);
-
-      // The card rendering would fail because the URL is unparseable. Phase 4
-      // adds a NOT VALID constraint to prevent new rows with bad image_path.
+      expect(rows).toHaveLength(0);
     });
   });
 });
