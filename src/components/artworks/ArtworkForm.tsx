@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { createArtwork, updateArtwork } from "@/app/actions/artworks";
@@ -141,10 +147,15 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
    * Swap the selected file for its object key before the action is dispatched.
    * The `delete` is what keeps the bytes off the wire — Server Action bodies
    * are capped at 1 MB, well under a real photograph.
+   *
+   * Every `action` call is wrapped in `startTransition`. React puts a form
+   * action inside a transition automatically, but that scope ends at the first
+   * `await` — dispatching after the upload without re-entering one leaves
+   * `pending` stuck false, so the button never shows its submitting state.
    */
   const submit = async (formData: FormData) => {
     if (isEdit) {
-      action(formData);
+      startTransition(() => action(formData));
       return;
     }
 
@@ -174,7 +185,7 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
       setUploading(false);
     }
 
-    action(formData);
+    startTransition(() => action(formData));
   };
 
   const busy = pending || uploading;
