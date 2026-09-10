@@ -156,3 +156,125 @@ where id in (
 update public.profiles
 set role = 'artist'
 where id = '00000000-0000-4000-8000-000000000001';
+
+-- ===========================================================================
+-- Phase 3: Artwork corpus and like history
+--
+-- 48 tagged artworks in four clusters of twelve, plus six untagged, all owned
+-- by the seeded artist. Each cluster points at its own placeholder image
+-- (uploaded separately — see supabase/seed-assets/README.md). `oil` is shared
+-- between "Warm portraiture" and "Muted landscape" on purpose: it gives a
+-- tag-match ordering one overlap case to discriminate rather than four cleanly
+-- separated islands. Do not remove it.
+--
+-- `created_at` is staggered across all 54 rows in round-robin cluster order
+-- (with untagged pieces sprinkled through, including near the newest end), so
+-- the current newest-first deck ordering is visibly interleaved. A corpus
+-- where clusters were contiguous by insertion order would make a broken
+-- ranking look like a working one.
+--
+-- Base instant for the stagger: 2026-01-01 00:00:00+00, plus one hour per
+-- global slot. Higher slot = newer = nearer the front of the deck.
+-- ===========================================================================
+
+-- Cluster 1 — Blue abstraction: abstract / blue / geometric / minimal
+insert into public.artworks (id, artist_id, title, tags, image_path, created_at)
+values
+  ('b0000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000001', 'Cobalt Grid',            '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '1 hour'),
+  ('b0000000-0000-4000-8000-000000000002', '00000000-0000-4000-8000-000000000001', 'Azure Partition',        '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '5 hour'),
+  ('b0000000-0000-4000-8000-000000000003', '00000000-0000-4000-8000-000000000001', 'Prussian Lattice',       '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '10 hour'),
+  ('b0000000-0000-4000-8000-000000000004', '00000000-0000-4000-8000-000000000001', 'Indigo Field Study',     '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '15 hour'),
+  ('b0000000-0000-4000-8000-000000000005', '00000000-0000-4000-8000-000000000001', 'Cerulean Fold',          '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '19 hour'),
+  ('b0000000-0000-4000-8000-000000000006', '00000000-0000-4000-8000-000000000001', 'Sapphire Interval',      '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '24 hour'),
+  ('b0000000-0000-4000-8000-000000000007', '00000000-0000-4000-8000-000000000001', 'Ultramarine Stack',      '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '29 hour'),
+  ('b0000000-0000-4000-8000-000000000008', '00000000-0000-4000-8000-000000000001', 'Navy Tessellation',      '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '33 hour'),
+  ('b0000000-0000-4000-8000-000000000009', '00000000-0000-4000-8000-000000000001', 'Cyan Meridian',          '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '38 hour'),
+  ('b0000000-0000-4000-8000-00000000000a', '00000000-0000-4000-8000-000000000001', 'Powder Blue Quadrant',   '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '43 hour'),
+  ('b0000000-0000-4000-8000-00000000000b', '00000000-0000-4000-8000-000000000001', 'Steel Blue Cadence',     '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '47 hour'),
+  ('b0000000-0000-4000-8000-00000000000c', '00000000-0000-4000-8000-000000000001', 'Midnight Modulus',       '{abstract,blue,geometric,minimal}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a1.png', timestamptz '2026-01-01 00:00:00+00' + interval '51 hour')
+on conflict (id) do nothing;
+
+-- Cluster 2 — Warm portraiture: portrait / figurative / warm / oil
+insert into public.artworks (id, artist_id, title, tags, image_path, created_at)
+values
+  ('c0000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000001', 'Ochre Portrait of a Stranger', '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '2 hour'),
+  ('c0000000-0000-4000-8000-000000000002', '00000000-0000-4000-8000-000000000001', 'Sitter in Amber Light',        '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '6 hour'),
+  ('c0000000-0000-4000-8000-000000000003', '00000000-0000-4000-8000-000000000001', 'Terracotta Half-Length',       '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '11 hour'),
+  ('c0000000-0000-4000-8000-000000000004', '00000000-0000-4000-8000-000000000001', 'The Reader in Sienna',         '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '16 hour'),
+  ('c0000000-0000-4000-8000-000000000005', '00000000-0000-4000-8000-000000000001', 'Portrait with Copper Scarf',   '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '20 hour'),
+  ('c0000000-0000-4000-8000-000000000006', '00000000-0000-4000-8000-000000000001', 'Study in Warm Flesh Tones',    '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '25 hour'),
+  ('c0000000-0000-4000-8000-000000000007', '00000000-0000-4000-8000-000000000001', 'Woman by a Rust Wall',         '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '30 hour'),
+  ('c0000000-0000-4000-8000-000000000008', '00000000-0000-4000-8000-000000000001', 'Old Friend in Umber',          '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '34 hour'),
+  ('c0000000-0000-4000-8000-000000000009', '00000000-0000-4000-8000-000000000001', 'Self-Portrait at Dusk',        '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '39 hour'),
+  ('c0000000-0000-4000-8000-00000000000a', '00000000-0000-4000-8000-000000000001', 'Boy with a Marigold',          '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '44 hour'),
+  ('c0000000-0000-4000-8000-00000000000b', '00000000-0000-4000-8000-000000000001', 'Seated Figure, Firelight',     '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '48 hour'),
+  ('c0000000-0000-4000-8000-00000000000c', '00000000-0000-4000-8000-000000000001', 'Portrait in Burnt Orange',     '{portrait,figurative,warm,oil}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a2.png', timestamptz '2026-01-01 00:00:00+00' + interval '52 hour')
+on conflict (id) do nothing;
+
+-- Cluster 3 — Muted landscape: landscape / muted / oil / pastoral
+insert into public.artworks (id, artist_id, title, tags, image_path, created_at)
+values
+  ('d0000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000001', 'Grey Estuary Morning',      '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '3 hour'),
+  ('d0000000-0000-4000-8000-000000000002', '00000000-0000-4000-8000-000000000001', 'Fog Over Low Hills',        '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '7 hour'),
+  ('d0000000-0000-4000-8000-000000000003', '00000000-0000-4000-8000-000000000001', 'Fallow Field, Overcast',    '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '12 hour'),
+  ('d0000000-0000-4000-8000-000000000004', '00000000-0000-4000-8000-000000000001', 'Distant Rain, Slate Sky',   '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '17 hour'),
+  ('d0000000-0000-4000-8000-000000000005', '00000000-0000-4000-8000-000000000001', 'Hedgerow in Winter',        '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '22 hour'),
+  ('d0000000-0000-4000-8000-000000000006', '00000000-0000-4000-8000-000000000001', 'The Drained Marsh',         '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '26 hour'),
+  ('d0000000-0000-4000-8000-000000000007', '00000000-0000-4000-8000-000000000001', 'Pale Pasture at Noon',      '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '31 hour'),
+  ('d0000000-0000-4000-8000-000000000008', '00000000-0000-4000-8000-000000000001', 'Chalk Downs Under Cloud',   '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '36 hour'),
+  ('d0000000-0000-4000-8000-000000000009', '00000000-0000-4000-8000-000000000001', 'River Bend, Still Water',   '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '40 hour'),
+  ('d0000000-0000-4000-8000-00000000000a', '00000000-0000-4000-8000-000000000001', 'Muted Valley, Late Autumn', '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '45 hour'),
+  ('d0000000-0000-4000-8000-00000000000b', '00000000-0000-4000-8000-000000000001', 'Coastal Flats, Grey Light', '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '49 hour'),
+  ('d0000000-0000-4000-8000-00000000000c', '00000000-0000-4000-8000-000000000001', 'Moorland, Fading Day',      '{landscape,muted,oil,pastoral}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a3.png', timestamptz '2026-01-01 00:00:00+00' + interval '53 hour')
+on conflict (id) do nothing;
+
+-- Cluster 4 — Neon street: street / neon / high-contrast / photography
+insert into public.artworks (id, artist_id, title, tags, image_path, created_at)
+values
+  ('e0000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000001', 'Rain on Sixth Avenue',              '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '4 hour'),
+  ('e0000000-0000-4000-8000-000000000002', '00000000-0000-4000-8000-000000000001', 'Arcade Alley, 2 AM',                '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '9 hour'),
+  ('e0000000-0000-4000-8000-000000000003', '00000000-0000-4000-8000-000000000001', 'Signage, Wet Asphalt',              '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '13 hour'),
+  ('e0000000-0000-4000-8000-000000000004', '00000000-0000-4000-8000-000000000001', 'Crossing Under Pink Light',         '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '18 hour'),
+  ('e0000000-0000-4000-8000-000000000005', '00000000-0000-4000-8000-000000000001', 'Late Bus, Neon Window',             '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '23 hour'),
+  ('e0000000-0000-4000-8000-000000000006', '00000000-0000-4000-8000-000000000001', 'Convenience Store Glow',            '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '27 hour'),
+  ('e0000000-0000-4000-8000-000000000007', '00000000-0000-4000-8000-000000000001', 'Motel Sign, No Vacancy',            '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '32 hour'),
+  ('e0000000-0000-4000-8000-000000000008', '00000000-0000-4000-8000-000000000001', 'Underpass in Magenta',              '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '37 hour'),
+  ('e0000000-0000-4000-8000-000000000009', '00000000-0000-4000-8000-000000000001', 'Taxi Rank, Electric Blue',          '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '41 hour'),
+  ('e0000000-0000-4000-8000-00000000000a', '00000000-0000-4000-8000-000000000001', 'Night Market Stalls',               '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '46 hour'),
+  ('e0000000-0000-4000-8000-00000000000b', '00000000-0000-4000-8000-000000000001', 'Subway Mouth, Cyan Haze',           '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '50 hour'),
+  ('e0000000-0000-4000-8000-00000000000c', '00000000-0000-4000-8000-000000000001', 'Boulevard, Last Light and Neon',    '{street,neon,high-contrast,photography}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a4.png', timestamptz '2026-01-01 00:00:00+00' + interval '54 hour')
+on conflict (id) do nothing;
+
+-- Untagged — six pieces with no tags, so the cold-start and no-match paths are
+-- observable. Sprinkled through the stagger (slots 8, 14, 21, 28, 35, 42), two
+-- of which fall inside the newest-20 window.
+insert into public.artworks (id, artist_id, title, tags, image_path, created_at)
+values
+  ('f0000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000001', 'Untitled Study I',   '{}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a0.png', timestamptz '2026-01-01 00:00:00+00' + interval '8 hour'),
+  ('f0000000-0000-4000-8000-000000000002', '00000000-0000-4000-8000-000000000001', 'Untitled Study II',  '{}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a0.png', timestamptz '2026-01-01 00:00:00+00' + interval '14 hour'),
+  ('f0000000-0000-4000-8000-000000000003', '00000000-0000-4000-8000-000000000001', 'Untitled Study III', '{}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a0.png', timestamptz '2026-01-01 00:00:00+00' + interval '21 hour'),
+  ('f0000000-0000-4000-8000-000000000004', '00000000-0000-4000-8000-000000000001', 'Untitled Study IV',  '{}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a0.png', timestamptz '2026-01-01 00:00:00+00' + interval '28 hour'),
+  ('f0000000-0000-4000-8000-000000000005', '00000000-0000-4000-8000-000000000001', 'Untitled Study V',   '{}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a0.png', timestamptz '2026-01-01 00:00:00+00' + interval '35 hour'),
+  ('f0000000-0000-4000-8000-000000000006', '00000000-0000-4000-8000-000000000001', 'Untitled Study VI',  '{}', '00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-0000000000a0.png', timestamptz '2026-01-01 00:00:00+00' + interval '42 hour')
+on conflict (id) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- Like history — warm collector only.
+--
+-- Eight likes, all inside the Blue abstraction cluster (b…01 through b…08).
+-- The remaining four (b…09 through b…0c) are deliberately left unliked so the
+-- deck still has unseen Blue abstraction members to serve. The cold collector
+-- gets no rows at all — both the ranked and cold-start paths are then
+-- observable without a single click.
+-- ---------------------------------------------------------------------------
+insert into public.interactions (user_id, artwork_id, action)
+values
+  ('00000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000001', 'like'),
+  ('00000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000002', 'like'),
+  ('00000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000003', 'like'),
+  ('00000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000004', 'like'),
+  ('00000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000005', 'like'),
+  ('00000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000006', 'like'),
+  ('00000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000007', 'like'),
+  ('00000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000008', 'like')
+on conflict (user_id, artwork_id) do nothing;

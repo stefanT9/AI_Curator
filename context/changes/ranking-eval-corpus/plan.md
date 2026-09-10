@@ -454,36 +454,36 @@ database rows, so the image upload is part of the reset workflow rather than one
 
 #### Automated
 
-- [x] 2.1 All five files exist with the exact expected names
-- [x] 2.2 Formatting check passes: `npm run format:check`
-- [x] 2.3 Linting passes: `npm run lint`
+- [x] 2.1 All five files exist with the exact expected names — eb134d4
+- [x] 2.2 Formatting check passes: `npm run format:check` — eb134d4
+- [x] 2.3 Linting passes: `npm run lint` — eb134d4
 
 #### Manual
 
-- [x] 2.4 The upload command completes without error
-- [x] 2.5 `storage ls` lists all five objects
-- [x] 2.6 A public object URL renders the image rather than a 404
-- [x] 2.7 The five placeholders are visually distinguishable
+- [x] 2.4 The upload command completes without error — eb134d4
+- [x] 2.5 `storage ls` lists all five objects — eb134d4
+- [x] 2.6 A public object URL renders the image rather than a 404 — eb134d4
+- [x] 2.7 The five placeholders are visually distinguishable — eb134d4
 
 ### Phase 3: Artwork Corpus and Like History
 
 #### Automated
 
-- [ ] 3.1 Formatting check passes: `npm run format:check`
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Type checking passes: `npm run typecheck`
-- [ ] 3.4 Unit tests pass: `npm run test`
-- [ ] 3.5 Production build succeeds: `npm run build`
+- [x] 3.1 Formatting check passes: `npm run format:check`
+- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.3 Type checking passes: `npm run typecheck`
+- [x] 3.4 Unit tests pass: `npm run test`
+- [x] 3.5 Production build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 3.6 Corpus totals 54 artworks, 48 of them tagged
-- [ ] 3.7 Warm collector's `/discover` renders a full 20-card deck with cluster imagery
-- [ ] 3.8 Warm collector's liked view shows exactly the eight seeded pieces
-- [ ] 3.9 Cold collector's liked view is empty and the deck still renders 20 cards
-- [ ] 3.10 Neither collector is served an artwork they have already liked
-- [ ] 3.11 Untagged pieces appear in the deck and are visually identifiable
-- [ ] 3.12 Re-running the seed produces no duplicate-key error
+- [x] 3.6 Corpus totals 54 artworks, 48 of them tagged
+- [x] 3.7 Warm collector's `/discover` renders a full 20-card deck with cluster imagery
+- [x] 3.8 Warm collector's liked view shows exactly the eight seeded pieces
+- [x] 3.9 Cold collector's liked view is empty and the deck still renders 20 cards
+- [x] 3.10 Neither collector is served an artwork they have already liked
+- [x] 3.11 Untagged pieces appear in the deck and are visually identifiable
+- [x] 3.12 Re-running the seed produces no duplicate-key error
 
 ### Phase 4: Workflow Documentation and Judgment Walkthrough
 
