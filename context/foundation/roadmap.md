@@ -45,7 +45,7 @@ everything except the ordering itself, so it is the smallest change that proves 
 
 | ID   | Change ID                           | Outcome (user can …)                                                              | Prerequisites | PRD refs                                    | Status   |
 | ---- | ----------------------------------- | --------------------------------------------------------------------------------- | ------------- | ------------------------------------------- | -------- |
-| F-01 | `ranking-eval-corpus`               | (foundation) tag-match ordering can be exercised and judged, not guessed at       | —             | §Constraints, Open Questions 2 and 4        | ready    |
+| F-01 | `ranking-eval-corpus`               | (foundation) tag-match ordering can be exercised and judged, not guessed at       | —             | §Constraints, Open Questions 2 and 4        | done     |
 | S-01 | `personalized-deck-ranking`         | be served cards ordered by tag-match to their likes, with passed pieces demoted   | F-01          | US-01, FR-002, FR-003, FR-004, FR-006, OQ-3 | proposed |
 | S-02 | `continuous-deck-refill`            | keep swiping past the end of the current cards without hitting a dead end         | —             | US-01, FR-001, FR-007, §Guardrails          | ready    |
 | S-03 | `cold-start-and-untagged-placement` | get a deliberate ordering before they have liked much, and where tags are missing | S-01          | FR-005, Open Questions 2 and 4              | blocked  |
@@ -91,7 +91,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Deliberately minimal — seed data in the development environment only, no schema change, no production data, no migration. Sequenced first because it is the cheapest way to stop OQ-2 and OQ-4 being argued in the abstract, and because with one user and no tag backfill for pre-enrichment artworks, the live catalogue may be too thin to judge ranking against. The failure mode to watch is scope creep: this must stay a corpus, not become a general fixtures framework.
-- **Status:** ready
+- **Status:** done
 
 ## Slices
 
@@ -165,4 +165,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Done
 
-_(Empty on first generation. `/10x-archive` appends entries here.)_
+- **F-01: (foundation) a seeded set of tagged artworks and a collector like-history exists in the development environment, so a tag-match ordering can be exercised and judged rather than guessed at.** — Archived 2026-09-10 → `context/archive/2026-09-10-ranking-eval-corpus/`. Lesson: —.
