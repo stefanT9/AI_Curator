@@ -19,6 +19,10 @@
     "typecheck": "next typegen && tsc --noEmit",
     "db:reset": "supabase db reset && npm run db:seed:images",
     "db:seed:images": "supabase storage cp --experimental --local -r supabase/seed-assets/00000000-0000-4000-8000-000000000001 ss:///artworks/00000000-0000-4000-8000-000000000001",
+    "db:seed:fetch": "tsx --conditions=react-server scripts/build-corpus.ts fetch",
+    "db:seed:enrich": "tsx --conditions=react-server scripts/build-corpus.ts enrich",
+    "db:seed:coverage": "tsx --conditions=react-server scripts/build-corpus.ts coverage",
+    "db:seed:generate": "tsx --conditions=react-server scripts/build-corpus.ts generate",
     "db:types": "supabase gen types typescript --linked > src/types/database.ts.tmp && mv src/types/database.ts.tmp src/types/database.ts",
     "db:types:local": "supabase gen types typescript --local > src/types/database.ts.tmp && mv src/types/database.ts.tmp src/types/database.ts"
   },
@@ -46,7 +50,11 @@
     "prettier": "^3.9.6",
     "supabase": "^2.117.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5.9.3",
     "vitest": "^4.1.11"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
