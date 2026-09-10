@@ -55,10 +55,29 @@ Node is pinned in `.nvmrc` / `engines` (currently 24 LTS — `nvm use` picks it 
 
 ### Tests
 
-- Vitest, config in `vitest.config.mts`, specs in `test/**/*.test.ts` (Node environment — no jsdom). Run with `npm run test`; `npm run test:watch` while iterating.
-- Coverage is a thin smoke layer over Server Actions and `src/lib` helpers: the Zod validation gates and the happy path with Supabase / `next/*` / the auth DAL mocked. Supabase is never hit for real.
-- `import "server-only"` is aliased to a stub in the Vitest config so `src/lib/**` modules load under Node.
+Three lanes, each with its own Vitest config and its own file glob so one can never pick up another's specs. Only the first runs in CI.
+
+**Default suite — `npm run test`** (`vitest.config.mts`, `test/**/*.test.ts`, Node environment, no jsdom; `npm run test:watch` while iterating).
+
+- A thin smoke layer over Server Actions and `src/lib` helpers: the Zod validation gates and the happy path with Supabase / `next/*` / the auth DAL mocked. **Supabase is never hit for real in this lane** — that is what lets it run deterministically in CI.
+- `import "server-only"` is aliased to a stub in the config so `src/lib/**` modules load under Node.
 - `vi.mock` factories are hoisted — share fixtures into them via `vi.hoisted`, not module-level `const`s.
+
+**Real-boundary lane — `npm run test:integration`** (`vitest.integration.config.mts`, `test/integration/**/*.int.ts`). Opt-in, local only, never in CI.
+
+- Talks to a real Supabase stack — real Postgres, Storage, Auth and RLS — because questions about what the storage boundary actually does cannot be answered by mocking it.
+- **Refuses to run against anything but a local stack.** `test/integration/setup.ts` throws unless the URL's hostname is loopback; the lane creates users and uploads objects, and `.env.local` points at the linked project.
+- Credentials come from `.env.test.local` (gitignored), which you generate yourself:
+  ```bash
+  npx supabase start
+  npx supabase status -o env --override-name api.url=NEXT_PUBLIC_SUPABASE_URL \
+    --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY > .env.test.local
+  ```
+- No service-role key. Fixtures run under the same RLS a real user has. Mint **one test user per file** — `[auth.rate_limit] sign_in_sign_ups` is 30 per 5 minutes per IP.
+
+**Live smoke checks — `npm run test:smoke`** (`vitest.smoke.config.mts`, `test/smoke/**/*.live.ts`). Opt-in, never in CI.
+
+- Calls a real external provider (currently OpenRouter, via `.env.local`). For manually confirming an integration works end to end, not for assertions anyone else has to keep green.
 
 ### Verify before calling a change done
 
