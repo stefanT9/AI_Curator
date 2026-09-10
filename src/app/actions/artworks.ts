@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { requireArtist } from "@/lib/auth/dal";
@@ -121,20 +122,45 @@ export async function createArtwork(
     };
   }
 
-  const { error: insertError } = await supabase.from("artworks").insert({
-    artist_id: artist.id,
-    title,
-    description,
-    tags: await topUpTags(tags, imagePath),
-    image_path: imagePath,
-  });
+  const { data: inserted, error: insertError } = await supabase
+    .from("artworks")
+    .insert({
+      artist_id: artist.id,
+      title,
+      description,
+      tags,
+      image_path: imagePath,
+    })
+    .select("id")
+    .single();
 
-  if (insertError) {
+  if (insertError || !inserted) {
     // The file is already in the bucket. Without this the bucket would collect
     // orphans no row ever points at.
     await supabase.storage.from(ARTWORKS_BUCKET).remove([imagePath]);
-    return { message: `Could not save the artwork: ${insertError.message}` };
+    return {
+      message: `Could not save the artwork: ${insertError?.message ?? "unknown error"}`,
+    };
   }
+
+  // The piece is saved with the artist's own tags before this runs. `after`
+  // defers the model call until the response has been sent, so publishing is
+  // never slower for it — the PRD guardrail says no step in the upload flow
+  // blocks waiting on an AI response, and awaiting it here would be that step.
+  //
+  // Both /studio and /discover render dynamically, so the later tags show up
+  // on the next request without an explicit revalidate.
+  after(async () => {
+    const toppedUp = await topUpTags(tags, imagePath);
+
+    if (toppedUp.length > tags.length) {
+      await supabase
+        .from("artworks")
+        .update({ tags: toppedUp })
+        .eq("id", inserted.id)
+        .eq("artist_id", artist.id);
+    }
+  });
 
   revalidatePath("/studio");
   revalidatePath("/discover");
