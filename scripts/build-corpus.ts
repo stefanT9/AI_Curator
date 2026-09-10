@@ -395,6 +395,12 @@ export type CorpusPiece = {
    * than an absence indistinguishable from "not yet run".
    */
   enrichment_failed?: EnrichmentFailure;
+  /**
+   * Part of the deliberate untagged tail. The generator emits `'{}'` for these
+   * pieces' tags and drops their description, whatever the earlier stages
+   * produced — this is a choice about the corpus, not a gap in it.
+   */
+  untagged?: boolean;
 };
 
 export type CorpusManifest = {
@@ -770,6 +776,7 @@ async function writeManifest(manifest: CorpusManifest): Promise<void> {
         tags_from_enrichment: piece.tags_from_enrichment,
         description: piece.description,
         enrichment_failed: piece.enrichment_failed,
+        untagged: piece.untagged,
       })),
   };
 
@@ -796,6 +803,7 @@ const CorpusPieceSchema = z.looseObject({
   tags_from_enrichment: z.array(z.string()).optional(),
   description: z.string().nullable().optional(),
   enrichment_failed: z.string().optional(),
+  untagged: z.boolean().optional(),
 });
 
 const CorpusManifestSchema = z.looseObject({
@@ -1354,6 +1362,92 @@ export function parseLimit(argv: readonly string[]): number | null {
 }
 
 /**
+ * Share of the corpus held back as a deliberate untagged tail.
+ *
+ * Not a gap — a fixture. S-01's outermost sort key demotes untagged pieces
+ * below every tagged one, including pieces the collector has already passed on,
+ * and that ordering is unobservable unless untagged pieces actually exist. It
+ * also mirrors production, where artworks published before enrichment existed
+ * carry no tags and no backfill is planned.
+ */
+const UNTAGGED_TAIL_FRACTION = 0.05;
+
+/**
+ * The untagged tail, spread evenly across the slot range.
+ *
+ * Even spacing by `slot` rather than a random sample, because `slot` becomes
+ * the `created_at` offset: a tail clustered at one end would sit entirely
+ * outside the first deck a collector sees, and the sort key it exists to make
+ * visible would go unobserved. Fifty pieces over a thousand slots is one every
+ * twentieth, which puts a piece in both the first and last twenty whichever end
+ * the deck calls newest.
+ *
+ * Deterministic and re-derivable: sorted by slot, picked evenly, no randomness.
+ */
+export function selectUntagged(
+  pieces: readonly CorpusPiece[],
+  fraction = UNTAGGED_TAIL_FRACTION,
+): CorpusPiece[] {
+  const bySlot = [...pieces].sort((a, b) => a.slot - b.slot);
+  return pickEvenly(bySlot, Math.round(pieces.length * fraction));
+}
+
+/**
+ * The tags a piece actually reaches the database with.
+ *
+ * One function so the coverage report and the generator cannot disagree about
+ * what the corpus serves. An untagged piece contributes nothing — counting its
+ * museum tags here would report coverage the `getStarterDeck` overlap will
+ * never find.
+ */
+export function effectiveTags(piece: CorpusPiece): string[] {
+  if (piece.untagged) return [];
+  return combineTags(
+    piece.tags_from_metadata,
+    piece.tags_from_enrichment ?? [],
+  );
+}
+
+export type FacetCoverage = {
+  facet: Facet;
+  counts: { term: string; pieces: number }[];
+  covered: number;
+  total: number;
+};
+
+/**
+ * How many pieces each vocabulary term can serve.
+ *
+ * The threshold for "covered" is one piece, matching the query rather than a
+ * taste judgment: `getStarterDeck` runs an `.overlaps("tags", terms)` that
+ * either returns rows or does not, and `ONBOARDING_POOL_SIZE` is only a ceiling
+ * on how many it takes.
+ */
+export function coverageReport(
+  pieces: readonly CorpusPiece[],
+): FacetCoverage[] {
+  const tally = new Map<string, number>();
+  for (const piece of pieces) {
+    for (const tag of effectiveTags(piece)) {
+      tally.set(tag, (tally.get(tag) ?? 0) + 1);
+    }
+  }
+
+  return FACETS.map((facet) => {
+    const counts = facetTerms(facet).map((term) => ({
+      term,
+      pieces: tally.get(term) ?? 0,
+    }));
+    return {
+      facet,
+      counts,
+      covered: counts.filter((entry) => entry.pieces > 0).length,
+      total: counts.length,
+    };
+  });
+}
+
+/**
  * Which pieces this run should call the model for, in the order it should do it.
  *
  * Resume is the default and needs no flag: a piece is done once it carries a
@@ -1590,17 +1684,115 @@ async function runEnrich(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Stage: coverage
+// ---------------------------------------------------------------------------
+
+/**
+ * Pin the untagged tail if it is not pinned already.
+ *
+ * Idempotent by construction: the selection is a pure function of the slots, so
+ * re-running re-derives the same fifty pieces. It is written into the manifest
+ * anyway rather than derived at generate time, because the tail is a curatorial
+ * decision about this corpus and belongs in the artifact a reviewer reads.
+ */
+function pinUntaggedTail(manifest: CorpusManifest): number {
+  const chosen = new Set(
+    selectUntagged(manifest.pieces).map((piece) => piece.piece_uuid),
+  );
+
+  for (const piece of manifest.pieces) {
+    if (chosen.has(piece.piece_uuid)) {
+      piece.untagged = true;
+    } else {
+      delete piece.untagged;
+    }
+  }
+
+  return chosen.size;
+}
+
+/** A bar cheap enough to read at a glance, scaled to the busiest term. */
+const bar = (count: number, max: number, width = 24) =>
+  "█".repeat(max === 0 ? 0 : Math.round((count / max) * width));
+
+async function runCoverage(): Promise<void> {
+  const manifest = await readManifest();
+  if (!manifest) {
+    throw new Error(
+      `No manifest at ${path.relative(REPO_ROOT, MANIFEST_PATH)} — run \`npm run db:seed:fetch\` first.`,
+    );
+  }
+
+  const tail = pinUntaggedTail(manifest);
+  await writeManifest(manifest);
+
+  const report = coverageReport(manifest.pieces);
+  const enriched = manifest.pieces.filter(
+    (piece) => piece.tags_from_enrichment !== undefined,
+  ).length;
+
+  console.log(
+    `${manifest.pieces.length} pieces — ${enriched} enriched, ${tail} held back as the untagged tail.\n`,
+  );
+
+  const gaps: string[] = [];
+
+  for (const facet of report) {
+    const max = Math.max(...facet.counts.map((entry) => entry.pieces));
+    console.log(
+      `${facet.facet}  ${facet.covered}/${facet.total} terms covered`,
+    );
+
+    for (const { term, pieces } of [...facet.counts].sort(
+      (a, b) => b.pieces - a.pieces,
+    )) {
+      const mark = pieces === 0 ? "·" : " ";
+      console.log(
+        `  ${mark} ${term.padEnd(18)} ${String(pieces).padStart(4)}  ${bar(pieces, max)}`,
+      );
+      if (pieces === 0) gaps.push(`${facet.facet}/${term}`);
+    }
+    console.log("");
+  }
+
+  const covered = report.reduce((n, facet) => n + facet.covered, 0);
+  const total = report.reduce((n, facet) => n + facet.total, 0);
+  console.log(
+    `Overall: ${covered}/${total} vocabulary terms have at least one piece.`,
+  );
+
+  if (gaps.length > 0) {
+    // Recorded, never closed. A public-domain corpus that cannot serve
+    // `street art` is a fact about public-domain art; tagging a 19th-century
+    // etching `street art` to reach a number would put a false tag on a real
+    // artwork. The onboarding picker is what stops a collector meeting an empty
+    // pool, by offering only terms the catalogue can actually serve.
+    console.log(
+      `\n${gaps.length} term(s) with no pieces — findings, not failures:`,
+    );
+    console.log(`  ${gaps.join(", ")}`);
+  }
+
+  if (enriched < manifest.pieces.length) {
+    console.log(
+      `\nNote: ${manifest.pieces.length - enriched} piece(s) are not yet enriched, so style and ` +
+        `mood coverage will grow as \`npm run db:seed:enrich:resume\` continues.`,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Dispatcher
 // ---------------------------------------------------------------------------
 
 const STAGES: Record<string, () => Promise<void>> = {
   fetch: runFetch,
   enrich: runEnrich,
+  coverage: runCoverage,
 };
 
 /** Stages the npm scripts expose that later phases of this change still owe. */
 const PLANNED_STAGES: Record<string, string> = {
-  coverage: "phase 3",
   generate: "phase 4",
 };
 

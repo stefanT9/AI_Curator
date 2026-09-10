@@ -79,3 +79,22 @@ the remainder manually via the resume/retry scripts. Consequences carried forwar
   snapshot time came back **byte-identical**, and resume reports pinned failures as skipped.
 - **Phase 3's untagged-tail criteria (3.7, 3.10) assume ~5%.** Reality is ~80% until the manual
   runs finish. Re-decide at the top of Phase 3 against the corpus that exists then.
+
+**2026-09-10, Phase 3 — coverage measured: 67/100 terms, and one finding worth carrying.**
+The report vindicates the picker reversal: `street art` has exactly 1 piece and `psychedelic`,
+`pop art`, `cubist`, `art deco`, `brutalist`, `hyperrealism` and `naive` have none. A 19th-century
+CC0 collection genuinely lacks them.
+
+**But the palette facet is capped by our own mapper, not by the collection.** Only 7 of 20 palette
+terms are reachable at all: `paletteTags` emits monochrome, black and white, desaturated, muted,
+vivid and three hue-dominants, and enrichment's palette terms are deliberately discarded in favour
+of the museum's HSL reading. So `sepia`, `warm palette`, `cool palette`, `pastel palette`,
+`earth tones`, `jewel tones`, `neon`, `high contrast`, `primary colours`, `complementary`,
+`gradient` and `metallic` can never be covered however much of the corpus is enriched. That is a
+design consequence, not a fact about public-domain art — **the data-driven picker change should
+not treat the two kinds of "uncovered" as one category.**
+
+Untagged tail: exactly 50 pieces (5.0%), spaced every 20 slots, deterministic from `slot` alone,
+with one piece inside each end-window so the sort key is observable whichever end Phase 4 calls
+newest. Coverage re-runs byte-identical. Style/mood coverage will grow as the owner resumes
+enrichment; the report says so and is the honest way to re-measure.

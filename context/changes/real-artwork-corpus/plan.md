@@ -853,19 +853,19 @@ steps exist to make that failure self-explaining rather than mysterious.
 
 #### Automated
 
-- [ ] 3.1 `npm run format:check` passes
-- [ ] 3.2 `npm run lint` passes
-- [ ] 3.3 `npm run typecheck` passes
-- [ ] 3.4 `npm run test` passes
-- [ ] 3.5 `npm run build` passes
-- [ ] 3.6 `npm run db:seed:coverage` exits 0 reporting per-facet term coverage
-- [ ] 3.7 ~50 pieces (5%) carry `untagged: true`
-- [ ] 3.8 No piece carries `tag_overrides` — the override mechanism is not built
+- [x] 3.1 `npm run format:check` passes
+- [x] 3.2 `npm run lint` passes
+- [x] 3.3 `npm run typecheck` passes
+- [x] 3.4 `npm run test` passes
+- [x] 3.5 `npm run build` passes
+- [x] 3.6 `npm run db:seed:coverage` exits 0 reporting per-facet term coverage
+- [x] 3.7 ~50 pieces (5%) carry `untagged: true`
+- [x] 3.8 No piece carries `tag_overrides` — the override mechanism is not built
 
 #### Manual
 
-- [ ] 3.9 Coverage report reviewed: gaps recorded as findings, not closed
-- [ ] 3.10 At least one untagged piece falls in the newest 20 slots
+- [x] 3.9 Coverage report reviewed: gaps recorded as findings, not closed
+- [x] 3.10 At least one untagged piece falls in the newest 20 slots
 
 ### Phase 4: seed.sql generation
 

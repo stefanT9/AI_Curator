@@ -2,12 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import {
   combineTags,
+  coverageReport,
+  effectiveTags,
   enrichedTags,
   facetOf,
   mediumTags,
   paletteTags,
   parseLimit,
   selectPending,
+  selectUntagged,
   subjectTags,
   truncateTitle,
   type AicArtwork,
@@ -434,5 +437,153 @@ describe("selectPending", () => {
 
   it("treats a null limit as no limit", () => {
     expect(selectPending(all, { limit: null })).toEqual([fresh]);
+  });
+});
+
+describe("the untagged tail", () => {
+  const corpus = (n: number): CorpusPiece[] =>
+    Array.from({ length: n }, (_, i) => ({
+      aic_id: i,
+      image_id: `image-${i}`,
+      piece_uuid: `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`,
+      title: `Piece ${i}`,
+      artist: null,
+      tags_from_metadata: ["oil painting"],
+      image_width: 843,
+      slot: i,
+      tags_from_enrichment: ["abstract", "serene"],
+    }));
+
+  describe("selectUntagged", () => {
+    it("holds back five percent of the corpus", () => {
+      expect(selectUntagged(corpus(1000))).toHaveLength(50);
+      expect(selectUntagged(corpus(200))).toHaveLength(10);
+    });
+
+    it("spreads the tail evenly across the slot range", () => {
+      const slots = selectUntagged(corpus(1000))
+        .map((piece) => piece.slot)
+        .sort((a, b) => a - b);
+      const gaps = new Set(slots.slice(1).map((slot, i) => slot - slots[i]));
+      expect(gaps).toEqual(new Set([20]));
+    });
+
+    it("puts a piece in the first and last twenty slots either way round", () => {
+      // `slot` becomes the created_at offset, and which end counts as newest is
+      // the generator's business. A tail that missed one end would leave the
+      // untagged sort key unobservable in the first deck a collector sees.
+      const slots = selectUntagged(corpus(1000)).map((piece) => piece.slot);
+      expect(slots.some((slot) => slot < 20)).toBe(true);
+      expect(slots.some((slot) => slot >= 980)).toBe(true);
+    });
+
+    it("is deterministic — same pieces every time", () => {
+      const once = selectUntagged(corpus(1000)).map((p) => p.piece_uuid);
+      const twice = selectUntagged(corpus(1000)).map((p) => p.piece_uuid);
+      expect(once).toEqual(twice);
+    });
+
+    it("selects by slot, not by array order", () => {
+      const shuffled = [...corpus(100)].reverse();
+      const slots = selectUntagged(shuffled).map((piece) => piece.slot);
+      expect(slots).toEqual([...slots].sort((a, b) => a - b));
+    });
+  });
+
+  describe("effectiveTags", () => {
+    const [piece] = corpus(1);
+
+    it("combines metadata and enrichment for an ordinary piece", () => {
+      expect(effectiveTags(piece)).toEqual([
+        "oil painting",
+        "abstract",
+        "serene",
+      ]);
+    });
+
+    it("gives an untagged piece nothing at all", () => {
+      // Counting its museum tags would report coverage the getStarterDeck
+      // overlap can never find, because the generator emits '{}' for it.
+      expect(effectiveTags({ ...piece, untagged: true })).toEqual([]);
+    });
+
+    it("handles a piece that has never been enriched", () => {
+      const bare: CorpusPiece = { ...piece };
+      delete bare.tags_from_enrichment;
+      expect(effectiveTags(bare)).toEqual(["oil painting"]);
+    });
+  });
+});
+
+describe("coverageReport", () => {
+  const piece = (
+    slot: number,
+    tags: string[],
+    extra: Partial<CorpusPiece> = {},
+  ): CorpusPiece => ({
+    aic_id: slot,
+    image_id: `image-${slot}`,
+    piece_uuid: `00000000-0000-4000-8000-${String(slot).padStart(12, "0")}`,
+    title: `Piece ${slot}`,
+    artist: null,
+    tags_from_metadata: tags,
+    image_width: 843,
+    slot,
+    ...extra,
+  });
+
+  it("reports every facet and every term, covered or not", () => {
+    const report = coverageReport([piece(0, ["oil painting"])]);
+    expect(report.map((facet) => facet.facet)).toEqual([
+      "medium",
+      "style",
+      "subject",
+      "palette",
+      "mood",
+    ]);
+    for (const facet of report) {
+      expect(facet.counts).toHaveLength(20);
+      expect(facet.total).toBe(20);
+    }
+  });
+
+  it("counts pieces per term", () => {
+    const report = coverageReport([
+      piece(0, ["oil painting"]),
+      piece(1, ["oil painting"]),
+      piece(2, ["etching"]),
+    ]);
+    const medium = report.find((facet) => facet.facet === "medium")!;
+    expect(medium.counts.find((c) => c.term === "oil painting")?.pieces).toBe(
+      2,
+    );
+    expect(medium.counts.find((c) => c.term === "etching")?.pieces).toBe(1);
+    expect(medium.counts.find((c) => c.term === "acrylic")?.pieces).toBe(0);
+    expect(medium.covered).toBe(2);
+  });
+
+  it("treats one piece as covered — the threshold the query uses", () => {
+    // getStarterDeck's .overlaps either returns rows or it does not;
+    // ONBOARDING_POOL_SIZE is only a ceiling on how many it takes.
+    const report = coverageReport([piece(0, ["etching"])]);
+    const medium = report.find((facet) => facet.facet === "medium")!;
+    expect(medium.covered).toBe(1);
+  });
+
+  it("does not count an untagged piece towards any term", () => {
+    const report = coverageReport([
+      piece(0, ["oil painting"], { untagged: true }),
+    ]);
+    expect(report.every((facet) => facet.covered === 0)).toBe(true);
+  });
+
+  it("counts style and mood terms that came from enrichment", () => {
+    const report = coverageReport([
+      piece(0, ["oil painting"], {
+        tags_from_enrichment: ["abstract", "serene"],
+      }),
+    ]);
+    expect(report.find((f) => f.facet === "style")!.covered).toBe(1);
+    expect(report.find((f) => f.facet === "mood")!.covered).toBe(1);
   });
 });
