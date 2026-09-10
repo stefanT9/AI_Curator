@@ -391,28 +391,28 @@ server-side.
 
 #### Automated
 
-- [x] 1.1 Probe reverted, working tree clean of `src/app/actions/interactions.ts`
-- [x] 1.2 Full gate still passes after revert
+- [x] 1.1 Probe reverted, working tree clean of `src/app/actions/interactions.ts` — 9b232f0
+- [x] 1.2 Full gate still passes after revert — 9b232f0
 
 #### Manual
 
-- [x] 1.3 Wrong card observed with the probe applied and the sequence written to `repro.md`
-- [x] 1.4 `repro.md` states whether the stale index fully explains the behavior
-- [x] 1.5 If a second cause appeared, plan reconciled before Phase 2
+- [x] 1.3 Wrong card observed with the probe applied and the sequence written to `repro.md` — 9b232f0
+- [x] 1.4 `repro.md` states whether the stale index fully explains the behavior — 9b232f0
+- [x] 1.5 If a second cause appeared, plan reconciled before Phase 2 — 9b232f0
 
 ### Phase 2: Extract the selection rule
 
 #### Automated
 
-- [ ] 2.1 New tests pass: `npm run test`
-- [ ] 2.2 Type checking passes: `npm run typecheck`
-- [ ] 2.3 Linting passes: `npm run lint`
-- [ ] 2.4 Formatting is clean: `npm run format:check`
-- [ ] 2.5 Build passes: `npm run build`
+- [x] 2.1 New tests pass: `npm run test`
+- [x] 2.2 Type checking passes: `npm run typecheck`
+- [x] 2.3 Linting passes: `npm run lint`
+- [x] 2.4 Formatting is clean: `npm run format:check`
+- [x] 2.5 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.6 Churn tests observed red against ordinal indexing before being accepted green
+- [x] 2.6 Churn tests observed red against ordinal indexing before being accepted green
 
 ### Phase 3: Rewire SwipeDeck to the helper
 
