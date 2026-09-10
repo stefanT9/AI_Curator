@@ -13,6 +13,8 @@ export type AuthUser = {
 export type UserProfile = AuthUser & {
   displayName: string | null;
   role: UserRole;
+  /** Null until the collector finishes the first-run flow. */
+  onboardedAt: string | null;
 };
 
 /**
@@ -69,7 +71,7 @@ export const getProfile = cache(async (): Promise<UserProfile | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("display_name, role")
+    .select("display_name, role, onboarded_at")
     .eq("id", user.id)
     .single();
 
@@ -81,6 +83,7 @@ export const getProfile = cache(async (): Promise<UserProfile | null> => {
     ...user,
     displayName: data.display_name,
     role: data.role,
+    onboardedAt: data.onboarded_at,
   };
 });
 
@@ -89,6 +92,24 @@ export const requireProfile = async (): Promise<UserProfile> => {
 
   if (!profile) {
     redirect("/login");
+  }
+
+  return profile;
+};
+
+/**
+ * Gate for the first-run flow. A collector who has not finished onboarding is
+ * sent to it, so the authoritative guard — not the optimistic proxy — is what
+ * makes it mandatory.
+ *
+ * The `(onboarding)` segment deliberately does not call this: gating the flow on
+ * itself would loop. It calls `requireProfile` and checks `onboardedAt` directly.
+ */
+export const requireOnboarded = async (): Promise<UserProfile> => {
+  const profile = await requireProfile();
+
+  if (profile.onboardedAt === null) {
+    redirect("/onboarding");
   }
 
   return profile;
