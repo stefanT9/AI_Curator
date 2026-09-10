@@ -42,9 +42,11 @@ export default async function OnboardingPage(props: PageProps<"/onboarding">) {
           <h1 className="text-2xl font-semibold tracking-tight">
             What are you drawn to?
           </h1>
-          <p className="mt-1 text-sm opacity-70">
-            Pick a few styles and we&rsquo;ll start you off with work that
-            matches — then your likes take over.
+          <p className="mt-2 text-sm leading-relaxed opacity-70">
+            Pick a few styles you already love — there are no wrong answers, and
+            nothing here is locked in. We&rsquo;ll open with a handful of pieces
+            in that direction; from there, what you like is what shapes your
+            feed.
           </p>
         </div>
 

@@ -674,20 +674,20 @@ auto-deploys it via `.github/workflows/migrations.yml`; never edit it after it a
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `npm run typecheck`
-- [x] 4.2 Linting passes: `npm run lint`
-- [x] 4.3 Formatting is clean: `npm run format:check`
-- [x] 4.4 Unit tests pass: `npm run test`
-- [x] 4.5 New DAL unit test: `requireOnboarded` redirects when `onboardedAt` is null and returns the profile when set
-- [x] 4.6 Build succeeds: `npm run build`
+- [x] 4.1 Type checking passes: `npm run typecheck` — aba3feb
+- [x] 4.2 Linting passes: `npm run lint` — aba3feb
+- [x] 4.3 Formatting is clean: `npm run format:check` — aba3feb
+- [x] 4.4 Unit tests pass: `npm run test` — aba3feb
+- [x] 4.5 New DAL unit test: `requireOnboarded` redirects when `onboardedAt` is null and returns the profile when set — aba3feb
+- [x] 4.6 Build succeeds: `npm run build` — aba3feb
 
 #### Manual
 
-- [x] 4.7 A fresh account navigating directly to `/discover` is redirected to `/onboarding`
-- [x] 4.8 The same holds for `/liked`, `/account` and `/studio`
-- [x] 4.9 `/onboarding` itself remains reachable — no redirect loop
-- [x] 4.10 An account that completed onboarding in Phase 3 reaches `/discover` normally
-- [x] 4.11 Signing out and back in does not re-trigger onboarding
+- [x] 4.7 A fresh account navigating directly to `/discover` is redirected to `/onboarding` — aba3feb
+- [x] 4.8 The same holds for `/liked`, `/account` and `/studio` — aba3feb
+- [x] 4.9 `/onboarding` itself remains reachable — no redirect loop — aba3feb
+- [x] 4.10 An account that completed onboarding in Phase 3 reaches `/discover` normally — aba3feb
+- [x] 4.11 Signing out and back in does not re-trigger onboarding — aba3feb
 
 ### Phase 5: First-run orientation
 

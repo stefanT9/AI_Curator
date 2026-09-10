@@ -46,6 +46,20 @@ export function StyleTermPicker() {
     selected.length >= ONBOARDING_TERM_MIN &&
     selected.length <= ONBOARDING_TERM_MAX;
 
+  // A bare "n of 4 selected" reads like a validation error before the person
+  // has done anything wrong. Say what to do next instead, and only mention the
+  // cap once it actually bites. Counts come from the constants, so the copy
+  // still reads correctly if the bounds are retuned.
+  const shortBy = ONBOARDING_TERM_MIN - selected.length;
+  const hint =
+    shortBy === ONBOARDING_TERM_MIN
+      ? `Choose any ${ONBOARDING_TERM_MIN} to get going.`
+      : shortBy > 0
+        ? `${shortBy} more and you’re set.`
+        : atCap
+          ? "That’s a full set. Tap one again to swap it out."
+          : "Good start — add another, or carry on.";
+
   return (
     <form action="/onboarding" method="get" className="flex flex-col gap-4">
       <ul className="flex flex-wrap gap-2">
@@ -84,8 +98,7 @@ export function StyleTermPicker() {
       ))}
 
       <p className="text-xs opacity-60" aria-live="polite">
-        {selected.length} of {ONBOARDING_TERM_MAX} selected — pick at least{" "}
-        {ONBOARDING_TERM_MIN}.
+        {hint}
       </p>
 
       <button type="submit" disabled={!canSubmit} className={submitButtonClass}>
