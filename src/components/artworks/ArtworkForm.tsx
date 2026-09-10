@@ -4,14 +4,29 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { createArtwork, updateArtwork } from "@/app/actions/artworks";
+import { suggestArtworkFields } from "@/app/actions/enrichment";
 import { Field, submitButtonClass } from "@/components/ui/Field";
 import { MAX_TAGS } from "@/lib/artworks/tags";
+import { downscaleToDataUrl } from "@/lib/artworks/downscale";
 import {
   ArtworkUploadError,
   removeArtworkImage,
   uploadArtworkImage,
 } from "@/lib/artworks/upload";
 import type { Artwork } from "@/types/domain";
+
+/**
+ * Per-field progress. Deliberately text, not a spinner overlay: it has to sit
+ * beside the label without making the field look disabled, because the field
+ * stays editable while a suggestion is in flight.
+ */
+function FieldProgress() {
+  return (
+    <span className="text-xs opacity-60" role="status">
+      Suggesting…
+    </span>
+  );
+}
 
 /**
  * Upload and edit share every field except the image, which is set once at
@@ -31,9 +46,21 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  // Description and tags become controlled the moment a suggestion fills them,
+  // and stay editable. `undefined` means "never touched — let the field manage
+  // itself", which is what keeps the edit form byte-for-byte as it was.
+  const [description, setDescription] = useState<string | undefined>(undefined);
+  const [tags, setTags] = useState<string | undefined>(undefined);
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestError, setSuggestError] = useState<string | null>(null);
+
   // The key of an object that is in the bucket but has no row yet. Held in a
   // ref rather than state because writing it must not re-render mid-submit.
   const orphanRef = useRef<string | null>(null);
+
+  // Identifies the image a suggestion belongs to. If the artist swaps the image
+  // mid-request, the in-flight result is for the wrong picture and is dropped.
+  const requestRef = useRef(0);
 
   // Object URLs are leaked memory until revoked.
   useEffect(() => {
@@ -54,13 +81,61 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
     }
   }, [state]);
 
+  /**
+   * Choosing an image is what triggers enrichment — the artist never asks for
+   * it. The request is fire-and-forget: nothing here blocks typing or submit,
+   * and a failure only sets a message next to the fields.
+   */
   const onImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+
     setUploadError(null);
+    setSuggestError(null);
     setPreview((current) => {
       if (current) URL.revokeObjectURL(current);
       return file ? URL.createObjectURL(file) : null;
     });
+
+    // Invalidate any in-flight suggestion; it describes the previous image.
+    const requestId = ++requestRef.current;
+
+    if (!file) {
+      setSuggesting(false);
+      return;
+    }
+
+    void suggest(file, requestId);
+  };
+
+  const suggest = async (file: File, requestId: number) => {
+    setSuggesting(true);
+
+    try {
+      const dataUrl = await downscaleToDataUrl(file);
+      const result = await suggestArtworkFields(dataUrl);
+
+      // The artist changed the image while this was in flight.
+      if (requestRef.current !== requestId) return;
+
+      if (!result.ok) {
+        setSuggestError(result.message);
+        return;
+      }
+
+      // Fill only what is empty. A suggestion never displaces the artist's own
+      // words — that is FR-002, and it is why these read the live values.
+      setDescription((current) =>
+        current?.trim() ? current : result.description,
+      );
+      setTags((current) =>
+        current?.trim() ? current : result.tags.join(", "),
+      );
+    } catch {
+      if (requestRef.current !== requestId) return;
+      setSuggestError("Could not read that image for suggestions.");
+    } finally {
+      if (requestRef.current === requestId) setSuggesting(false);
+    }
   };
 
   /**
@@ -153,6 +228,9 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
         placeholder="What is this piece about? Medium, size, what you were after."
         defaultValue={artwork?.description ?? undefined}
         errors={state?.errors?.description}
+        value={description}
+        onValueChange={setDescription}
+        action={suggesting ? <FieldProgress /> : null}
       />
 
       <Field
@@ -162,7 +240,14 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
         hint={`Comma-separated, up to ${MAX_TAGS}. These are what collectors get matched on.`}
         defaultValue={artwork?.tags.join(", ")}
         errors={state?.errors?.tags}
+        value={tags}
+        onValueChange={setTags}
+        action={suggesting ? <FieldProgress /> : null}
       />
+
+      {suggestError ? (
+        <p className="text-xs opacity-70">{suggestError}</p>
+      ) : null}
 
       {state?.message ? (
         <p role="alert" className="text-sm text-red-600 dark:text-red-400">
