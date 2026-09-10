@@ -19,6 +19,11 @@ type FieldProps = {
    * Renders the field controlled, so a parent can fill it programmatically.
    * When supplied, `defaultValue` is ignored and `onValueChange` is required to
    * keep the field editable. Omit both and the field behaves exactly as before.
+   *
+   * Decide once per call site and hold it: a `value` that starts `undefined`
+   * and later becomes a string flips the field from uncontrolled to
+   * controlled, which React warns about and which discards the value on the
+   * switch. Seed the parent's state with `""` rather than `undefined`.
    */
   value?: string;
   onValueChange?: (value: string) => void;

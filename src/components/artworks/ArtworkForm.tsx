@@ -46,11 +46,12 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  // Description and tags become controlled the moment a suggestion fills them,
-  // and stay editable. `undefined` means "never touched — let the field manage
-  // itself", which is what keeps the edit form byte-for-byte as it was.
-  const [description, setDescription] = useState<string | undefined>(undefined);
-  const [tags, setTags] = useState<string | undefined>(undefined);
+  // Controlled for the component's whole lifetime, seeded from the artwork on
+  // the edit form. Starting them undefined and letting a suggestion define them
+  // would flip these fields from uncontrolled to controlled mid-life, which
+  // React warns about and which drops the value on the switch.
+  const [description, setDescription] = useState(artwork?.description ?? "");
+  const [tags, setTags] = useState(artwork?.tags.join(", ") ?? "");
   const [suggesting, setSuggesting] = useState(false);
   const [suggestError, setSuggestError] = useState<string | null>(null);
 
@@ -125,11 +126,9 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
       // Fill only what is empty. A suggestion never displaces the artist's own
       // words — that is FR-002, and it is why these read the live values.
       setDescription((current) =>
-        current?.trim() ? current : result.description,
+        current.trim() ? current : result.description,
       );
-      setTags((current) =>
-        current?.trim() ? current : result.tags.join(", "),
-      );
+      setTags((current) => (current.trim() ? current : result.tags.join(", ")));
     } catch {
       if (requestRef.current !== requestId) return;
       setSuggestError("Could not read that image for suggestions.");
@@ -226,7 +225,6 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
         label="Description"
         multiline
         placeholder="What is this piece about? Medium, size, what you were after."
-        defaultValue={artwork?.description ?? undefined}
         errors={state?.errors?.description}
         value={description}
         onValueChange={setDescription}
@@ -238,7 +236,6 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
         label="Tags"
         placeholder="abstract, oil, warm"
         hint={`Comma-separated, up to ${MAX_TAGS}. These are what collectors get matched on.`}
-        defaultValue={artwork?.tags.join(", ")}
         errors={state?.errors?.tags}
         value={tags}
         onValueChange={setTags}
