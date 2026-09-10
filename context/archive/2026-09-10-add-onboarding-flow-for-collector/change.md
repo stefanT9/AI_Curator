@@ -1,10 +1,10 @@
 ---
 change_id: add-onboarding-flow-for-collector
 title: Add onboarding flow for collector
-status: implemented
+status: archived
 created: 2026-09-10
 updated: 2026-09-10
-archived_at: null
+archived_at: 2026-09-10T17:59:42Z
 ---
 
 ## Notes
