@@ -86,6 +86,8 @@ _Before this change: the artist typed every field manually with no assistance; a
 - FR-001: An artist can request an AI suggestion for the description field and the tags field via each field's assistance control. Priority: must-have. Change: new
   > Socrates: Counter-argument considered: "only tags carry recommendation signal — title/description assist is scope for little gain." Resolution: narrowed. Assistance covers **description + tags** only this change; the title stays the artist's own voice; broader text assist is deferred (see Non-Goals).
 - FR-002: An artist can edit or discard any AI suggestion before publishing; accepting a suggestion is per-field and optional. Priority: must-have. Change: new
+
+  > **Revised during implementation.** FR-001's "assistance control" per field was replaced by an automatic trigger: enrichment runs once when the artist selects an image, and fills the description and tags fields only where they are empty. The artist-effort goal is unchanged and the no-overwrite guarantee is stronger (nothing can be displaced, because only empty fields are filled), but "opt-in per field" is no longer literally true — the suggestion arrives unasked. Editing and clearing remain fully available. Owner decision, 2026-09-10.
   > Socrates: Counter-argument considered: "pure opt-in keeps the tag signal thin — artists will ignore suggestions." Resolution: kept as opt-in. FR-003's automatic baseline tagging is the coverage backstop, so opt-in on the artist-facing controls is safe.
 - FR-003: The system generates a baseline set of tags for an artwork at publish time when the artist-entered tags are below a minimum count, so no piece is published with too few tags. Priority: must-have. Change: new
   > Socrates: Counter-argument considered: "an AI operation on every publish is the cost/latency exposure the guardrails flag." Resolution: revised. The baseline operation runs only when the artwork has fewer than N tags after artist input — artists who tag well incur no AI operation. N is an Open Question.
@@ -103,7 +105,9 @@ _Before this change: the artist typed every field manually with no assistance; a
 
 - "Bulk" assistance that fills all empty fields in one action — considered during shaping, then cut to protect the delivery window. Recorded as a Non-Goal.
 
-Note: the artist-facing tags field is a free-text multi-input; AI tag suggestions populate that same free-text field. This change adds no new fields to the upload form; it does add a persisted tag list on the artwork record.
+Note: the artist-facing tags field is a free-text multi-input; AI tag suggestions populate that same free-text field. This change adds no new fields to the upload form.
+
+_Corrected during planning:_ an earlier version of this note said the change "does add a persisted tag list on the artwork record". It does not — `artworks.tags text[]` with its GIN index already existed (`supabase/migrations/20260909160100_add_artworks.sql`). The only schema movement is the `cardinality` ceiling, raised from 10 to 20.
 
 ## Constraints & Compatibility
 
@@ -138,11 +142,11 @@ For reference, the preserved model: email/password authentication; every authent
 
 ## Open Questions
 
-1. **Does automatic baseline tagging use a controlled vocabulary, or free text like the artist-facing tags field?** — Owner: user. Consequence: determines how useful the persisted tags are to the future recommendation capability.
-2. **What is the minimum tag count (N) below which automatic baseline tagging runs (FR-003)?** — Owner: user.
-3. **What is the latency target for a single-field suggestion?** "Feels prompt" was accepted during shaping; the Guardrail needs a number. — Owner: user.
-4. **Should artist images sent for AI analysis carry a data-retention / no-training guarantee from the third-party processor?** Not selected as a hard requirement during shaping; confirm whether it belongs in this PRD. — Owner: user.
-5. **Which fields' prior AI suggestions count as "content the artist entered" for the no-overwrite rule** (e.g. does an untouched earlier suggestion block a re-run)? — Owner: user.
+1. ~~**Does automatic baseline tagging use a controlled vocabulary, or free text like the artist-facing tags field?**~~ **Resolved:** controlled vocabulary. Generated tags are drawn from a five-facet taxonomy (`src/lib/ai/taxonomy.ts`); artist-typed tags stay free text. Overlap is the point — two pieces tagged `warm palette` match, "warm ochre tones" and "warm palette" never do.
+2. ~~**What is the minimum tag count (N) below which automatic baseline tagging runs (FR-003)?**~~ **Resolved:** N = 5 (`MIN_GENERATED_TAGS`, `src/lib/ai/schema.ts`). Generated sets are capped at 12, below the 20-tag storage ceiling, so artist tags survive the merge.
+3. ~~**What is the latency target for a single-field suggestion?**~~ **Resolved:** a 25-second ceiling across the whole model fallback chain (`src/lib/ai/enrich.ts`). Planned at 12s and raised after live measurement — free-tier latency is highly variable, and a timeout is non-blocking by design, so a longer ceiling costs a slower worst case, never a blocked publish.
+4. **Should artist images sent for AI analysis carry a data-retention / no-training guarantee from the third-party processor?** — Owner: user. **Recorded as accepted risk:** the OpenRouter free tier carries no such guarantee, knowingly traded for zero cost. Vercel AI Gateway offers `zdr=all` / `no_training=all` models from roughly $0.03 per million input tokens should this become a requirement. Still open as a product decision.
+5. ~~**Which fields' prior AI suggestions count as "content the artist entered" for the no-overwrite rule?**~~ **Resolved:** moot under the shipped design. Enrichment runs once, when an image is selected, and fills a field **only if it is empty** — so nothing is ever displaced and there is no re-run to arbitrate. A non-empty field, whether the artist typed it or an earlier suggestion filled it, is left alone.
 6. **Is there a Secondary success outcome for this change?** The original nice-to-have ("bulk" assistance) became a Non-Goal and no replacement was chosen; `### Secondary` is a TODO until this resolves. — Owner: user.
 7. **Can a logged-out visitor swipe or view artwork pages, or is all of it behind authentication?** Does not affect this change but the PRD should state it. — Owner: user.
 8. **What happens to artworks uploaded before this change — is retro-tagging planned as a follow-up?** — Owner: user. (Related to Non-Goals.)

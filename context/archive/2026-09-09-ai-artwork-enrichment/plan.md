@@ -76,6 +76,14 @@ A pure `src/lib/ai/` module owns the taxonomy, the response schema, and the Open
 
 Raise the tag ceiling from 10 to 20 across all three places that state it, then build a self-contained `src/lib/ai/` module that turns image bytes into a validated `{ description, tags }` object, or fails cleanly. The service has no knowledge of forms, actions, or Supabase.
 
+**Revised during implementation.** Three details below were superseded by what live measurement and the installed SDK actually required. The contracts stand; these specifics do not:
+
+- **Timeout is 25s, not 12s.** Roughly one call in three still timed out at 12s even with the chain reordered and the SDK's own retries disabled, because free-tier latency is highly variable. A timeout is non-blocking by design, so a longer ceiling costs a slower worst case, never a blocked publish. See the comment at `src/lib/ai/enrich.ts` and PRD Open Question 3.
+- **`MODELS` order is `mini, dots, pro`, not `pro, mini, dots`.** Ordered by measured latency rather than catalogue position — `pro` is the strongest model but alone ate most of the budget.
+- **`generateText` + `Output.object`, not `generateObject`.** The AI SDK v7 equivalent for structured output on this provider.
+
+Also correcting an internal contradiction: §8's test case says "schema rejects 11 tags" while §5 caps generated tags at 12. §5 is correct. The shipped test asserts rejection at `MAX_GENERATED_TAGS + 1` rather than a literal, so it follows the cap wherever it moves.
+
 The ceiling rises first because everything downstream — the response schema's tag count, the publish-time merge cap — is sized against it.
 
 ### Changes Required
@@ -132,11 +140,11 @@ The 12-tag cap is deliberately below the new 20-tag storage ceiling: it leaves r
 
 **File**: `src/lib/ai/enrich.ts`
 
-**Intent**: Issue one structured-output call against OpenRouter with an image and a prompt, walking a fallback chain of free models and abandoning the attempt at 12 seconds.
+**Intent**: Issue one structured-output call against OpenRouter with an image and a prompt, walking a fallback chain of free models and abandoning the attempt at 12 seconds. _(Superseded: 25 seconds — see the revision note above.)_
 
 **Contract**: `enrichFromImage(dataUrl: string): Promise<EnrichmentResult>` where the result discriminates success from a typed failure (`"unconfigured" | "timeout" | "rate_limited" | "unavailable" | "invalid_response"`). Returning a typed failure rather than throwing is what lets callers decide whether to surface or swallow it.
 
-Behaviour: return `unconfigured` immediately when `OPENROUTER_API_KEY` is absent, so an unconfigured environment costs nothing. Try each model in `MODELS` in order; advance to the next on a 429 or an unavailability error; do not advance on a schema-validation failure, which indicates a prompt problem rather than a model problem. Apply a single 12-second budget across the whole chain via `AbortSignal.timeout`, not per attempt — a per-attempt timeout would let a three-model chain run for 36 seconds and break the guardrail.
+Behaviour: return `unconfigured` immediately when `OPENROUTER_API_KEY` is absent, so an unconfigured environment costs nothing. Try each model in `MODELS` in order; advance to the next on a 429 or an unavailability error; do not advance on a schema-validation failure, which indicates a prompt problem rather than a model problem. Apply a single budget across the whole chain via `AbortSignal.timeout`, not per attempt — a per-attempt timeout would let a three-model chain run for three times as long and break the guardrail. _(Planned at 12 seconds, shipped at 25 — see the revision note above.)_
 
 `MODELS` is an ordered constant, verified against the live catalogue on 2026-09-09:
 `["nex-agi/nex-n2.5-pro:free", "nex-agi/nex-n2.5-mini:free", "dots-studio/dots-3-note-preview:free"]`
@@ -159,7 +167,7 @@ The prompt must instruct the model to describe the artwork in the artist's regis
 
 **Intent**: Cover the logic most likely to break — malformed model output and the failure ladder — with the AI SDK mocked.
 
-**Contract**: Mock `ai`'s `generateObject` via `vi.hoisted` (module-level consts are not visible inside hoisted `vi.mock` factories — see AGENTS.md). Cases: taxonomy terms all within 30 characters and unique; schema rejects an off-taxonomy tag; schema rejects 11 tags; `unconfigured` returned with no key set and `generateObject` never called; a 429 on the first model advances to the second; a schema failure does not advance; a timeout maps to the `timeout` failure.
+**Contract**: Mock `ai`'s `generateObject` via `vi.hoisted` (module-level consts are not visible inside hoisted `vi.mock` factories — see AGENTS.md). Cases: taxonomy terms all within 30 characters and unique; schema rejects an off-taxonomy tag; schema rejects a tag count above the cap of 12; `unconfigured` returned with no key set and `generateObject` never called; a 429 on the first model advances to the second; a schema failure does not advance; a timeout maps to the `timeout` failure.
 
 ### Success Criteria
 
@@ -329,7 +337,9 @@ Unlike `createArtwork`, this is a plain async function rather than a `useActionS
 
 ### Overview
 
-Add the per-field assistance controls, the shared single-call result cache, and the in-flight and error states — without disabling publish at any point.
+Fill the description and tags fields from the image automatically, the moment one is chosen, without disabling publish at any point.
+
+**Revised during implementation.** The original contract below was per-field "Suggest" buttons with a shared result cache. The owner changed the trigger: enrichment now runs on image selection rather than on demand, so there are no buttons and no cache to share — one call per selected image, filling both fields at once. The no-overwrite rule is satisfied by construction instead of by an Undo affordance: a suggestion only ever fills a field that is empty.
 
 ### Changes Required
 
@@ -347,19 +357,21 @@ Add the per-field assistance controls, the shared single-call result cache, and 
 
 **Intent**: Wire the controls, hold the shared cached result, and keep the form fully usable while a request is in flight.
 
-**Contract**: Render assistance controls only when `!isEdit` and an image is selected — the edit form has no image input, so it has nothing to analyse. Hold three pieces of state: the cached `EnrichmentResult`, an in-flight flag, and an error message.
+**Contract**: Enrichment fires from the existing `onImageChange` handler, and only when `!isEdit` — the edit form has no image input, so it has nothing to analyse. Hold four pieces of state: the description value, the tags value, an in-flight flag, and an error message.
 
-Behaviour: clicking either control uses the cached result when present and only calls `suggestArtworkFields` otherwise; the description field takes the description, the tags field takes `tags.join(", ")` to match the existing comma-separated contract. Both fields become controlled once filled. The in-flight flag disables only the two assistance controls and shows progress on the triggered field — it must never touch the submit button, which is already bound to the form's own `pending` state (`src/components/artworks/ArtworkForm.tsx:17`). Errors render as non-blocking text near the field, leaving manual typing available.
+Behaviour: selecting an image downscales it and calls `suggestArtworkFields` once; the description field takes the description, the tags field takes `tags.join(", ")` to match the existing comma-separated contract. Both fields become controlled once filled. The in-flight flag drives per-field progress text only — it must never touch the submit button, which stays bound to the form's own `pending` and upload state. Errors render as non-blocking text below the fields, leaving manual typing available.
 
-Selecting a different image clears the cached result and the error inside the existing `onImageChange` handler, so the second control cannot fill from a stale analysis.
+Selecting a different image while a request is in flight must not let the earlier result land: hold a monotonic request id in a ref and drop any response whose id is stale. This replaces the original cache-invalidation rule, since there is no longer a cache to invalidate.
 
-Carry the cached tags into the form submission as a hidden input so Phase 4 can reuse them instead of paying for a second model call.
+No hidden input is carried into the submission. With enrichment happening before submit, the tags field already holds the generated tags, so Phase 4's top-up is a fallback rather than the normal path.
 
 #### 3. Overwrite semantics
 
 **Intent**: Satisfy the PRD's no-overwrite rule without making the control feel broken.
 
-**Contract**: PRD FR-002 forbids replacing artist content "without an explicit action on that field's control" — clicking the control **is** that explicit action, so a click always fills. To keep it recoverable, capture the field's prior value on fill and offer a single "Undo" affordance next to the control that restores it. This resolves PRD Open Question 5: a prior untouched suggestion does not block a re-run.
+**Contract**: With no control to click, there is no "explicit action on that field's control" to lean on, so the rule is enforced directly: a suggestion fills a field **only when that field is empty**. Anything the artist has typed survives, and no Undo affordance is needed because nothing is ever displaced.
+
+This resolves PRD Open Question 5 differently from the original plan: an untouched earlier suggestion *does* block a later one, because by then the field is no longer empty. Re-running against a fresh image is how an artist gets a different suggestion.
 
 ### Success Criteria
 
@@ -372,9 +384,9 @@ Carry the cached tags into the form submission as a hidden input so Phase 4 can 
 
 #### Manual Verification
 
-- Selecting an image and clicking Suggest on Description fills it; clicking Suggest on Tags then fills instantly with no second network request (verify in the Network tab)
+- Selecting an image fills both Description and Tags from one request (verify a single call in the Network tab)
 - The Upload button stays enabled throughout an in-flight suggestion, and other fields stay editable
-- Editing a suggestion and clicking Suggest again replaces it, and Undo restores the edited text
+- Typing a description first, then selecting an image, leaves the typed text untouched while Tags still fills
 - Changing the image clears the cache — the next Suggest issues a fresh request
 - With `OPENROUTER_API_KEY` removed, the control shows a non-blocking message and the piece still publishes
 - Login, signup, display-name and become-artist forms are visually and behaviourally unchanged
@@ -397,7 +409,9 @@ Guarantee no piece is published with fewer than five tags, without slowing or en
 
 **Intent**: Fill the tag gap at publish for under-tagged pieces, reusing the client's cached suggestion when it was submitted.
 
-**Contract**: Extend `CreateArtworkSchema` with an optional `suggestedTags` field parsed through the same normalization as `tags`, sourced from the hidden input added in Phase 3. After validation and after the image upload succeeds, when `tags.length < 5`: merge in `suggestedTags` first (deduped, artist tags kept ahead of generated ones), and only if the merged list is still under five, call `enrichFromImage` once with the uploaded bytes. Cap the final list at the shared ceiling constant (20) so the insert can never violate `artworks_tags_length`.
+**Contract** (revised alongside Phase 3): there is no `suggestedTags` hidden input — Phase 3 now fills the tags field itself before submit, so the submitted `tags` already carry the generated set on the normal path. After validation and after the ownership and existence checks, when `tags.length < MIN_GENERATED_TAGS`, call `enrichFromImage` once with the artwork's **public Storage URL** (the object is already uploaded by then, and the bucket is public — passing the raw storage key instead is a silent failure, since the SDK expects a data URL or an http URL). Merge deduped with artist tags leading, and cap at `MAX_TAGS` so the insert can never violate `artworks_tags_length`.
+
+This lives in `src/lib/artworks/top-up.ts`, not beside `createArtwork`: every export of a `"use server"` module becomes a callable endpoint, and an unauthenticated model-call endpoint is not something to ship.
 
 Artist tags lead the merged array and generated tags fill behind them, so if the cap ever truncates, it truncates generated tags first — the artist's own words are never the ones dropped.
 
@@ -407,11 +421,11 @@ Do not add a top-up to `updateArtwork`: editing has no image in hand, and the PR
 
 #### 2. Action tests
 
-**File**: `test/actions/artworks.test.ts`
+**File**: `test/lib/top-up.test.ts`
 
 **Intent**: Cover the new branch points without reaching Supabase or a model.
 
-**Contract**: Extend the existing file, mocking `@/lib/ai`. Cases: five or more artist tags means the service is never called; fewer than five with sufficient `suggestedTags` supplied means the service is never called; fewer than five with no suggestions calls the service once; a service failure still produces a successful insert path with the artist's original tags; the merged result never exceeds 20 tags, and when it would, generated tags are dropped before artist tags.
+**Contract**: `topUpTags` is a plain module, so it is tested directly in `test/lib/top-up.test.ts` with `@/lib/ai` mocked. Cases: five or more artist tags means the service is never called; fewer than five calls it exactly once; the argument is a public URL and not a storage key; a failed result and a thrown error both return the artist's tags untouched; a tag the artist already typed is not duplicated; the merged result never exceeds 20 tags, and when it would, generated tags are dropped before artist tags.
 
 #### 3. Project documentation
 
@@ -427,7 +441,7 @@ Do not add a top-up to `updateArtwork`: editing has no image in hand, and the PR
 
 **Intent**: Close the open questions this planning session answered and correct the stale storage claim.
 
-**Contract**: Resolve Open Question 1 (controlled vocabulary for generated tags), 2 (N = 5), 3 (12-second budget), and 5 (an explicit control click authorises replacement, with Undo). Record Open Question 4 as accepted risk: the OpenRouter free tier carries no data-retention or no-training guarantee, which was knowingly traded for zero cost — note that Vercel AI Gateway offers `zdr=all` / `no_training=all` models from about $0.03 per million input tokens should that become a requirement. Correct the Scope of Change note that says this change "does add a persisted tag list on the artwork record": the column already existed.
+**Contract**: Resolve Open Question 1 (controlled vocabulary for generated tags), 2 (N = 5), 3 (25-second budget — see Phase 1's revision note), and 5 (moot under the shipped design — a suggestion fills a field only when empty, so nothing is ever displaced; see Phase 3's revision note). Record Open Question 4 as accepted risk: the OpenRouter free tier carries no data-retention or no-training guarantee, which was knowingly traded for zero cost — note that Vercel AI Gateway offers `zdr=all` / `no_training=all` models from about $0.03 per million input tokens should that become a requirement. Correct the Scope of Change note that says this change "does add a persisted tag list on the artwork record": the column already existed.
 
 ### Success Criteria
 
@@ -477,7 +491,7 @@ Not applicable — the project has no integration test layer, and AGENTS.md scop
 
 ## Performance Considerations
 
-Client downscaling to a 768px JPEG is the main lever: it cuts a 10 MB upload to roughly 100 KB, which dominates both latency and image-token cost. The 12-second budget spans the entire fallback chain rather than each attempt, bounding worst-case wait.
+Client downscaling to a 768px JPEG is the main lever: it cuts a 10 MB upload to roughly 100 KB, which dominates both latency and image-token cost. The budget spans the entire fallback chain rather than each attempt, bounding worst-case wait. _(25 seconds as shipped — see Phase 1's revision note.)_
 
 Publish latency is unaffected in the common cases: a well-tagged piece makes no call, and an under-tagged piece whose artist already ran a suggestion reuses that result. Only an under-tagged piece with no prior suggestion pays a model call before insert — the one path where publish is measurably slower, and the reason the top-up is capped at a single attempt.
 
@@ -522,76 +536,76 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Manual
 
-- [ ] 1.8 Migration applies cleanly against the local stack (`supabase migration up --local`, run by the owner)
-- [ ] 1.9 An artwork with 20 tags inserts; one with 21 is rejected by `artworks_tags_length`
-- [ ] 1.10 Real key returns a plausible description and 5-12 on-taxonomy tags for a sample image
-- [ ] 1.11 Missing key returns `unconfigured` without a network request
+- [x] 1.8 Migration applies cleanly against the local stack (`supabase migration up --local`, run by the owner)
+- [x] 1.9 An artwork with 20 tags inserts; one with 21 is rejected by `artworks_tags_length`
+- [x] 1.10 Real key returns a plausible description and 5-12 on-taxonomy tags for a sample image
+- [x] 1.11 Missing key returns `unconfigured` without a network request
 
 ### Phase 1.5: Direct-to-Storage Image Upload
 
 #### Automated
 
-- [x] 1.5.1 Unit tests pass: `npm run test`
-- [x] 1.5.2 Type checking passes: `npm run typecheck`
-- [x] 1.5.3 Linting passes: `npm run lint`
-- [x] 1.5.4 Formatting is clean: `npm run format:check`
-- [x] 1.5.5 Build succeeds: `npm run build`
+- [x] 1.5.1 Unit tests pass: `npm run test` — d715bda
+- [x] 1.5.2 Type checking passes: `npm run typecheck` — d715bda
+- [x] 1.5.3 Linting passes: `npm run lint` — d715bda
+- [x] 1.5.4 Formatting is clean: `npm run format:check` — d715bda
+- [x] 1.5.5 Build succeeds: `npm run build` — d715bda
 
 #### Manual
 
-- [ ] 1.5.6 A photo larger than 1 MB publishes successfully
-- [ ] 1.5.7 A file over 10 MB is rejected in the browser before any network call
-- [ ] 1.5.8 The uploaded object lands under the artist's own folder
-- [ ] 1.5.9 A rejected publish after a successful upload leaves no orphan
-- [ ] 1.5.10 Studio list, artwork detail and swipe deck render uploaded images as before
+- [x] 1.5.6 A photo larger than 1 MB publishes successfully
+- [x] 1.5.7 A file over 10 MB is rejected in the browser before any network call
+- [x] 1.5.8 The uploaded object lands under the artist's own folder
+- [x] 1.5.9 A rejected publish after a successful upload leaves no orphan
+- [x] 1.5.10 Studio list, artwork detail and swipe deck render uploaded images as before
 
 ### Phase 2: Transport — Server Action and Client Downscale
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `npm run test`
-- [ ] 2.2 Type checking passes: `npm run typecheck`
-- [ ] 2.3 Linting passes: `npm run lint`
-- [ ] 2.4 Build succeeds: `npm run build`
+- [x] 2.1 Unit tests pass: `npm run test` — a4e9c6c
+- [x] 2.2 Type checking passes: `npm run typecheck` — a4e9c6c
+- [x] 2.3 Linting passes: `npm run lint` — a4e9c6c
+- [x] 2.4 Build succeeds: `npm run build` — a4e9c6c
 
 #### Manual
 
-- [ ] 2.5 Downscaled payload is roughly two orders of magnitude smaller than the original file
-- [ ] 2.6 Downscaled image is still clearly legible as the artwork
+- [x] 2.5 Downscaled payload is roughly two orders of magnitude smaller than the original file
+- [x] 2.6 Downscaled image is still clearly legible as the artwork
 
 ### Phase 3: Form Assistance UI
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `npm run typecheck`
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Existing tests still pass: `npm run test`
-- [ ] 3.4 Build succeeds: `npm run build`
+- [x] 3.1 Type checking passes: `npm run typecheck` — 99f5433
+- [x] 3.2 Linting passes: `npm run lint` — 99f5433
+- [x] 3.3 Existing tests still pass: `npm run test` — 99f5433
+- [x] 3.4 Build succeeds: `npm run build` — 99f5433
 
 #### Manual
 
-- [ ] 3.5 Second field fills instantly from cache with no second network request
-- [ ] 3.6 Upload button stays enabled and other fields stay editable during an in-flight suggestion
-- [ ] 3.7 Re-running a suggestion replaces the value and Undo restores it
-- [ ] 3.8 Changing the image clears the cache and forces a fresh request
-- [ ] 3.9 With no API key, the control fails non-blockingly and the piece still publishes
-- [ ] 3.10 Login, signup, display-name and become-artist forms are unchanged
+- [x] 3.5 Selecting an image fills both fields from a single request
+- [x] 3.6 Upload button stays enabled and other fields stay editable during an in-flight suggestion
+- [x] 3.7 Text typed before selecting an image is never displaced by the suggestion
+- [x] 3.8 Swapping the image mid-request discards the stale result and re-runs
+- [x] 3.9 With no API key, suggestion fails non-blockingly and the piece still publishes
+- [x] 3.10 Login, signup, display-name and become-artist forms are unchanged
 
 ### Phase 4: Publish-Time Baseline Tagging and Documentation
 
 #### Automated
 
-- [ ] 4.1 All tests pass: `npm run test`
-- [ ] 4.2 Type checking passes: `npm run typecheck`
-- [ ] 4.3 Linting passes: `npm run lint`
-- [ ] 4.4 Formatting is clean: `npm run format:check`
-- [ ] 4.5 Build succeeds: `npm run build`
+- [x] 4.1 All tests pass: `npm run test` — e67dd3d
+- [x] 4.2 Type checking passes: `npm run typecheck` — e67dd3d
+- [x] 4.3 Linting passes: `npm run lint` — e67dd3d
+- [x] 4.4 Formatting is clean: `npm run format:check` — e67dd3d
+- [x] 4.5 Build succeeds: `npm run build` — e67dd3d
 
 #### Manual
 
-- [ ] 4.6 Publishing with zero tags yields a piece with at least five tags
-- [ ] 4.7 Publishing with six artist tags issues no model call
-- [ ] 4.8 Publishing after a suggestion issues no second call
-- [ ] 4.9 With no API key, publishing an untagged piece still succeeds
-- [ ] 4.10 Existing artworks, studio list, and swipe/like flows are unchanged
-- [ ] 4.11 A piece with 15 artist tags saves successfully, confirming the raised ceiling end to end
+- [x] 4.6 Publishing with zero tags yields a piece with at least five tags
+- [x] 4.7 Publishing with six artist tags issues no model call
+- [x] 4.8 Publishing after a suggestion filled the tags issues no second call
+- [x] 4.9 With no API key, publishing an untagged piece still succeeds
+- [x] 4.10 Existing artworks, studio list, and swipe/like flows are unchanged
+- [x] 4.11 A piece with 15 artist tags saves successfully, confirming the raised ceiling end to end

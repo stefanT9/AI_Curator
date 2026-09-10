@@ -11,9 +11,12 @@
  * their own folder" already scopes an authenticated artist's writes to
  * `${uid}/`, so the browser session is the authorisation.
  *
- * Deliberately free of "server-only" — and equally, never import this from a
- * server module.
+ * "client-only" is the mirror of the "server-only" guard on the data-access
+ * modules: importing this from a server module is a build error rather than a
+ * runtime "document is not defined".
  */
+
+import "client-only";
 
 import { createClient } from "@/utils/supabase/client";
 import {
