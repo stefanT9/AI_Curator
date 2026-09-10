@@ -1,7 +1,7 @@
 ---
 change_id: ai-artwork-enrichment
 title: AI enrichment for artwork uploads — image-derived description and tags
-status: implemented
+status: impl_reviewed
 created: 2026-09-09
 updated: 2026-09-10
 archived_at: null
@@ -20,3 +20,5 @@ Step 1.7 was adapted during implementation: `npm run db:types:local` crashes in 
 **Defect found and fixed 2026-09-10.** Commit `b99f16d` wired `enrichFromImage(imagePath)` into `createArtwork`, passing a Storage object key where the function expects a data URL or http URL. The SDK treated the key as base64, so every call failed silently and no artwork was ever enriched — while still costing up to 25s per publish. It also ran before the ownership and existence checks, and on every publish rather than only under-tagged ones. Replaced by `src/lib/artworks/top-up.ts`, which is conditional on `tags.length < 5`, runs after both gates, dedupes, and passes the public Storage URL.
 
 **Manual verification complete 2026-09-10.** All 23 manual rows across phases 1, 1.5, 2, 3 and 4 confirmed passing by the owner.
+
+**Implementation review 2026-09-10** (`reviews/impl-review.md`): NEEDS ATTENTION — 2 critical, 7 warnings, 1 observation. Five fixed (F1 quota, F2 top-up off the publish path, F3 Storage-blip deletion, F8 plan record, F10 partial), five skipped by owner decision. One rule recorded in `context/foundation/lessons.md`.
