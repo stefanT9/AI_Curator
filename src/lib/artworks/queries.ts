@@ -2,6 +2,8 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/utils/supabase/server";
+import { requireUser } from "@/lib/auth/dal";
+import { ONBOARDING_POOL_SIZE } from "@/lib/onboarding/config";
 import type { Artwork, ArtistSummary, ArtworkWithArtist } from "@/types/domain";
 
 /**
@@ -58,6 +60,66 @@ export const getSwipeDeck = async (
 
   if (error) {
     throw new Error(`Failed to load the deck: ${error.message}`);
+  }
+
+  return attachArtists(data ?? []);
+};
+
+/**
+ * The onboarding pool: artworks matching any of the style terms the collector
+ * just picked, by other artists, that they have not already rated.
+ *
+ * Expressed in PostgREST rather than a SQL function because — unlike
+ * `swipe_deck` — the anti-join it needs is against a set small enough to read
+ * first: RLS on `interactions` already scopes the select to this user's own
+ * rows, so one round trip gets every id to exclude.
+ *
+ * `overlaps` compiles to the `&&` array operator, which uses
+ * `artworks_tags_idx` — the same GIN index the ranking function relies on.
+ *
+ * Returning fewer than `ONBOARDING_POOL_SIZE` rows — including none at all —
+ * is a valid result, not an error. A collector whose terms match nothing must
+ * still be able to finish the flow.
+ */
+export const getStarterDeck = async (
+  terms: string[],
+): Promise<ArtworkWithArtist[]> => {
+  if (terms.length === 0) {
+    return [];
+  }
+
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  const { data: rated, error: ratedError } = await supabase
+    .from("interactions")
+    .select("artwork_id");
+
+  if (ratedError) {
+    throw new Error(`Failed to load your ratings: ${ratedError.message}`);
+  }
+
+  let query = supabase
+    .from("artworks")
+    .select("*")
+    .overlaps("tags", terms)
+    // Same exclusion `swipe_deck` makes: nobody rates their own work.
+    .neq("artist_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(ONBOARDING_POOL_SIZE);
+
+  const ratedIds = (rated ?? []).map((row) => row.artwork_id);
+
+  if (ratedIds.length > 0) {
+    // Quoted: PostgREST's `in` list is parsed as CSV, so an unquoted value
+    // would be at the mercy of whatever punctuation it contains.
+    query = query.not("id", "in", `("${ratedIds.join('","')}")`);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(`Failed to load starter artworks: ${error.message}`);
   }
 
   return attachArtists(data ?? []);

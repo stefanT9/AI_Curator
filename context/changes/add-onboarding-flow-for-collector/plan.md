@@ -621,34 +621,34 @@ auto-deploys it via `.github/workflows/migrations.yml`; never edit it after it a
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly against a local reset
-- [x] 1.2 Type checking passes: `npm run typecheck`
-- [x] 1.3 Linting passes: `npm run lint`
-- [x] 1.4 Formatting is clean: `npm run format:check`
-- [x] 1.5 Unit tests pass: `npm run test`
-- [x] 1.6 `src/types/database.ts` contains `onboarded_at` on the `profiles` row type
-- [x] 1.7 Build succeeds: `npm run build`
+- [x] 1.1 Migration applies cleanly against a local reset — ef83e6d
+- [x] 1.2 Type checking passes: `npm run typecheck` — ef83e6d
+- [x] 1.3 Linting passes: `npm run lint` — ef83e6d
+- [x] 1.4 Formatting is clean: `npm run format:check` — ef83e6d
+- [x] 1.5 Unit tests pass: `npm run test` — ef83e6d
+- [x] 1.6 `src/types/database.ts` contains `onboarded_at` on the `profiles` row type — ef83e6d
+- [x] 1.7 Build succeeds: `npm run build` — ef83e6d
 
 #### Manual
 
-- [x] 1.8 Signing in as an existing account still reaches `/discover` — the gate is defined but not wired
+- [x] 1.8 Signing in as an existing account still reaches `/discover` — the gate is defined but not wired — ef83e6d
 
 ### Phase 2: Starter selection
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `npm run typecheck`
-- [ ] 2.2 Linting passes: `npm run lint`
-- [ ] 2.3 Formatting is clean: `npm run format:check`
-- [ ] 2.4 Unit tests pass: `npm run test`
-- [ ] 2.5 New unit test covers `getStarterDeck` returning an empty array without throwing
-- [ ] 2.6 Build succeeds: `npm run build`
+- [x] 2.1 Type checking passes: `npm run typecheck`
+- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.3 Formatting is clean: `npm run format:check`
+- [x] 2.4 Unit tests pass: `npm run test`
+- [x] 2.5 New unit test covers `getStarterDeck` returning an empty array without throwing
+- [x] 2.6 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 2.7 Navigating directly to `/onboarding` renders 20 style chips with no app nav
-- [ ] 2.8 Submit is disabled at 0, 1 and 5 selections; enabled at 2, 3 and 4
-- [ ] 2.9 An account that has already onboarded is redirected away from `/onboarding`
+- [x] 2.7 Navigating directly to `/onboarding` renders 20 style chips with no app nav
+- [x] 2.8 Submit is disabled at 0, 1 and 5 selections; enabled at 2, 3 and 4
+- [x] 2.9 An account that has already onboarded is redirected away from `/onboarding`
 
 ### Phase 3: Rating loop and completion
 
