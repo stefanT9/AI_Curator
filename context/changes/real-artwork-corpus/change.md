@@ -1,7 +1,7 @@
 ---
 change_id: real-artwork-corpus
 title: Real artwork corpus
-status: implementing
+status: implemented
 created: 2026-09-10
 updated: 2026-09-10
 archived_at: null
@@ -122,3 +122,24 @@ an empty pool. Recorded rather than reworded, per the lesson on Progress items.
 *The like history is emergent, not designed.* The generator picked `figurative` as the most
 populous style term and liked its eight oldest members, pinning both into the manifest under
 `like_history` so Phase 5's walkthrough can name the group instead of rediscovering it.
+
+**2026-09-10, Phase 5 close — the instrument is re-established, and one thing about it is weaker
+than the plan assumed.** `judgment.md` groups by a first-match rule (style chip → medium chip →
+subject-only), because with 196 of 1000 pieces enriched, 759 of the 946 tagged pieces carry no
+style term at all and the plan's implied style-only grouping would have left most of the corpus
+ungrouped. Both walks were run and both predictions held — Walk A concentrates `figurative` at
+the front, Walk B shows no untagged card in the first 20 — but **the twenty labels were not
+transcribed card by card**, so the recorded baseline is a shape check, not a positional diff. A
+future ranking change needing a true before/after must re-transcribe first; the doc says so where
+the baseline is recorded, and the manifest-computed predicted sequences are the template.
+
+Two departures from the plan's Phase 5 contract, both deliberate. The supersede annotation went
+**under the archived file's H1 rather than appended**, because criterion 5.9 asks for the reader
+to be told within the first screen. And the roadmap entry does **not** carry the plan's promised
+residual "a handful of style terms are covered by curatorial override" — overrides were dropped
+on 2026-09-10 and never built. What is recorded instead is the real residual, and the distinction
+Phase 3 found: style/mood gaps are facts about public-domain art and narrow as enrichment
+resumes, whereas 13 of 20 palette terms are unreachable by `paletteTags` itself. The data-driven
+picker change must not conflate them.
+
+Progress items 2.6 and 2.9 are carried into archive unchecked, per the Phase 2 decision above.

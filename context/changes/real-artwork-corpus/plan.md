@@ -894,15 +894,15 @@ steps exist to make that failure self-explaining rather than mysterious.
 
 #### Automated
 
-- [x] 5.1 `npm run format:check` passes
-- [x] 5.2 `npm run lint` passes
-- [x] 5.3 `npm run typecheck` passes
-- [x] 5.4 `npm run test` passes
-- [x] 5.5 `npm run build` passes
-- [x] 5.6 `judgment.md` exists and cheat-sheet counts sum to the tagged-piece count
+- [x] 5.1 `npm run format:check` passes — c459774
+- [x] 5.2 `npm run lint` passes — c459774
+- [x] 5.3 `npm run typecheck` passes — c459774
+- [x] 5.4 `npm run test` passes — c459774
+- [x] 5.5 `npm run build` passes — c459774
+- [x] 5.6 `judgment.md` exists and cheat-sheet counts sum to the tagged-piece count — c459774
 
 #### Manual
 
-- [x] 5.7 Walk A and Walk B run end to end from the cheat-sheet alone
-- [x] 5.8 Recorded baseline filled in with real observations
-- [x] 5.9 Archived F-01 walkthrough marked superseded within its first screen
+- [x] 5.7 Walk A and Walk B run end to end from the cheat-sheet alone — c459774
+- [x] 5.8 Recorded baseline filled in with real observations — c459774
+- [x] 5.9 Archived F-01 walkthrough marked superseded within its first screen — c459774
