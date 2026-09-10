@@ -528,10 +528,10 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Manual
 
-- [ ] 1.8 Migration applies cleanly against the local stack (`supabase migration up --local`, run by the owner)
-- [ ] 1.9 An artwork with 20 tags inserts; one with 21 is rejected by `artworks_tags_length`
-- [ ] 1.10 Real key returns a plausible description and 5-12 on-taxonomy tags for a sample image
-- [ ] 1.11 Missing key returns `unconfigured` without a network request
+- [x] 1.8 Migration applies cleanly against the local stack (`supabase migration up --local`, run by the owner)
+- [x] 1.9 An artwork with 20 tags inserts; one with 21 is rejected by `artworks_tags_length`
+- [x] 1.10 Real key returns a plausible description and 5-12 on-taxonomy tags for a sample image
+- [x] 1.11 Missing key returns `unconfigured` without a network request
 
 ### Phase 1.5: Direct-to-Storage Image Upload
 
@@ -545,11 +545,11 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Manual
 
-- [ ] 1.5.6 A photo larger than 1 MB publishes successfully
-- [ ] 1.5.7 A file over 10 MB is rejected in the browser before any network call
-- [ ] 1.5.8 The uploaded object lands under the artist's own folder
-- [ ] 1.5.9 A rejected publish after a successful upload leaves no orphan
-- [ ] 1.5.10 Studio list, artwork detail and swipe deck render uploaded images as before
+- [x] 1.5.6 A photo larger than 1 MB publishes successfully
+- [x] 1.5.7 A file over 10 MB is rejected in the browser before any network call
+- [x] 1.5.8 The uploaded object lands under the artist's own folder
+- [x] 1.5.9 A rejected publish after a successful upload leaves no orphan
+- [x] 1.5.10 Studio list, artwork detail and swipe deck render uploaded images as before
 
 ### Phase 2: Transport — Server Action and Client Downscale
 
@@ -562,8 +562,8 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Manual
 
-- [ ] 2.5 Downscaled payload is roughly two orders of magnitude smaller than the original file
-- [ ] 2.6 Downscaled image is still clearly legible as the artwork
+- [x] 2.5 Downscaled payload is roughly two orders of magnitude smaller than the original file
+- [x] 2.6 Downscaled image is still clearly legible as the artwork
 
 ### Phase 3: Form Assistance UI
 
@@ -576,12 +576,12 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Manual
 
-- [ ] 3.5 Selecting an image fills both fields from a single request
-- [ ] 3.6 Upload button stays enabled and other fields stay editable during an in-flight suggestion
-- [ ] 3.7 Text typed before selecting an image is never displaced by the suggestion
-- [ ] 3.8 Swapping the image mid-request discards the stale result and re-runs
-- [ ] 3.9 With no API key, suggestion fails non-blockingly and the piece still publishes
-- [ ] 3.10 Login, signup, display-name and become-artist forms are unchanged
+- [x] 3.5 Selecting an image fills both fields from a single request
+- [x] 3.6 Upload button stays enabled and other fields stay editable during an in-flight suggestion
+- [x] 3.7 Text typed before selecting an image is never displaced by the suggestion
+- [x] 3.8 Swapping the image mid-request discards the stale result and re-runs
+- [x] 3.9 With no API key, suggestion fails non-blockingly and the piece still publishes
+- [x] 3.10 Login, signup, display-name and become-artist forms are unchanged
 
 ### Phase 4: Publish-Time Baseline Tagging and Documentation
 
@@ -595,9 +595,9 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Manual
 
-- [ ] 4.6 Publishing with zero tags yields a piece with at least five tags
-- [ ] 4.7 Publishing with six artist tags issues no model call
-- [ ] 4.8 Publishing after a suggestion filled the tags issues no second call
-- [ ] 4.9 With no API key, publishing an untagged piece still succeeds
-- [ ] 4.10 Existing artworks, studio list, and swipe/like flows are unchanged
-- [ ] 4.11 A piece with 15 artist tags saves successfully, confirming the raised ceiling end to end
+- [x] 4.6 Publishing with zero tags yields a piece with at least five tags
+- [x] 4.7 Publishing with six artist tags issues no model call
+- [x] 4.8 Publishing after a suggestion filled the tags issues no second call
+- [x] 4.9 With no API key, publishing an untagged piece still succeeds
+- [x] 4.10 Existing artworks, studio list, and swipe/like flows are unchanged
+- [x] 4.11 A piece with 15 artist tags saves successfully, confirming the raised ceiling end to end
