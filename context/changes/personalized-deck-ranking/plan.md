@@ -375,31 +375,31 @@ again (demoted), and untagged artworks move to the bottom of every deck.
 
 #### Automated
 
-- [x] 1.1 Formatting passes: `npm run format:check`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Type checking passes: `npm run typecheck`
-- [x] 1.4 Default test suite passes: `npm run test`
-- [x] 1.5 Production build succeeds: `npm run build`
-- [x] 1.6 `src/types/database.ts` is unchanged
+- [x] 1.1 Formatting passes: `npm run format:check` — 183d9f6
+- [x] 1.2 Linting passes: `npm run lint` — 183d9f6
+- [x] 1.3 Type checking passes: `npm run typecheck` — 183d9f6
+- [x] 1.4 Default test suite passes: `npm run test` — 183d9f6
+- [x] 1.5 Production build succeeds: `npm run build` — 183d9f6
+- [x] 1.6 `src/types/database.ts` is unchanged — 183d9f6
 
 #### Manual
 
-- [x] 1.7 Migration applies cleanly on a fresh local stack
-- [x] 1.8 `security invoker` and empty `search_path` survived the replace
-- [x] 1.9 Execute grants still limited to `authenticated`
+- [x] 1.7 Migration applies cleanly on a fresh local stack — 183d9f6
+- [x] 1.8 `security invoker` and empty `search_path` survived the replace — 183d9f6
+- [x] 1.9 Execute grants still limited to `authenticated` — 183d9f6
 
 ### Phase 2: Real-boundary proof
 
 #### Automated
 
-- [ ] 2.1 Integration lane passes: `npm run test:integration`
-- [ ] 2.2 Default gate still passes: test, lint, typecheck, format:check
-- [ ] 2.3 Spec observed failing when the skip-tier expression is made non-null-safe
+- [x] 2.1 Integration lane passes: `npm run test:integration`
+- [x] 2.2 Default gate still passes: test, lint, typecheck, format:check
+- [x] 2.3 Spec observed failing when the skip-tier expression is made non-null-safe
 
 #### Manual
 
-- [ ] 2.4 Local stack running and `.env.test.local` points at loopback
-- [ ] 2.5 Failure output names the broken ordering rule
+- [x] 2.4 Local stack running and `.env.test.local` points at loopback
+- [x] 2.5 Failure output names the broken ordering rule
 
 ### Phase 3: Judgment walk and decision record
 
