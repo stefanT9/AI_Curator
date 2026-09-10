@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { recordInteraction } from "@/app/actions/interactions";
 import { ArtCard } from "@/components/artworks/ArtCard";
+import { selectNextCard } from "@/lib/artworks/deck";
 import type {
   Artwork,
   ArtworkWithArtist,
@@ -14,7 +15,11 @@ import type {
 const COMMIT_THRESHOLD_PX = 100;
 
 export function SwipeDeck({ deck }: { deck: ArtworkWithArtist[] }) {
-  const [index, setIndex] = useState(0);
+  // Ids decided this session, not an ordinal position: `deck` can be replaced
+  // wholesale by a refetch (a Server Action mutation re-renders /discover),
+  // and an ordinal index reads the wrong card once the array underneath it
+  // has moved. See context/changes/swipe-deck-card-selection/repro.md.
+  const [decidedIds, setDecidedIds] = useState<Set<string>>(() => new Set());
   const [error, setError] = useState<string | null>(null);
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -22,28 +27,41 @@ export function SwipeDeck({ deck }: { deck: ArtworkWithArtist[] }) {
 
   // Only ever touched inside pointer handlers, never during render.
   const pointerStartX = useRef<number | null>(null);
-  const current = deck[index];
+  const { current, remaining } = selectNextCard(deck, decidedIds);
 
+  // The keydown effect below passes a `current` reference that can be one
+  // render stale (same id, possibly a different object) by the time this
+  // fires — reading anything but `artwork.id` here would be unsafe.
   const decide = useCallback((artwork: Artwork, action: InteractionAction) => {
     setError(null);
     setDragX(0);
 
     // Advance first — waiting on the round trip would make every swipe feel
-    // like a page load. The card comes back if the write fails.
-    setIndex((previous) => previous + 1);
+    // like a page load. The card comes back if the write fails. The
+    // functional form over a new Set matters: concurrent in-flight swipes
+    // would otherwise read a stale closed-over set.
+    setDecidedIds((previous) => new Set(previous).add(artwork.id));
 
     startTransition(async () => {
       const result = await recordInteraction(artwork.id, action);
 
       if (!result.ok) {
-        setIndex((previous) => Math.max(0, previous - 1));
+        setDecidedIds((previous) => {
+          const next = new Set(previous);
+          next.delete(artwork.id);
+          return next;
+        });
         setError(result.message);
       }
     });
   }, []);
 
   // Arrow keys are the keyboard equivalent of the drag; the buttons below are
-  // the pointer-free path for everyone else.
+  // the pointer-free path for everyone else. Keyed off `current?.id` rather
+  // than the `current` object so a refetch that returns the same artwork
+  // (different identity, same id) does not tear down and re-register this.
+  const currentId = current?.id;
+
   useEffect(() => {
     if (!current) return;
 
@@ -59,7 +77,8 @@ export function SwipeDeck({ deck }: { deck: ArtworkWithArtist[] }) {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [current, decide]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed off currentId per plan.md Phase 3, not the `current` object
+  }, [currentId, decide]);
 
   if (!current) {
     return <EmptyDeck />;
@@ -149,7 +168,7 @@ export function SwipeDeck({ deck }: { deck: ArtworkWithArtist[] }) {
           View details
         </Link>
         <span aria-live="polite">
-          {isPending ? "Saving…" : `${deck.length - index} left`}
+          {isPending ? "Saving…" : `${remaining} left`}
         </span>
       </div>
 
