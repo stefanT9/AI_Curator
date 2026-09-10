@@ -39,6 +39,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_enrichment_calls: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       artworks: {
         Row: {
           artist_id: string
@@ -151,6 +169,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_enrichment_slot: {
+        Args: { p_daily_limit?: number; p_hourly_limit?: number }
+        Returns: boolean
+      }
       swipe_deck: {
         Args: { p_limit?: number }
         Returns: {

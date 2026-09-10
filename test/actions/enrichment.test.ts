@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { requireArtist, enrichFromImage } = vi.hoisted(() => ({
+const { requireArtist, enrichFromImage, rpc } = vi.hoisted(() => ({
   requireArtist: vi.fn(),
   enrichFromImage: vi.fn(),
+  rpc: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/dal", () => ({ requireArtist }));
 vi.mock("@/lib/ai", () => ({ enrichFromImage }));
+vi.mock("@/utils/supabase/server", () => ({
+  createClient: vi.fn(async () => ({ rpc })),
+}));
 
 import { suggestArtworkFields } from "@/app/actions/enrichment";
 
@@ -16,6 +20,8 @@ const dataUrl = "data:image/jpeg;base64,AAAA";
 beforeEach(() => {
   vi.clearAllMocks();
   requireArtist.mockResolvedValue({ id: "artist-1" });
+  // Quota slot granted unless a test says otherwise.
+  rpc.mockResolvedValue({ data: true, error: null });
 });
 
 describe("suggestArtworkFields", () => {
@@ -33,6 +39,32 @@ describe("suggestArtworkFields", () => {
 
     expect(result.ok).toBe(false);
     expect(enrichFromImage).not.toHaveBeenCalled();
+  });
+
+  it("refuses without spending a call when the quota is exhausted", async () => {
+    rpc.mockResolvedValue({ data: false, error: null });
+
+    const result = await suggestArtworkFields(dataUrl);
+
+    expect(result.ok).toBe(false);
+    expect(enrichFromImage).not.toHaveBeenCalled();
+  });
+
+  it("refuses when the quota check itself fails, rather than spending a call", async () => {
+    rpc.mockResolvedValue({ data: null, error: { message: "boom" } });
+
+    const result = await suggestArtworkFields(dataUrl);
+
+    expect(result.ok).toBe(false);
+    expect(enrichFromImage).not.toHaveBeenCalled();
+  });
+
+  // The slot is claimed only after the payload is known good, so a malformed
+  // request cannot burn quota.
+  it("does not claim a quota slot for invalid input", async () => {
+    await suggestArtworkFields("not-a-data-url");
+
+    expect(rpc).not.toHaveBeenCalled();
   });
 
   it("maps a typed failure onto actionable copy", async () => {

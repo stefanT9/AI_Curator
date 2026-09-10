@@ -2,6 +2,7 @@
 
 import * as z from "zod";
 import { requireArtist } from "@/lib/auth/dal";
+import { createClient } from "@/utils/supabase/server";
 import { enrichFromImage, type EnrichmentFailure } from "@/lib/ai";
 
 /**
@@ -53,6 +54,30 @@ export async function suggestArtworkFields(
 
   if (!validated.success) {
     return { ok: false, message: validated.error.issues[0].message };
+  }
+
+  // Claim a quota slot before spending anything. This is a "use server" export,
+  // so it is a POST endpoint any authenticated artist can call directly — and
+  // becoming an artist is a one-click self-serve opt-in. Without this, one
+  // account looping the endpoint drains the shared OpenRouter key for everyone.
+  //
+  // The check and the insert are one function call so two concurrent requests
+  // cannot both read a count under the cap and then both proceed.
+  const supabase = await createClient();
+  const { data: claimed, error: quotaError } = await supabase.rpc(
+    "claim_enrichment_slot",
+  );
+
+  if (quotaError) {
+    return { ok: false, message: MESSAGES.unavailable };
+  }
+
+  if (!claimed) {
+    return {
+      ok: false,
+      message:
+        "You have used your suggestions for now. Fill the fields in yourself, or try again later.",
+    };
   }
 
   const result = await enrichFromImage(validated.data);
