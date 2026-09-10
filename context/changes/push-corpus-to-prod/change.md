@@ -1,7 +1,7 @@
 ---
 change_id: push-corpus-to-prod
 title: Push the local artwork corpus to the linked production project
-status: implementing
+status: implemented
 created: 2026-09-10
 updated: 2026-09-11
 archived_at: null

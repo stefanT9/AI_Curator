@@ -611,13 +611,13 @@ migration.
 
 #### Automated
 
-- [x] 4.1 Pre-push dry-run reports the linked project's host, the demo artist's uid, 1000 rows to create and 1000 objects to upload
-- [x] 4.2 `--apply` exits 0 with no collected failures
-- [x] 4.3 Post-push dry-run reports nothing to do
+- [x] 4.1 Pre-push dry-run reports the linked project's host, the demo artist's uid, 1000 rows to create and 1000 objects to upload — 32bcb0a
+- [x] 4.2 `--apply` exits 0 with no collected failures — 32bcb0a
+- [x] 4.3 Post-push dry-run reports nothing to do — 32bcb0a
 
 #### Manual
 
-- [x] 4.4 A fresh collector sees a full deck with images rendering in the deployed app
-- [x] 4.5 The demo artist's studio lists the corpus, attributed to the demo account
-- [x] 4.6 An untagged-tail piece renders without tags or description rather than erroring
-- [x] 4.7 No account other than the demo artist owns any pushed artwork
+- [x] 4.4 A fresh collector sees a full deck with images rendering in the deployed app — 32bcb0a
+- [x] 4.5 The demo artist's studio lists the corpus, attributed to the demo account — 32bcb0a
+- [x] 4.6 An untagged-tail piece renders without tags or description rather than erroring — 32bcb0a
+- [x] 4.7 No account other than the demo artist owns any pushed artwork — 32bcb0a
