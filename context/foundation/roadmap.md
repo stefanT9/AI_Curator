@@ -6,7 +6,7 @@ created: 2026-09-10
 updated: 2026-09-10
 prd_version: 2
 main_goal: low-complexity
-top_blocker: decisions
+top_blocker: none
 ---
 
 # Roadmap: ArtSwipe — Recommendation Engine
@@ -43,21 +43,22 @@ everything except the ordering itself, so it is the smallest change that proves 
 
 ## At a glance
 
-| ID   | Change ID                           | Outcome (user can …)                                                              | Prerequisites | PRD refs                                    | Status  |
-| ---- | ----------------------------------- | --------------------------------------------------------------------------------- | ------------- | ------------------------------------------- | ------- |
-| F-01 | `ranking-eval-corpus`               | (foundation) tag-match ordering can be exercised and judged, not guessed at       | —             | §Constraints, Open Questions 2 and 4        | done    |
-| S-01 | `personalized-deck-ranking`         | be served cards ordered by tag-match to their likes, with passed pieces demoted   | F-01          | US-01, FR-002, FR-003, FR-004, FR-006, OQ-3 | done    |
-| S-02 | `continuous-deck-refill`            | keep swiping past the end of the current cards without hitting a dead end         | —             | US-01, FR-001, FR-007, §Guardrails          | ready   |
-| S-03 | `cold-start-and-untagged-placement` | get a deliberate ordering before they have liked much, and where tags are missing | S-01          | FR-005, Open Question 2                     | blocked |
+| ID   | Change ID                           | Outcome (user can …)                                                                           | Prerequisites | PRD refs                                        | Status     |
+| ---- | ----------------------------------- | ---------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------------- | ---------- |
+| F-01 | `ranking-eval-corpus`               | (foundation) tag-match ordering can be exercised and judged, not guessed at                    | —             | §Constraints, Open Questions 2 and 4            | done       |
+| S-01 | `personalized-deck-ranking`         | be served cards ordered by tag-match to their likes, with passed pieces demoted                | F-01          | US-01, FR-002, FR-003, FR-004, FR-006, OQ-3     | done       |
+| S-02 | `continuous-deck-refill`            | keep swiping past the end of the current cards without hitting a dead end                      | —             | US-01, FR-001, FR-007, §Guardrails              | ready      |
+| S-03 | `cold-start-and-untagged-placement` | get a deliberate ordering before they have liked much, and where tags are missing              | S-01          | FR-005, Open Question 2                         | superseded |
+| S-04 | `add-onboarding-flow-for-collector` | be walked through a first-run flow that leaves them holding real likes before their first deck | S-01          | FR-005, §Non-Goals, Open Question 2 (dissolved) | done       |
 
 ## Streams
 
 Navigation aid — groups items that share a Prerequisites chain. Canonical ordering still lives in the dependency graph below; this table is the proposed reading order across parallel tracks.
 
-| Stream | Theme            | Chain                    | Note                                                                                                                              |
-| ------ | ---------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| A      | Ranking          | `F-01` → `S-01` → `S-03` | The ordering work itself. Ends in the blocked slice, so the stream stalls until OQ-2 is answered (OQ-4 was answered inside S-01). |
-| B      | Swipe continuity | `S-02`                   | Standalone — no foundation prerequisite, and deliberately ordering-agnostic so it can run alongside Stream A.                     |
+| Stream | Theme            | Chain                    | Note                                                                                                                                                               |
+| ------ | ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A      | Ranking          | `F-01` → `S-01` → `S-04` | The ordering work itself. No longer stalls: `S-04` dissolved OQ-2 instead of answering it, which superseded `S-03` (OQ-4 had already been answered inside `S-01`). |
+| B      | Swipe continuity | `S-02`                   | Standalone — no foundation prerequisite, and deliberately ordering-agnostic so it can run alongside Stream A.                                                      |
 
 ## Baseline
 
@@ -131,27 +132,74 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
-  - How many likes switch ranking on? (PRD Open Question 2) — Owner: user. Block: yes. FR-005 has no acceptance criteria a test can assert until this is a number. **This is now the slice's only remaining blocker.**
+  - ~~How many likes switch ranking on? (PRD Open Question 2)~~ — **Dissolved 2026-09-10 by `S-04`,** not answered. See below.
   - ~~Where do untagged artworks sit in the ordering? (PRD Open Question 4)~~ — **Answered 2026-09-10 inside S-01:** untagged pieces sort below every tagged piece, including previously-passed ones. Nothing left for this slice to decide; it inherits the placement.
 - **Risk:** Split out from S-01 precisely because it is the blocked half — S-01 can ship with a naive fallback (a collector with no likes scores zero against everything and lands back on newest-first), while this slice makes that behavior deliberate and testable. Sequencing it inside S-01 instead would have blocked the north star on two decisions that do not actually gate it. The risk in deferring is that "accidentally correct" fallback behavior is mistaken for designed behavior and never revisited.
-- **Status:** blocked
+- **Status:** superseded by `S-04` (2026-09-10)
+
+  > **Superseded 2026-09-10 by `S-04: add-onboarding-flow-for-collector`.** Both
+  > halves of this slice are now closed elsewhere, so nothing is left for it to
+  > decide and it is not worth planning.
+  >
+  > The untagged half was answered inside `S-01` (Open Question 4 above). The
+  > cold-start half was **dissolved rather than answered** by `S-04`. Open Question 2
+  > asked how many likes switch ranking on; it presumed a population of collectors
+  > sitting below the threshold, and `S-04`'s mandatory first-run gate removes that
+  > population. A collector cannot reach `/discover` without passing through the
+  > flow, and the flow ends only when they have liked `ONBOARDING_LIKE_TARGET`
+  > (currently 5, in `src/lib/onboarding/config.ts`) pieces or exhausted the starter
+  > pool.
+  >
+  > **`ONBOARDING_LIKE_TARGET` is the number that replaces the threshold** — but it
+  > is a different kind of number. The threshold would have been a condition
+  > `swipe_deck` tested before deciding whether to rank; the target is a stopping
+  > condition for the onboarding loop. `swipe_deck` is unchanged and still tests
+  > nothing: it ranks on whatever likes exist, which is now never zero for a
+  > collector who liked anything during onboarding.
+  >
+  > **What this slice worried about still exists, in one branch.** A collector who
+  > skips every starter piece, or picks terms matching no artwork, is released with
+  > `onboarded_at` stamped and zero likes, and lands on the newest-first deck. The
+  > unranked ordering therefore survives exactly as this slice's Risk note described
+  > it — an accidental fallback presented as a deliberate one — but it is now an
+  > exhaustion release reached by choice, not the default first experience of every
+  > new account. If that branch ever needs deliberate ordering of its own, open a new
+  > slice against it rather than reviving this one.
+
+### S-04: A collector arrives at their first deck already holding likes
+
+> Added 2026-09-10. Not in the original slice set — it was planned directly as
+> `add-onboarding-flow-for-collector` and is recorded here after the fact, because it is
+> what closed `S-03` and Open Question 2.
+
+- **Outcome:** A brand-new collector cannot reach the app until they have picked 2–4 style terms and rated a starter set built from them, so their first `/discover` deck is genuinely ranked rather than newest-first.
+- **Change ID:** `add-onboarding-flow-for-collector`
+- **PRD refs:** FR-005, `## Non-Goals` ("no collector-facing controls over ranking" — amended with a carve-out for first-run term selection), `## Constraints & Compatibility` (amended), Open Question 2 (dissolved)
+- **Prerequisites:** S-01 — the flow exists to feed the ranking function, so there has to be one.
+- **Parallel with:** S-02
+- **Blockers:** —
+- **Unknowns:** —
+- **Decisions folded in:** Open Question 2 is dissolved, not answered — see `S-03` above. The chosen style terms are **transient**: never persisted, discarded once the starter pool is built, so no preference table and no facet column. `onboarded_at` is nullable with no backfill, so every pre-existing account is routed through the flow. The gate lives in `(app)/layout.tsx` via `requireOnboarded()`, not in `src/proxy.ts` — the proxy redirect is optimistic and bypassable.
+- **Risk:** The gate is a trap door. Wiring `requireOnboarded` into the authenticated layout before the flow that satisfies it exists locks every account, including the dev user, out of the whole segment with no escape — which is why the plan sequenced the gate last among functional phases. The second risk is starvation: a collector who skips everything must still be released with `onboarded_at` stamped and zero likes. Treating pool exhaustion as an error reintroduces the lockout.
+- **Status:** done
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                           | Suggested issue title                                                                  | Ready for `/10x-plan` | Notes                                                     |
-| ---------- | ----------------------------------- | -------------------------------------------------------------------------------------- | --------------------- | --------------------------------------------------------- |
-| F-01       | `ranking-eval-corpus`               | Seed a tagged-artwork corpus and like history for ranking work                         | yes                   | Run `/10x-plan ranking-eval-corpus`                       |
-| S-01       | `personalized-deck-ranking`         | Order the swipe deck by tag-match to the collector's own likes, demoting passed pieces | done                  | Shipped — F-01 delivered the corpus it was judged against |
-| S-02       | `continuous-deck-refill`            | Refill the swipe deck automatically as the collector swipes                            | yes                   | Run `/10x-plan continuous-deck-refill`                    |
-| S-03       | `cold-start-and-untagged-placement` | Define the cold-start fallback (untagged placement settled by S-01)                    | no                    | Blocked on Open Question 2 alone                          |
+| Roadmap ID | Change ID                           | Suggested issue title                                                                  | Ready for `/10x-plan` | Notes                                                                                |
+| ---------- | ----------------------------------- | -------------------------------------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------ |
+| F-01       | `ranking-eval-corpus`               | Seed a tagged-artwork corpus and like history for ranking work                         | yes                   | Run `/10x-plan ranking-eval-corpus`                                                  |
+| S-01       | `personalized-deck-ranking`         | Order the swipe deck by tag-match to the collector's own likes, demoting passed pieces | done                  | Shipped — F-01 delivered the corpus it was judged against                            |
+| S-02       | `continuous-deck-refill`            | Refill the swipe deck automatically as the collector swipes                            | yes                   | Run `/10x-plan continuous-deck-refill`                                               |
+| S-03       | `cold-start-and-untagged-placement` | Define the cold-start fallback (untagged placement settled by S-01)                    | superseded            | Nothing left to decide — OQ-4 answered in S-01, OQ-2 dissolved by S-04. Do not plan. |
+| S-04       | `add-onboarding-flow-for-collector` | Gate first run behind a style picker and starter deck so the first real deck is ranked | done                  | Shipped — dissolved OQ-2 and superseded S-03                                         |
 
 ## Open Roadmap Questions
 
 1. **How are tags weighted when matching?** Raw overlap treats every tag as equally important, so "blue" weighs the same as "oil-on-canvas". — Owner: user. Block: none — held as a non-blocking Unknown on `S-01`; the PRD's stated v1 answer (unweighted tag-match) is a usable default.
-2. **How many likes switch ranking on?** FR-005 falls back to the existing ordering until a collector has liked "enough"; the threshold is undefined. — Owner: user. Block: `S-03`.
+2. ~~**How many likes switch ranking on?**~~ — **DISSOLVED 2026-09-10 by `S-04` (`add-onboarding-flow-for-collector`), not answered.** The question presumed collectors sitting below a threshold; the mandatory first-run gate removes that population, so there is no threshold for `swipe_deck` to test and it was never changed. The number that replaces it is `ONBOARDING_LIKE_TARGET` (currently 5, `src/lib/onboarding/config.ts`) — a stopping condition for the onboarding loop, not a switch on ranking. The unranked ordering survives only as the exhaustion release for a collector who skipped every starter piece. Block: none — this was `S-03`'s last blocker, and `S-03` is superseded.
 3. ~~**Do artworks a collector passed on reappear, and after how long?**~~ — **RESOLVED 2026-09-10 by the user: they reappear, but at lower priority.** Recorded as a two-tier ordering in `S-01` (unseen by tag-match, then previously-passed by tag-match). This is a change to live behavior, not a confirmation of it — `swipe_deck` currently excludes passed artworks permanently, so the exclusion predicate must narrow to `action = 'like'`. Note this decision is not yet reflected in `prd-v2.md`, whose FR-006 still reads "Whether artworks they passed on reappear is unresolved."
 4. ~~**Where do untagged artworks sit in the ordering?**~~ — **RESOLVED 2026-09-10 inside `S-01` (`personalized-deck-ranking`): untagged artworks sort below every tagged piece, including previously-passed ones.** Rationale: the tag-overlap sort key already scores an untagged piece at zero, so the placement existed whether or not anyone decided it — the choice was between an explicit, assertable demotion and an accidental one. Demotion is the outermost key of the four-key sort, so it holds for every collector, cold or warm. Cost: it changes the cold-start deck, so the archived Walk B expectation in `context/archive/2026-09-10-ranking-eval-corpus/judgment.md` was amended (tagged newest-first, untagged tail) rather than preserved. No backfill exists for pre-enrichment artworks, so this remains a real population — but it now has a defined home. Block: none — `S-03` no longer waits on this.
-5. **Two Scope-of-Change items are untestable as written.** Carried from the PRD: the cold-start item depends on Question 2 and the already-liked/passed item on Question 3. — Owner: user. Block: half closed — Question 3 is now decided, so the already-liked/passed item is testable; only the cold-start item remains, held in `S-03` pending Question 2.
+5. ~~**Two Scope-of-Change items are untestable as written.**~~ — **CLOSED 2026-09-10.** Carried from the PRD: the cold-start item depended on Question 2 and the already-liked/passed item on Question 3. Question 3 was decided inside `S-01`, making the already-liked/passed item testable. Question 2 was dissolved by `S-04`, which gives the cold-start item concrete criteria at last — not a like threshold, but the two flow exits: a collector reaching `ONBOARDING_LIKE_TARGET` gets a ranked deck, and one who skips everything gets newest-first. Both are assertable. Block: none.
 
 ## Parked
 
@@ -168,3 +216,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 - **F-01: (foundation) a seeded set of tagged artworks and a collector like-history exists in the development environment, so a tag-match ordering can be exercised and judged rather than guessed at.** — Archived 2026-09-10 → `context/archive/2026-09-10-ranking-eval-corpus/`. Lesson: —.
 - **S-01: A collector who has liked several pieces is served their next cards ordered by how well each piece's tags match the tags on the pieces they liked, instead of newest-first — and pieces they previously passed on return below all fresh matches, rather than being gone for good.** — Archived 2026-09-10 → `context/archive/2026-09-10-personalized-deck-ranking/`. Lesson: —.
+- **S-04: A new collector is walked through a first-run flow — pick 2–4 style terms, rate a starter set built from them — so they reach `/discover` already holding likes and their first deck is genuinely ranked.** — Archived 2026-09-10 → `context/archive/2026-09-10-add-onboarding-flow-for-collector/`. Dissolved Open Question 2 and superseded `S-03`. Lesson: —.

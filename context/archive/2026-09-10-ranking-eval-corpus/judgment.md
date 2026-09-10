@@ -75,6 +75,34 @@ match on, so the cold-start deck stays newest-first.
 > The recorded baseline measurements below are untouched — only this
 > forward-looking expectation changed.
 
+> **Annotated 2026-09-10 by `add-onboarding-flow-for-collector` (S-04). Nothing above
+> is retracted.** Both expectations recorded for Walk B held for S-01 and remain the
+> correct check for that slice — re-run this walk against S-01 and judge it by the
+> post-S-01 expectation exactly as written.
+>
+> What changed is the walk's _premise_, not its expectation. Walk B exists to observe a
+> collector who has no likes. S-04 makes onboarding mandatory at
+> `(app)/layout.tsx`, so `seed-collector-cold@artswipe.local` now reaches `/discover`
+> only _after_ the first-run flow, and the flow's whole purpose is to leave it holding
+> likes. Signing in and opening `/discover` therefore no longer produces a cold deck —
+> it redirects to `/onboarding`, and whatever deck follows is warm.
+>
+> **The fixture is still reachable pre-onboarding.** The gate reads
+> `profiles.onboarded_at`, and the flow is the only thing that writes it. To run Walk B
+> as specified, stamp the column directly and rate nothing:
+>
+> ```sql
+> update public.profiles set onboarded_at = now()
+> where id = (select id from auth.users where email = 'seed-collector-cold@artswipe.local');
+> ```
+>
+> That satisfies the gate while leaving the collector with zero `interactions` rows —
+> genuinely cold, which is what this walk measures. `npx supabase db reset` returns it
+> to null. Note that S-04 also gives cold-start a second, in-product route: a collector
+> who completes onboarding but skips every starter piece is released with zero likes and
+> lands on this same deck. If you would rather observe that path, walk it instead of
+> stamping — the expected ordering is identical.
+
 ## Recorded baseline (pre-S-01)
 
 Cluster codes: 1 = Blue abstraction, 2 = Warm portraiture, 3 = Muted landscape,

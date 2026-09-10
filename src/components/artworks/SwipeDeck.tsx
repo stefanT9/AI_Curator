@@ -1,10 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  useTransition,
+} from "react";
 import Link from "next/link";
 import { recordInteraction } from "@/app/actions/interactions";
 import { ArtCard } from "@/components/artworks/ArtCard";
+import { FirstRunHint } from "@/components/artworks/FirstRunHint";
 import { selectNextCard } from "@/lib/artworks/deck";
+import {
+  firstRunHintServerSnapshot,
+  hasSeenFirstRunHint,
+  markFirstRunHintSeen,
+  subscribeToFirstRunHint,
+} from "@/lib/artworks/first-run-hint";
 import type {
   Artwork,
   ArtworkWithArtist,
@@ -25,36 +39,61 @@ export function SwipeDeck({ deck }: { deck: ArtworkWithArtist[] }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  // `localStorage` is an external store, so it is read as one rather than
+  // copied into state from an effect. The server snapshot reports "seen", so
+  // the hint is absent from the server-rendered markup and appears only once
+  // the client has actually consulted storage — no hydration mismatch, and no
+  // flash of a hint the collector dismissed long ago.
+  const hintSeen = useSyncExternalStore(
+    subscribeToFirstRunHint,
+    hasSeenFirstRunHint,
+    firstRunHintServerSnapshot,
+  );
+
   // Only ever touched inside pointer handlers, never during render.
   const pointerStartX = useRef<number | null>(null);
+
+  // Stable, so `decide` below stays stable and the keydown effect is not torn
+  // down and re-registered by a hint dismissal.
+  const dismissHint = useCallback(() => {
+    markFirstRunHintSeen();
+  }, []);
+
   const { current, remaining } = selectNextCard(deck, decidedIds);
 
   // The keydown effect below passes a `current` reference that can be one
   // render stale (same id, possibly a different object) by the time this
   // fires — reading anything but `artwork.id` here would be unsafe.
-  const decide = useCallback((artwork: Artwork, action: InteractionAction) => {
-    setError(null);
-    setDragX(0);
+  const decide = useCallback(
+    (artwork: Artwork, action: InteractionAction) => {
+      setError(null);
+      setDragX(0);
 
-    // Advance first — waiting on the round trip would make every swipe feel
-    // like a page load. The card comes back if the write fails. The
-    // functional form over a new Set matters: concurrent in-flight swipes
-    // would otherwise read a stale closed-over set.
-    setDecidedIds((previous) => new Set(previous).add(artwork.id));
+      // Registering a verdict *is* proof the affordances landed, so the first
+      // one retires the hint as surely as the button does.
+      dismissHint();
 
-    startTransition(async () => {
-      const result = await recordInteraction(artwork.id, action);
+      // Advance first — waiting on the round trip would make every swipe feel
+      // like a page load. The card comes back if the write fails. The
+      // functional form over a new Set matters: concurrent in-flight swipes
+      // would otherwise read a stale closed-over set.
+      setDecidedIds((previous) => new Set(previous).add(artwork.id));
 
-      if (!result.ok) {
-        setDecidedIds((previous) => {
-          const next = new Set(previous);
-          next.delete(artwork.id);
-          return next;
-        });
-        setError(result.message);
-      }
-    });
-  }, []);
+      startTransition(async () => {
+        const result = await recordInteraction(artwork.id, action);
+
+        if (!result.ok) {
+          setDecidedIds((previous) => {
+            const next = new Set(previous);
+            next.delete(artwork.id);
+            return next;
+          });
+          setError(result.message);
+        }
+      });
+    },
+    [dismissHint],
+  );
 
   // Arrow keys are the keyboard equivalent of the drag; the buttons below are
   // the pointer-free path for everyone else. Keyed off `current?.id` rather
@@ -116,6 +155,8 @@ export function SwipeDeck({ deck }: { deck: ArtworkWithArtist[] }) {
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
+      {hintSeen ? null : <FirstRunHint onDismiss={dismissHint} />}
+
       <div
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -171,10 +212,6 @@ export function SwipeDeck({ deck }: { deck: ArtworkWithArtist[] }) {
           {isPending ? "Saving…" : `${remaining} left`}
         </span>
       </div>
-
-      <p className="text-center text-xs opacity-50">
-        Drag the card, use the buttons, or press ← and →.
-      </p>
 
       {error ? (
         <p role="alert" className="text-sm text-red-600 dark:text-red-400">

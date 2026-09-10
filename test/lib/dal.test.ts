@@ -1,14 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getClaims, redirect } = vi.hoisted(() => ({
+const { getClaims, single, redirect } = vi.hoisted(() => ({
   getClaims: vi.fn(),
+  single: vi.fn(),
   redirect: vi.fn((path: string) => {
     throw new Error(`REDIRECT:${path}`);
   }),
 }));
 
 vi.mock("@/utils/supabase/server", () => ({
-  createClient: vi.fn(async () => ({ auth: { getClaims } })),
+  createClient: vi.fn(async () => ({
+    auth: { getClaims },
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({ eq: vi.fn(() => ({ single })) })),
+    })),
+  })),
 }));
 vi.mock("next/navigation", () => ({ redirect }));
 
@@ -60,5 +66,46 @@ describe("requireUser", () => {
     const { requireUser } = await loadDal();
 
     await expect(requireUser()).rejects.toThrow("REDIRECT:/login");
+  });
+});
+
+describe("requireOnboarded", () => {
+  const signIn = () =>
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "user-1", email: "a@b.com" } },
+      error: null,
+    });
+
+  it("redirects to /onboarding while onboarded_at is null", async () => {
+    signIn();
+    single.mockResolvedValue({
+      data: { display_name: "Ada", role: "collector", onboarded_at: null },
+      error: null,
+    });
+    const { requireOnboarded } = await loadDal();
+
+    await expect(requireOnboarded()).rejects.toThrow("REDIRECT:/onboarding");
+  });
+
+  it("returns the profile once onboarding is stamped", async () => {
+    signIn();
+    single.mockResolvedValue({
+      data: {
+        display_name: "Ada",
+        role: "collector",
+        onboarded_at: "2026-09-10T12:00:00Z",
+      },
+      error: null,
+    });
+    const { requireOnboarded } = await loadDal();
+
+    expect(await requireOnboarded()).toEqual({
+      id: "user-1",
+      email: "a@b.com",
+      displayName: "Ada",
+      role: "collector",
+      onboardedAt: "2026-09-10T12:00:00Z",
+    });
+    expect(redirect).not.toHaveBeenCalled();
   });
 });
