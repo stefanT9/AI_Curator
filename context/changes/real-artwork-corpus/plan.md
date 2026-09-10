@@ -833,21 +833,21 @@ steps exist to make that failure self-explaining rather than mysterious.
 
 #### Automated
 
-- [ ] 2.1 `npm run format:check` passes
-- [ ] 2.2 `npm run lint` passes
-- [ ] 2.3 `npm run typecheck` passes
-- [ ] 2.4 `npm run test` passes, including `test/build-corpus.test.ts`
-- [ ] 2.5 `npm run build` passes
+- [x] 2.1 `npm run format:check` passes
+- [x] 2.2 `npm run lint` passes
+- [x] 2.3 `npm run typecheck` passes
+- [x] 2.4 `npm run test` passes, including `test/build-corpus.test.ts`
+- [x] 2.5 `npm run build` passes
 - [ ] 2.6 `npm run db:seed:enrich` exits 0; every piece has enrichment or a failure reason
-- [ ] 2.7 Every `tags_from_enrichment` entry is a style or mood taxonomy term
-- [ ] 2.8 No piece's combined tag array exceeds 20 entries
+- [x] 2.7 Every `tags_from_enrichment` entry is a style or mood taxonomy term
+- [x] 2.8 No piece's combined tag array exceeds 20 entries
 - [ ] 2.9 Re-running `db:seed:enrich` makes zero model calls and is byte-identical
 
 #### Manual
 
-- [ ] 2.10 Five pieces spot-checked: style/mood defensible, description in an artist's register
-- [ ] 2.11 Failure count is a small minority
-- [ ] 2.12 Observed wall-clock and per-call latency noted against the infrastructure risk
+- [x] 2.10 Five pieces spot-checked: style/mood defensible, description in an artist's register
+- [x] 2.11 Failure count is a small minority
+- [x] 2.12 Observed wall-clock and per-call latency noted against the infrastructure risk
 
 ### Phase 3: Coverage verification and overrides
 

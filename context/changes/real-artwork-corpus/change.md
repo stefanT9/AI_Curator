@@ -1,7 +1,7 @@
 ---
 change_id: real-artwork-corpus
 title: Real artwork corpus
-status: impl_reviewed
+status: implementing
 created: 2026-09-10
 updated: 2026-09-10
 archived_at: null
@@ -37,3 +37,40 @@ failure rate and tag quality, then choose the full number. Requires a `--limit` 
 enrich stage. OpenRouter account measured: credits present (not free-tier), so the cap is 1000
 free-model requests/day; `:free` models cost nothing. `enrichFromImage` can spend up to 3
 requests per piece via its fallback chain.
+
+**2026-09-10, Phase 2 — trial measured, then the rate limit rewrote the plan.**
+
+*Trial.* Two `--limit 25` runs: 50/50 enriched, 0 failures, 2.7s per piece at concurrency 4,
+one model request per piece — the first-choice model never fell through. Descriptions are in a
+first-person artist register; style/mood terms are defensible; 10 of 20 style and 10 of 20 mood
+terms appeared across just 50 pieces. Max combined tag count is 10, so the 20-term ceiling and
+its round-robin trim never fire on real data — `combineTags` is a guard, not a live path.
+
+*What the trial could not see.* Sized at 500 on that evidence, the long run degraded badly after
+~120 pieces: 22 `rate_limited` failures. Cause is ours, not the model's — OpenRouter caps `:free`
+models near **20 requests/minute**, and concurrency 4 at ~10s per call is ~24/minute. The first
+~120 pieces rode burst allowance. Because a pinned failure is never retried, each 429 was
+silently making a piece permanently metadata-only, so the run was stopped.
+
+*Two fixes, both owner-approved.* **`ENRICH_CONCURRENCY` 4 → 2** (~12 requests/minute), a
+deliberate deviation from the plan's stated "bounded at 4" — the plan's number predates the
+measurement. And **`--retry-failed`**, an opt-in that reopens pinned failures; it must be opt-in
+because a pinned failure counts as done, which is what makes a plain re-run a true no-op.
+Verified: concurrency 2 ran 26 further pieces with **zero** failures, and the first retried 429
+piece succeeded immediately — those failures were transient, not model incapacity.
+
+*Scripts.* `db:seed:enrich` resumes by default; `db:seed:enrich:resume` is the same command under
+a name that says so; `db:seed:enrich:retry` reopens failures. All three invoke `tsx` directly —
+an earlier version aliased through `npm run`, which swallows extra args (`--limit 1` was dropped
+and a 1-piece check started all 830).
+
+*Corpus state at Phase 2 close: 197 of 1000 pinned — 174 enriched, 23 failed.* Owner will drive
+the remainder manually via the resume/retry scripts. Consequences carried forward:
+
+- **Criteria 2.6 and 2.9 are left unchecked, not claimed.** Both describe a fully-enriched
+  manifest: 2.6 wants every piece to carry enrichment or a failure reason (803 are untouched),
+  and 2.9 wants a re-run to be byte-identical (every run so far still had work to do). What *is*
+  proven is the substance underneath 2.9: across three further runs, all 146 pieces enriched at
+  snapshot time came back **byte-identical**, and resume reports pinned failures as skipped.
+- **Phase 3's untagged-tail criteria (3.7, 3.10) assume ~5%.** Reality is ~80% until the manual
+  runs finish. Re-decide at the top of Phase 3 against the corpus that exists then.

@@ -21,7 +21,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 833
+      "slot": 833,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn",
+        "monumental"
+      ],
+      "description": "I have tried to preserve the hush and scale of the church interior, where architecture, ritual, and shadow meet in a solemn stillness. The figures move quietly through the vastness, drawn less by narrative than by the weight of space, light, and ceremony."
     },
     {
       "aic_id": 16,
@@ -34,7 +40,12 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 674
+      "slot": 674,
+      "tags_from_enrichment": [
+        "figurative",
+        "dramatic"
+      ],
+      "description": "In this work I press the body into a collapsing landscape, letting gesture and pressure carry the drama: limbs reach, fall, and interlock among fractured stone until the figures become part of the same violent motion. The monochrome line keeps the event elemental, reducing it to the urgent rhythm of struggle, weight, and release."
     },
     {
       "aic_id": 33,
@@ -46,7 +57,12 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 581
+      "slot": 581,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn"
+      ],
+      "description": "I have worked in fine engraved line to give the figures a grave and ceremonial presence, letting architecture frame the encounter and the pale drapery gather the eye toward the central figures. The scene is held in a restrained tonal range, with light and shadow carrying the emotional weight rather than colour."
     },
     {
       "aic_id": 52,
@@ -58,7 +74,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 928
+      "slot": 928,
+      "tags_from_enrichment": [
+        "figurative",
+        "realism",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I have rendered the sitter in engraved line, enclosing his likeness within an inscribed oval frame and building the face, ruff, hand, and dark costume through restrained tonal gradation. The aim is a grave dignity, where each incised mark contributes to the measured presence and inward composure of the figure."
     },
     {
       "aic_id": 71,
@@ -71,7 +94,12 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 210
+      "slot": 210,
+      "tags_from_enrichment": [
+        "realism",
+        "contemplative"
+      ],
+      "description": "In this forest study, I have tried to let the trunks rise with the slow weight of living timber, their bark marked by the patient pressure of line. The undergrowth gathers into a dark, restless floor, while the pale stems and openings behind hold a hush of air. What interests me most is the balance between enclosure and depth: the trees close in, yet the eye is drawn gradually into the light beyond."
     },
     {
       "aic_id": 89,
@@ -84,7 +112,12 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 773
+      "slot": 773,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene"
+      ],
+      "description": "I sought to hold a hushed moment of repose: figures gathered beneath leaning trees, their drapery and the soft ground rendered through fine, brown strokes. The wooded setting opens around them, giving the scene a quiet narrative weight, as if rest itself were the true subject."
     },
     {
       "aic_id": 116,
@@ -96,7 +129,15 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 681
+      "slot": 681,
+      "tags_from_enrichment": [
+        "energetic",
+        "realism",
+        "figurative",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I set the sitter within an oval frame, letting the engraved line build the curl of the hair, the breadth of the collar, and the weight of the dark fabric into a likeness of measured dignity. The inscription, laurel, and coat of arms gather rank and remembrance around the face, while the quiet turn of the eyes gives the portrait a restrained inward life."
     },
     {
       "aic_id": 135,
@@ -109,7 +150,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 14
+      "slot": 14,
+      "tags_from_enrichment": [
+        "abstract",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I sought a quiet, luminous surface in which carving and glaze speak as one: scrolling foliage and blossom forms unfold over the body of the vessel, softened by the pale celadon ground. The relief gives the form a living texture, while its restrained color keeps the ornament calm, ceremonial, and timeless."
     },
     {
       "aic_id": 153,
@@ -124,7 +171,13 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 26
+      "slot": 26,
+      "tags_from_enrichment": [
+        "figurative",
+        "contemplative",
+        "dramatic"
+      ],
+      "description": "I made this white-stone figure as a suspended instant of revelation: a body caught between motion and stillness, one hand raised against the light, the drapery becoming wind, veil, and tide at once. The gesture of looking is central—half vigilance, half longing—so the figure feels both embodied and apparitional."
     },
     {
       "aic_id": 176,
@@ -138,7 +191,12 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 439
+      "slot": 439,
+      "tags_from_enrichment": [
+        "figurative",
+        "energetic"
+      ],
+      "description": "I give the vessel a warm earthen ground and set dark, swift figures across its surface, letting the white accents brighten gesture and presence. The figures move with a measured urgency, as if caught in a procession or contest, their bodies drawn into the curve of the pot so that the decoration follows the hand and the eye together."
     },
     {
       "aic_id": 242,
@@ -151,7 +209,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 442
+      "slot": 442,
+      "tags_from_enrichment": [
+        "figurative",
+        "dramatic"
+      ],
+      "description": "I shape the vessel as a stage for bodies and symbols: a dark ground carries terracotta figures in poised, charged contact, while winged beasts and repeated ornament circle the surface like remembered rites. The paint is not merely decoration; it sets flesh, gesture, and pattern in a measured dialogue, letting the ancient language of line and clay speak with immediate presence."
     },
     {
       "aic_id": 282,
@@ -164,7 +227,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 557
+      "slot": 557,
+      "tags_from_enrichment": [
+        "abstract",
+        "serene"
+      ],
+      "description": "I conceived this vessel as a quiet, utilitarian form enriched by hand-painted botanical marks, where the black linework moves across the surface like growth traced onto warm clay. The lid, handles, and shallow base give it a ceremonial stillness, while the painted leaves and stems keep the object rooted in natural rhythm."
     },
     {
       "aic_id": 326,
@@ -179,7 +247,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 678
+      "slot": 678,
+      "tags_from_enrichment": [
+        "figurative",
+        "gestural",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I set a broken torso upright, giving the fragment a fragile monumentality; the rough surfaces and simplified planes hold both the memory of a body and the fact of its loss. The figure rises from its dark base as if from an archaeological silence, inviting attention to gesture, weight, and the quiet drama of what remains."
     },
     {
       "aic_id": 338,
@@ -193,7 +268,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 897
+      "slot": 897,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I shaped this fragment with the body reduced to weight, pressure, and absence: a leg and foot still carrying the suggestion of movement, yet broken, porous, and weathered. The pale ceramic surface is left exposed, with cracks and traces of handling allowed to remain, while the dark base anchors the figure and emphasizes its fragility."
     },
     {
       "aic_id": 349,
@@ -207,7 +288,13 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 417
+      "slot": 417,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I conceived this small ceramic head as a quiet study in presence and erosion: a figure emerging from roughened earth, its softened features and faint traces of color held against the austerity of a dark base. The surface is not polished into ideal beauty, but left porous, weathered, and human, as though memory itself had worn the face down to its essential stillness."
     },
     {
       "aic_id": 360,
@@ -221,7 +308,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 948
+      "slot": 948,
+      "tags_from_enrichment": [
+        "figurative",
+        "folk art",
+        "contemplative",
+        "eerie"
+      ],
+      "description": "A small dark head, rounded and inward-turned, carries a quiet, watchful presence; the incised surface gathers the face like a woven covering, while the plain pedestal gives the figure a still, ceremonial weight."
     },
     {
       "aic_id": 371,
@@ -235,7 +329,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 218
+      "slot": 218,
+      "tags_from_enrichment": [
+        "figurative",
+        "contemplative",
+        "solemn"
+      ],
+      "description": "I shaped this small head from clay with the hand still present in the surface, leaving the face quiet, unfinished, and close to the body of the work. The bust rises from a dark, simple support, giving the fragile modeled head a sense of gravity and stillness."
     },
     {
       "aic_id": 383,
@@ -249,7 +349,15 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 154
+      "slot": 154,
+      "tags_from_enrichment": [
+        "surrealist",
+        "minimalist",
+        "figurative",
+        "eerie",
+        "contemplative"
+      ],
+      "description": "I made this small sculpture from a black, pawn-like base and a weathered, bone-pale head, letting the familiar geometry of a game piece become a pedestal for an intimate, fragile presence. The head is rough and unfinished, almost archaeological, as if memory had gathered on its surface. I wanted the contrast between the severe, dark support and the vulnerable, worn face to feel both playful and uneasy, a quiet encounter between object, body, and ritual."
     },
     {
       "aic_id": 394,
@@ -264,7 +372,12 @@
         "black and white"
       ],
       "image_width": 843,
-      "slot": 786
+      "slot": 786,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene"
+      ],
+      "description": "I made this small terracotta head as a study in quiet presence, letting the softened planes and restrained surface carry the expression. The figure is simple and still, with attention to the turn of the head, the suggestion of hair, and the modest pedestal that lifts it from the ordinary into a more contemplative object."
     },
     {
       "aic_id": 462,
@@ -277,7 +390,12 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 953
+      "slot": 953,
+      "tags_from_enrichment": [
+        "figurative",
+        "contemplative"
+      ],
+      "description": "This tapestry presents a ceremonial interior in which figures gather around a table, their draped forms and measured gestures giving the scene a composed, almost ceremonial gravity. The surrounding architecture, garlands, birds, putti, and dense floral ornament transform the room into an opulent woven frame, balancing narrative intimacy with architectural grandeur. Its restrained palette, softened tonal transitions, and layered decorative richness create an atmosphere that feels both contemplative and ceremonial."
     },
     {
       "aic_id": 582,
@@ -290,7 +408,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 456
+      "slot": 456,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene"
+      ],
+      "description": "I have composed a delicate folding fan as a portable pastoral tableau, where painted figures, flowering borders, and distant scenery unfold together like a quiet narrative. The ornamental ribs and airy paper surface invite the hand to move, revealing a charming meeting of landscape, figure, and floral decoration."
     },
     {
       "aic_id": 605,
@@ -304,7 +427,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 388
+      "slot": 388,
+      "tags_from_enrichment": [
+        "figurative",
+        "realism",
+        "dramatic",
+        "solemn"
+      ],
+      "description": "I have treated the portrait medal as a study in character rather than flattery: a compact field of bronze in which the profile, inscription, and incised detail compete for attention. The face is rendered with a sculptor’s economy—strong planes, dense hair, and a hard collar—while the surrounding lettering gives the bust its civic and commemorative weight. The surface is deliberately worked, with worn highlights and deep recesses that make age and authority feel inseparable from the likeness."
     },
     {
       "aic_id": 671,
@@ -318,7 +448,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 562
+      "slot": 562,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn"
+      ],
+      "description": "I sought to give the bust a compact monumentality: a dark, polished head and shoulders gathered into stillness, with the face held between severity and inward attention. The contrast of the black surface and pale support gives the figure a quiet gravity, while the restrained features invite contemplation without explanation."
     },
     {
       "aic_id": 793,
@@ -331,7 +466,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 908
+      "slot": 908,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn",
+        "dramatic"
+      ],
+      "description": "I conceive the dragon as a moving weather-system, body and cloud braided into one continuous pressure of gold, jade, and shadow. The dark ground holds the creature close, so its limbs, horns, and breath seem to gather beneath the surface rather than simply lie upon it; every panel becomes a tide of imperial force, ritual order, and restless life."
     },
     {
       "aic_id": 864,
@@ -346,7 +487,12 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 771
+      "slot": 771,
+      "tags_from_enrichment": [
+        "realism",
+        "contemplative"
+      ],
+      "description": "I have sought a likeness both immediate and inward: a figure held in quiet attention, his dark cap and somber clothing set against a cool blue ground, while the small flower in his hand lends the portrait a delicate note of transience and private feeling."
     },
     {
       "aic_id": 881,
@@ -361,7 +507,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 242
+      "slot": 242,
+      "tags_from_enrichment": [
+        "realism",
+        "dramatic",
+        "contemplative",
+        "melancholic"
+      ],
+      "description": "A shadowed lane presses close around an old whitewashed wall, its timber and rough planes caught in a hard, luminous dark; beyond the arch the sea opens like a released breath, while the lone figure and his burden keep the scene humble, weathered, and watchful."
     },
     {
       "aic_id": 894,
@@ -377,7 +530,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 208
+      "slot": 208,
+      "tags_from_enrichment": [
+        "realism",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I have tried to let the trees, the low light, and the quiet path carry the painting’s atmosphere; the figures are there as a human warmth, small against the breadth of the woodland and water."
     },
     {
       "aic_id": 920,
@@ -390,7 +549,12 @@
         "muted"
       ],
       "image_width": 658,
-      "slot": 293
+      "slot": 293,
+      "tags_from_enrichment": [
+        "art nouveau",
+        "serene"
+      ],
+      "description": "I developed this textile as a lush, interlocking field of scrolling foliage and floral ornament, letting the metallic threads shimmer against the deep green ground. The design moves through repetition and counterpoint, balancing decorative abundance with a quiet, measured rhythm."
     },
     {
       "aic_id": 1599,
@@ -403,7 +567,13 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 542
+      "slot": 542,
+      "tags_from_enrichment": [
+        "art nouveau",
+        "nostalgic",
+        "contemplative"
+      ],
+      "description": "I let the floral ornament breathe as a weathered, almost architectural surface, its scrolling vines and clustered blossoms pressed into a quiet monochrome field. The pattern feels both decorative and ancient, half ornament, half memory, opening into a space where repetition becomes rhythm and age softens the edges into shadow."
     },
     {
       "aic_id": 1839,
@@ -417,7 +587,14 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 325
+      "slot": 325,
+      "tags_from_enrichment": [
+        "geometric",
+        "folk art",
+        "nostalgic",
+        "contemplative"
+      ],
+      "description": "I have worked with a worn linen remnant, allowing its frayed edges and losses to remain part of the design. A faded red medallion and border carry interlocking foliate and geometric ornament, while the aged ground gathers light like dry earth and time."
     },
     {
       "aic_id": 1858,
@@ -430,7 +607,12 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 565
+      "slot": 565,
+      "tags_from_enrichment": [
+        "illustrative",
+        "solemn"
+      ],
+      "description": "I made this fragment as a devotional textile, weaving a radiant central sun into a field of floral and cloud forms. The worn edges and subdued rose, olive, and gold ground are part of the work’s presence: a quiet emblem of light preserved through age, ornament, and touch."
     },
     {
       "aic_id": 1879,
@@ -444,7 +626,12 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 720
+      "slot": 720,
+      "tags_from_enrichment": [
+        "geometric",
+        "serene"
+      ],
+      "description": "I built a small woven field on a deep green ground, allowing stylized blossoms and scrolling stems to repeat in measured rows like a garden remembered rather than observed. The ochre, gray, and green threads sit close together, giving the surface a quiet richness while the frayed edges keep the work tactile and unfinished."
     },
     {
       "aic_id": 1897,
@@ -459,7 +646,12 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 824
+      "slot": 824,
+      "tags_from_enrichment": [
+        "art nouveau",
+        "serene"
+      ],
+      "description": "I built a dense, rhythmic field of scrolling stems and stylized blossoms on a deep red ground, letting the warm ochre ornament unfold with measured symmetry and ceremonial grace. The worn edges and softened surface carry the trace of time, while the repeated floral forms retain a calm, ornamental vitality."
     },
     {
       "aic_id": 1914,
@@ -474,7 +666,13 @@
         "blue dominant"
       ],
       "image_width": 843,
-      "slot": 972
+      "slot": 972,
+      "tags_from_enrichment": [
+        "abstract",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I developed this work as a field of layered blues and greens, where repeated botanical forms emerge and recede through rhythm and ornament. The surface is built from curling stems, softened blossoms, and dense woven patterns, more concerned with resonance than narrative. I wanted the textile to feel ceremonial yet weathered, carrying the quiet gravity of age, touch, and inherited design."
     },
     {
       "aic_id": 1933,
@@ -488,7 +686,14 @@
         "desaturated"
       ],
       "image_width": 746,
-      "slot": 743
+      "slot": 743,
+      "tags_from_enrichment": [
+        "folk art",
+        "art nouveau",
+        "serene",
+        "nostalgic"
+      ],
+      "description": "I built this textile from dense, rhythmic ornament—flower, leaf, and vine pressed into a woven field of vertical and lattice-like structure. The design favors bold silhouette and pattern over naturalistic detail, letting the fabric itself become a garden of repeated, interlocking forms."
     },
     {
       "aic_id": 1949,
@@ -504,7 +709,12 @@
         "red dominant"
       ],
       "image_width": 442,
-      "slot": 379
+      "slot": 379,
+      "tags_from_enrichment": [
+        "abstract",
+        "serene"
+      ],
+      "description": "I conceived this cloth as a quiet, repeating garden, arranging blossoms and scrolling foliage into a measured rhythm so the surface feels both rich and composed. The red-brown pigment warms the pale ground, and I let the ornament gather density without becoming loud, so the pattern carries a calm, ceremonial presence."
     },
     {
       "aic_id": 1968,
@@ -518,7 +728,12 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 963
+      "slot": 963,
+      "tags_from_enrichment": [
+        "art nouveau",
+        "serene"
+      ],
+      "description": "I built this long green textile around a quiet rhythm of blossoms, stems, and looping ribbons, letting pale flowers and muted coral accents rise from a softly striated ground. The surface feels woven and alive, delicate without becoming fragile, its floral language carried by a slow, sinuous movement."
     },
     {
       "aic_id": 1986,
@@ -531,7 +746,13 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 426
+      "slot": 426,
+      "tags_from_enrichment": [
+        "abstract",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I made this fragment as a study in dense ornament: a dark, almost nocturnal floral field woven over a subdued ground, where repeated blooms and scrolling vines settle into a measured, ceremonial rhythm. The worn edges and softened color keep the pattern from feeling finished or decorative alone; it holds instead as a small architecture of shadow, texture, and quiet repetition."
     },
     {
       "aic_id": 2000,
@@ -544,7 +765,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 353
+      "slot": 353,
+      "tags_from_enrichment": [
+        "folk art",
+        "abstract",
+        "serene"
+      ],
+      "description": "I treated the cloth as a quiet field of repeated forms, letting the rust-red motifs wander across the warm ground like small, stubborn blooms. The pattern keeps returning to itself, but each motif bends and gathers differently, giving the surface a hand-made rhythm and a sense of gentle movement."
     },
     {
       "aic_id": 2016,
@@ -557,7 +784,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 639
+      "slot": 639,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene",
+        "nostalgic"
+      ],
+      "description": "I wanted the pattern to feel both worked and worn, a quiet field of burgundy flowers laid into a pale ground, with the rhythm of the motif becoming almost a second surface. The dark red forms gather and recede like pressed leaves, giving the textile a handmade gravity without losing its decorative ease."
     },
     {
       "aic_id": 2040,
@@ -571,7 +804,14 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 539
+      "slot": 539,
+      "tags_from_enrichment": [
+        "geometric",
+        "abstract",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I conceived the surface as a woven field of disciplined repetition, where each motif sits like a small emblem within a measured grid. The worn edges and softened color carry the passage of time, while the rhythmic interlacing keeps the fragment both architectural and intimate."
     },
     {
       "aic_id": 2061,
@@ -584,7 +824,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 487
+      "slot": 487,
+      "tags_from_enrichment": [
+        "abstract",
+        "geometric",
+        "contemplative"
+      ],
+      "description": "I made this work as a woven field of stepped forms, where the structure of the textile and the looseness of the fiber both remain visible. Warm ochre, red, olive, and slate shapes move across the surface like fragments of a map or a coded pattern, balancing order with the irregular hand of the process."
     },
     {
       "aic_id": 2075,
@@ -597,7 +843,14 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 872
+      "slot": 872,
+      "tags_from_enrichment": [
+        "illustrative",
+        "realism",
+        "playful",
+        "energetic"
+      ],
+      "description": "I have caught the chase at the instant when the hounds have slipped away and the company, half in earnest and half in comic disorder, pours across the Leicestershire fields. Horses strain, riders lean, and the little theatre of red coats, dark coats, fences, and distant hounds turns a country pursuit into a lively study of movement, temperament, and rural energy."
     },
     {
       "aic_id": 2083,
@@ -610,7 +863,14 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 193
+      "slot": 193,
+      "tags_from_enrichment": [
+        "abstract",
+        "gestural",
+        "contemplative",
+        "melancholic"
+      ],
+      "description": "I think of this piece as a long, wandering seam—part cord, part body, part memory. The fibers twist and thicken as if pulled through time, carrying the marks of handling, pressure, and wear. Its earthy colors feel worn rather than decorated, and the small flashes of deeper red read almost like interruptions in an otherwise quiet line."
     },
     {
       "aic_id": 2102,
@@ -624,7 +884,13 @@
         "blue dominant"
       ],
       "image_width": 843,
-      "slot": 453
+      "slot": 453,
+      "tags_from_enrichment": [
+        "figurative",
+        "illustrative",
+        "playful"
+      ],
+      "description": "I conceived this woven piece as a richly ornamented world of gardens, architecture, flowers, and living creatures, where ceremonial figures move through draped fabrics, scrolling foliage, and gilded abundance. Its pageantry is balanced by a sense of playful discovery, inviting the eye to wander through layers of color, pattern, and imagined spectacle."
     },
     {
       "aic_id": 2118,
@@ -637,7 +903,12 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 731
+      "slot": 731,
+      "tags_from_enrichment": [
+        "realism",
+        "serene"
+      ],
+      "description": "I have sought to catch the last soft light of an autumn afternoon, letting the fields, trees, birds, and quiet figures share one expansive moment of labour and repose. The falling sun gives the scene its quiet grandeur, drawing the eye across the open country while the darkening trees frame the deepening air."
     },
     {
       "aic_id": 2141,
@@ -651,7 +922,13 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 76
+      "slot": 76,
+      "tags_from_enrichment": [
+        "folk art",
+        "nostalgic",
+        "contemplative"
+      ],
+      "description": "I make this piece from a worn, patterned textile, preserving its frayed edges and faded surface as part of the work. The diagonal ornament and softened brown tones carry a sense of age, use, and quiet endurance, turning a fragile fragment into a field of memory and touch."
     },
     {
       "aic_id": 2153,
@@ -664,7 +941,12 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 298
+      "slot": 298,
+      "tags_from_enrichment": [
+        "realism",
+        "dramatic"
+      ],
+      "description": "I have sought to preserve the living weather of Suffolk, where rain, light, and cloud move across the church, fields, and water with a force equal to any figure in the scene. The landscape is not a fixed prospect but an atmosphere—damp air, broken light, and the solemn presence of rural life held within a single charged moment."
     },
     {
       "aic_id": 2178,
@@ -677,7 +959,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 99
+      "slot": 99,
+      "tags_from_enrichment": [
+        "art nouveau",
+        "nostalgic"
+      ],
+      "description": "I set a warm, weathered ground beneath scrolling stems and clustered blossoms, letting the worn threads and softened color carry the sense of age. The pattern moves like a garden remembered rather than observed, with dark forms pressing into the cloth and pale highlights curling through the weave."
     },
     {
       "aic_id": 2200,
@@ -690,7 +977,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 284
+      "slot": 284,
+      "tags_from_enrichment": [
+        "geometric",
+        "serene",
+        "nostalgic"
+      ],
+      "description": "I shaped this woven fragment as a quiet, repeated field of floral forms, letting the motif move through the fabric like a remembered garden. The worn browns and muted golds carry the sense of age, while the regular lattice gives the surface a calm, almost ceremonial order."
     },
     {
       "aic_id": 2239,
@@ -703,7 +996,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 13
+      "slot": 13,
+      "tags_from_enrichment": [
+        "art nouveau",
+        "serene",
+        "romantic"
+      ],
+      "description": "I worked with a richly woven surface in which deep red botanical forms unfold across a warm golden ground, their scrolling stems and stylized blossoms creating a rhythm that feels both ceremonial and intimate. The pattern gathers and releases like a vine moving through memory, balancing ornament with restraint and allowing the texture of the textile to carry the piece’s quiet richness."
     },
     {
       "aic_id": 2264,
@@ -716,7 +1015,12 @@
         "desaturated"
       ],
       "image_width": 832,
-      "slot": 338
+      "slot": 338,
+      "tags_from_enrichment": [
+        "folk art",
+        "serene"
+      ],
+      "description": "I wanted the textile to feel like a cultivated garden growing outward from a central axis: flowers, fruit, grain, birds, and cherubs arranged in a formal rhythm that remains lively rather than rigid. The warm red ground and pale ornament give the pattern a ceremonial brightness, while the hand-printed irregularities keep it from becoming too perfect. It is decorative, but also a little theatrical—an ornamental world where abundance is allowed to flourish."
     },
     {
       "aic_id": 2282,
@@ -728,7 +1032,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 380
+      "slot": 380,
+      "tags_from_enrichment": [
+        "abstract",
+        "geometric",
+        "contemplative"
+      ],
+      "description": "A dense, circular field of interlaced ornament unfolds in quiet, patient rhythm, each loop and knot echoing the others in a pattern that feels at once decorative and architectural. The dark ground gathers the design inward, while the pale linework wanders, curls, and knots around it like a living vine. I am drawn to the tension between order and unruliness here: a disciplined geometry loosened into arabesque, a surface that seems both plan and living growth."
     },
     {
       "aic_id": 2303,
@@ -741,7 +1051,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 119
+      "slot": 119,
+      "tags_from_enrichment": [
+        "abstract",
+        "dreamlike"
+      ],
+      "description": "I worked in a lace language—dense black stitches and open white gaps moving in a slow horizontal rhythm, with flowerlike and vine-like forms that feel both decorative and bodily. The piece is built around absence as much as line: the empty spaces carry the pattern, turning ornament into a field of breathing, interwoven shadows."
     },
     {
       "aic_id": 2305,
@@ -755,7 +1070,12 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 837
+      "slot": 837,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn"
+      ],
+      "description": "I composed this oval portrait as a quiet study of presence, letting the sitter’s dark coat, red collar, and pale hair rest against the deep green of the curtain and the burnished gold of the frame. The enclosed format gives the figure an intimate, almost ceremonial weight, while the rich fabrics and restrained expression hold a formal dignity within a small, concentrated space."
     },
     {
       "aic_id": 2330,
@@ -767,7 +1087,14 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 631
+      "slot": 631,
+      "tags_from_enrichment": [
+        "figurative",
+        "illustrative",
+        "solemn",
+        "dramatic"
+      ],
+      "description": "I have gathered the living and the dead upon a cold, luminous shore, where robed souls stand above a troubled sea and the bodies of the judged lie scattered in the water. Fire gathers at the edge of the world, and the rock itself seems quick with faces, so that nature becomes a witness to the soul’s awakening. The work presses upon the imagination as a vision of judgment, release, and terror, exposing the spirit to a light from which nothing can be hidden."
     },
     {
       "aic_id": 2446,
@@ -782,7 +1109,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 189
+      "slot": 189,
+      "tags_from_enrichment": [
+        "figurative",
+        "melancholic"
+      ],
+      "description": "I sought to give sorrow a body without excess: a woman gathered inward, hand to brow, clothed in a veil and drapery that move as though thought itself had taken weight. The quiet discipline of the carved form is balanced by the softness of falling fabric, so that restraint becomes tenderness and mourning feels less like spectacle than a held breath."
     },
     {
       "aic_id": 2508,
@@ -796,7 +1128,12 @@
         "blue dominant"
       ],
       "image_width": 843,
-      "slot": 393
+      "slot": 393,
+      "tags_from_enrichment": [
+        "illustrative",
+        "playful"
+      ],
+      "description": "I wanted Saldanha’s name to anchor a festive emblem of flowers, birds, fish, foliage, and small architectural emblems, all bound by gilded borders and bright enamel color. The plate becomes a ceremonial surface where nature, heraldry, and craft meet in a lively, radiant harmony."
     },
     {
       "aic_id": 2529,
@@ -809,7 +1146,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 261
+      "slot": 261,
+      "tags_from_enrichment": [
+        "folk art",
+        "geometric",
+        "serene",
+        "nostalgic"
+      ],
+      "description": "I wanted this textile to feel like a garden remembered through hand and repetition: flowers and leaves growing in a steady rhythm across the blue field, each pierced surface catching light like a small opening in cloth. The white embroidery gives the pattern both delicacy and structure, turning ornament into something quiet, enduring, and intimate."
     },
     {
       "aic_id": 2606,
@@ -823,7 +1167,12 @@
         "blue dominant"
       ],
       "image_width": 843,
-      "slot": 517
+      "slot": 517,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn"
+      ],
+      "description": "I conceived this ceramic dish as a ceremonial field of flowers and script, with a crowned calligraphic emblem held between small figures at its heart. Around it, gilded vines and cobalt blossoms trace the scalloped edge, so that the plate reads as both a vessel and a heraldic garden, delicate in execution but stately in bearing."
     },
     {
       "aic_id": 2773,
@@ -837,7 +1186,14 @@
         "blue dominant"
       ],
       "image_width": 843,
-      "slot": 329
+      "slot": 329,
+      "tags_from_enrichment": [
+        "figurative",
+        "illustrative",
+        "solemn",
+        "nostalgic"
+      ],
+      "description": "I made this plate as a commemorative vessel, placing a portrait in the center beneath a border of repeating leaves. The scalloped rim and reserve-blue decoration give the surface a quiet ceremony, turning an object of use into a small monument of memory and civic reverence."
     },
     {
       "aic_id": 2823,
@@ -853,7 +1209,14 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 723
+      "slot": 723,
+      "tags_from_enrichment": [
+        "figurative",
+        "realism",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I have tried to hold the child’s presence in a quiet inwardness, letting the dark, hushed room gather around him like atmosphere. The pale face and collar rise softly from the brown shadows, while the small dog at his side lends the portrait a note of companionship and fragile stillness. My aim was not so much to record a likeness as to preserve a mood: tender, watchful, and suspended."
     },
     {
       "aic_id": 2890,
@@ -865,7 +1228,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 249
+      "slot": 249,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I set the scene as a quiet interval on the road, where travelers and horse pause at the riverbank while a ferry carries its load through the current. I wanted the broad bands of water, cloud, and distant land to give the passage a calm, suspended rhythm, and the small figures to feel part of a larger movement of seasons, labor, and travel."
     },
     {
       "aic_id": 2914,
@@ -877,7 +1246,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 231
+      "slot": 231,
+      "tags_from_enrichment": [
+        "figurative",
+        "energetic",
+        "dramatic"
+      ],
+      "description": "A procession surges through the open plain beneath the immense, wind-struck face of Mount Fuji, its diagonal hatching giving the mountain a restless, almost volcanic force. Riders and attendants advance in colorful disorder, banners snapping against the sky, while the broad horizontal bands of road and water hold the scene in a measured, rhythmic balance. The composition turns travel into spectacle: worldly, animated, and quietly monumental, with the mountain looming over the fleeting human pageant below."
     },
     {
       "aic_id": 2941,
@@ -889,7 +1264,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 747
+      "slot": 747,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I set the road of the Tōkaidō in dialogue with the vast presence of Mount Fuji, letting travelers pass through a landscape that feels both lived-in and timeless. The broad bands of cloud and water carry the eye across the composition, while the small figures remind me how briefly a human journey crosses such enduring scenery. I wanted the print to hold quiet movement: the road, the clouds, and the mountain all seem to breathe together."
     },
     {
       "aic_id": 2981,
@@ -901,7 +1282,12 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 698
+      "slot": 698,
+      "tags_from_enrichment": [
+        "illustrative",
+        "energetic"
+      ],
+      "description": "Travelers and porters pass through the Oil Post Town along the Tōkaidō, their bundled loads and traveling staffs giving the scene its immediate life. A river, distant hills, and the broad bands of cloud above open the composition out beyond the figures, while the stone marker and roadside forms anchor it in a recognizable place. The work feels vivid and lively, with a quiet narrative energy rather than a solemn or dramatic one."
     },
     {
       "aic_id": 3028,
@@ -913,7 +1299,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 957
+      "slot": 957,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene",
+        "playful"
+      ],
+      "description": "Travelers pause beneath a waterside shelter as a hostess offers a cup, the scene unfolding with the wit and narrative ease of a familiar stop along the Tōkaidō. The open veranda, rippling water, and willow branches open the composition toward the landscape, while the figures’ varied gestures and expressive faces give the episode its human warmth."
     },
     {
       "aic_id": 3070,
@@ -925,7 +1317,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 407
+      "slot": 407,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn",
+        "dramatic",
+        "contemplative"
+      ],
+      "description": "A stern and authoritative portrait, rendered with incisive, densely worked lines that model the fur mantle, embroidered garment, and weathered face without softening the sitter’s gravity. The arched frame and heraldic shields give the likeness a formal, emblematic presence, while the direct gaze and compressed space make the figure feel immediate and psychologically assertive."
     },
     {
       "aic_id": 3363,
@@ -938,7 +1337,14 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 437
+      "slot": 437,
+      "tags_from_enrichment": [
+        "illustrative",
+        "folk art",
+        "playful",
+        "dramatic"
+      ],
+      "description": "A lively rural fête turns the swing into a stage for flirtation and social comedy, with a fashionable woman poised above the crowd while onlookers, dancers, and comic onlookers press into the scene. I wanted the picture to balance outdoor pleasure with a mischievous moral edge: the bright spring setting and animated gestures invite amusement, but the title’s sly emphasis on the displayed leg turns spectacle into a teasing commentary on vanity, courtship, and the theatricality of polite recreation."
     },
     {
       "aic_id": 3403,
@@ -951,7 +1357,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 783
+      "slot": 783,
+      "tags_from_enrichment": [
+        "illustrative",
+        "realism",
+        "playful",
+        "contemplative"
+      ],
+      "description": "I give the moment its quiet comedy: a solitary figure, half absorbed and half exposed, receives the letter as both invitation and trial. The room remains spare, almost all breath and shadow, so that the gesture of reading carries the whole drama. Behind him, the pressed traces of print become a kind of murmuring crowd, while his stance and sudden stillness turn a private glance into a small theatre of coquetry."
     },
     {
       "aic_id": 3548,
@@ -963,7 +1376,12 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 30
+      "slot": 30,
+      "tags_from_enrichment": [
+        "figurative",
+        "dramatic"
+      ],
+      "description": "I set the actor as a tall, vertical emblem of stage presence, letting the bold bands of his striped robe carry the eye from the flowered curtain to the lowered gaze and composed stance. The sword and cane anchor the figure in a theatrical interior, while the pale ground and patterned cloth keep the scene decorative rather than narrative. My aim was to capture performance as a controlled charge: ornament, line, and color gathered into a single note of severity and poised force."
     },
     {
       "aic_id": 3579,
@@ -976,7 +1394,15 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 675
+      "slot": 675,
+      "tags_from_enrichment": [
+        "minimalist",
+        "abstract",
+        "geometric",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I was drawn to the vessel’s rounded, resting body and the simple lift of its arched handle, a form that feels at once practical and ceremonial. The pale surface is left open and porous, with small warm traces of firing allowed to remain visible rather than corrected."
     },
     {
       "aic_id": 3587,
@@ -988,7 +1414,14 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 309
+      "slot": 309,
+      "tags_from_enrichment": [
+        "figurative",
+        "illustrative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I wanted the eye to pass through the group as through a folded screen: the high figure’s hooded silhouette, the two women bent toward the written sheet, and the patterned kimono opening into bamboo and grass like a private garden. Black line carries the poise of the bodies, while the yellowed ground and soft washes of orange, blue, and green hold the moment in a hush of cultivated leisure."
     },
     {
       "aic_id": 3624,
@@ -1002,7 +1435,15 @@
         "black and white"
       ],
       "image_width": 843,
-      "slot": 424
+      "slot": 424,
+      "tags_from_enrichment": [
+        "figurative",
+        "folk art",
+        "geometric",
+        "solemn",
+        "dreamlike"
+      ],
+      "description": "I formed the vessel around a face that feels both personal and ceremonial, giving the clay a quiet, watchful presence. The ear forms and patterned band set up a rhythm across the surface, balancing the simplicity of the head with a charged, almost vocal energy."
     },
     {
       "aic_id": 3636,
@@ -1014,7 +1455,14 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 748
+      "slot": 748,
+      "tags_from_enrichment": [
+        "figurative",
+        "illustrative",
+        "geometric",
+        "serene"
+      ],
+      "description": "I bring the theatre into a quiet bower of wisteria, where musicians, actors, and attendants are arranged by line and pattern rather than illusionistic depth. Flat gold, rose, and olive fields hold the figures in a poised rhythm; black contour, sword, fan, and music stands give the scene its theatrical weight."
     },
     {
       "aic_id": 3687,
@@ -1026,7 +1474,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 925
+      "slot": 925,
+      "tags_from_enrichment": [
+        "illustrative",
+        "figurative",
+        "dramatic"
+      ],
+      "description": "I composed this small roundel as a chivalric encounter, with the mounted knight and dragon set against a hill crowned by towers, so that the drama unfolds within a crowded, ornamental landscape. The crowded figures, animals, plants, and architecture press inward like a carved emblem, giving the scene both narrative urgency and ceremonial balance."
     },
     {
       "aic_id": 3714,
@@ -1038,7 +1492,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 689
+      "slot": 689,
+      "tags_from_enrichment": [
+        "energetic",
+        "figurative",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I use line as the chief instrument of light and devotion, shaping faces, drapery, and architecture through incised rhythm. The foreground adoration is held in solemn attention, while the distant procession and animals keep the earthly world moving around the sacred stillness."
     },
     {
       "aic_id": 3744,
@@ -1050,7 +1511,15 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 966
+      "slot": 966,
+      "tags_from_enrichment": [
+        "contemplative",
+        "realism",
+        "dramatic",
+        "solemn",
+        "figurative"
+      ],
+      "description": "I sought to make the moment of recognition at the table arise through the discipline of line: faces, hands, vessels, and folded cloth are weighed against one another, while arches and distant towers frame the sacred encounter without overwhelming its inward gravity. The meal becomes a quiet threshold, where gesture and gaze disclose the presence of Christ among the pilgrims."
     },
     {
       "aic_id": 3780,
@@ -1062,7 +1531,15 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 369
+      "slot": 369,
+      "tags_from_enrichment": [
+        "figurative",
+        "realism",
+        "illustrative",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I give the standing figure a grave and measured presence, letting the long folds of the robe fall with deliberate weight and the hand-held attributes speak quietly of martyrdom. The linear discipline of the engraving draws attention to contour, texture, and the restrained drama of the figure’s inward gaze, where devotion and endurance are held in careful balance."
     },
     {
       "aic_id": 3818,
@@ -1074,7 +1551,15 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 667
+      "slot": 667,
+      "tags_from_enrichment": [
+        "figurative",
+        "illustrative",
+        "energetic",
+        "playful",
+        "dramatic"
+      ],
+      "description": "I conceived this piece as a dense, animated ornament in which the human body, foliage, scrollwork, and inscriptions are made to strain, curl, and support one another in perpetual motion. The figures seem less like separate characters than living parts of a single ornamental architecture, balancing wit, strain, and theatrical energy. I wanted the composition to feel both orderly in its symmetry and unruly in its details, with every ribbon, tendril, and limb contributing to a charged, almost breathing surface."
     },
     {
       "aic_id": 4706,
@@ -1089,7 +1574,13 @@
         "blue dominant"
       ],
       "image_width": 843,
-      "slot": 844
+      "slot": 844,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene",
+        "playful"
+      ],
+      "description": "I sought to give breath to a blue, temple-like space in which a lithe dancer moves between two gentle stags, the pale bodies and curling branches held against a deep, quiet ground. The figures are simplified and rhythmic, less concerned with weight than with grace, as if the whole scene were suspended in a ritual of calm attention."
     },
     {
       "aic_id": 4711,
@@ -1102,7 +1593,15 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 757
+      "slot": 757,
+      "tags_from_enrichment": [
+        "figurative",
+        "geometric",
+        "folk art",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I shaped this vessel as a quiet container for gathering and remembering, its tapering body wrapped in bands of animal forms that press, turn, and reappear like a shared ritual language. The ochre interior contrasts with the darker ground, while repeated eyes, teeth, and sinuous bodies keep the surface both ordered and alive. I wanted the painting to feel ancient and immediate: patterned, rhythmic, and held together by the tension between restraint and movement."
     },
     {
       "aic_id": 4750,
@@ -1115,7 +1614,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 459
+      "slot": 459,
+      "tags_from_enrichment": [
+        "geometric",
+        "folk art",
+        "serene",
+        "solemn"
+      ],
+      "description": "I formed the bowl as a quiet field for pattern: a warm earthen body circled by stylized creatures and angular marks, drawn in black, white, and red like a story carried around the rim. I wanted the surface to feel ceremonial yet alive, holding the steadiness of clay with the quick rhythm of a remembered tale."
     },
     {
       "aic_id": 4758,
@@ -1131,7 +1637,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 378
+      "slot": 378,
+      "tags_from_enrichment": [
+        "impressionist",
+        "dramatic",
+        "serene"
+      ],
+      "description": "I tried to keep the village alive as a place of weather, work, and passing light: the church rising beyond the trees, the road worn by cart and hoof, the sky in constant motion above the fields. The brushwork is meant to feel immediate and open, with colour carried in broken touches so that the scene breathes rather than settles into polish."
     },
     {
       "aic_id": 4801,
@@ -1144,7 +1656,15 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 332
+      "slot": 332,
+      "tags_from_enrichment": [
+        "figurative",
+        "illustrative",
+        "geometric",
+        "playful",
+        "contemplative"
+      ],
+      "description": "I give the vessel a rounded, listening body, carrying a bird presence drawn in bold, pared-back marks. The painted figure feels both emblem and companion, standing at the center of the surface while dark bands and repeated strokes gather the eye into a steady rhythm. Its worn earthen ground and simplified anatomy keep the form close to clay, gesture, and ritual memory."
     },
     {
       "aic_id": 4847,
@@ -1157,7 +1677,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 402
+      "slot": 402,
+      "tags_from_enrichment": [
+        "geometric",
+        "contemplative"
+      ],
+      "description": "I shaped this vessel with a low, spreading body and a rounded rim, giving it the quiet presence of an object made to hold, gather, and remember. The warm earthen surface is broken by a rhythmic band of dark zigzag marks, where repetition becomes both decoration and a kind of measured pulse. I was drawn to the tension between the simplicity of the form and the restless energy of the pattern, letting age, wear, and mineral color soften the hand that made it."
     },
     {
       "aic_id": 4896,
@@ -1171,7 +1696,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 595
+      "slot": 595,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn"
+      ],
+      "description": "I aimed to let the figure rise slowly from the dark, with the face held in a hard, quiet light. The brushwork is spare and direct, leaving the coat and background as dense, shadowed masses so that the sitter’s presence feels both immediate and inward. I was interested less in decoration than in the weight of a life carried through silence."
     },
     {
       "aic_id": 5407,
@@ -1185,7 +1715,13 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 515
+      "slot": 515,
+      "tags_from_enrichment": [
+        "art nouveau",
+        "romantic",
+        "playful"
+      ],
+      "description": "I made this vessel as a dialogue between utility and ornament, letting the porcelain body glow with a warm amber lustre beneath white floral relief and rose-pink accents. The curved spout and handle give the form a light, almost dancing profile, while the painted leaf bands and raised blossoms turn a domestic object into a small, decorative still life."
     },
     {
       "aic_id": 5932,
@@ -1198,7 +1734,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 361
+      "slot": 361,
+      "tags_from_enrichment": [
+        "abstract",
+        "geometric",
+        "solemn",
+        "eerie"
+      ],
+      "description": "I carved a face from earthen clay, letting the surface keep its rough, weathered grain. The features are reduced to deep cuts and repeated incisions: heavy eyes, a broad brow, and a mouth that narrows into a fan of vertical marks, as if the face were both mask and vessel. I wanted the object to feel old, guarded, and present, held together by the patience of its own lines."
     },
     {
       "aic_id": 5983,
@@ -1211,7 +1754,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 508
+      "slot": 508,
+      "tags_from_enrichment": [
+        "abstract",
+        "solemn"
+      ],
+      "description": "I shaped the piece around a long, birdlike tension, reducing the body to a dark, polished sweep with a pointed beak and small openings that feel at once functional and incantatory. The surface is kept severe and low-key, so the weight of the form, the restrained silhouette, and the sense of concealed use carry the work more than decoration."
     },
     {
       "aic_id": 6005,
@@ -1228,7 +1776,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 587
+      "slot": 587,
+      "tags_from_enrichment": [
+        "impressionist",
+        "contemplative"
+      ],
+      "description": "I sought to give the road, the bare trees, and the low village their full share of presence, as if the land itself were breathing beneath a heavy sky. The figures on the path are there to humanize the distance, not to command it; the houses and church stand quietly within the slope of the hills. I wanted the green fields, the dark earth, and the shifting clouds to speak together in a subdued harmony, where atmosphere and light transform an ordinary view into something intimate and enduring."
     },
     {
       "aic_id": 6251,
@@ -1241,7 +1794,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 489
+      "slot": 489,
+      "tags_from_enrichment": [
+        "figurative",
+        "dramatic"
+      ],
+      "description": "I built the vessel around a single gesture: a rounded body, a looped handle, and a narrow spout that rises like a reed. The clay remains warm and earthen, while the pale slip and carved lines gather into a watchful animal face, fierce but contained, as if the vessel were also a creature holding its breath."
     },
     {
       "aic_id": 6283,
@@ -1254,7 +1812,13 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 197
+      "slot": 197,
+      "tags_from_enrichment": [
+        "figurative",
+        "folk art",
+        "solemn"
+      ],
+      "description": "I conceived this vessel as a compact armored presence, its tapering body rising like a helmeted figure and its stirrup handle giving it a quiet, animated strength. The red clay surface is restrained and earthy, broken by pale bands, a beaded medallion, and crosshatched forms that suggest armor, identity, and ritual use. I wanted the piece to feel both functional and symbolic, a small container with the solemn authority of a portrait object."
     },
     {
       "aic_id": 6314,
@@ -1267,7 +1831,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 551
+      "slot": 551,
+      "tags_from_enrichment": [
+        "figurative",
+        "folk art",
+        "eerie",
+        "contemplative"
+      ],
+      "description": "I have shaped this ceramic vessel as a squat, breathing creature, its rounded body crowded with fishlike faces, fins, and mouths pressed into the surface as though the container itself were alive. The long spout rises like a neck or reed, making function feel ritual and bodily; the earth-toned surface gathers wear in its ridges and hollows, leaving the forms tender, watchful, and faintly uncanny."
     },
     {
       "aic_id": 6352,
@@ -1280,7 +1851,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 421
+      "slot": 421,
+      "tags_from_enrichment": [
+        "figurative",
+        "contemplative"
+      ],
+      "description": "I shaped the vessel around a single human presence, giving the container weight, posture, and a quiet authority. The reddish clay is allowed to remain visible beneath pale surfaces, with dark accents marking the headdress, ornaments, and small cup held in the hand. Behind the figure, the tubular form rises like an extension of breath or body, binding utility to ritual. I wanted the face to feel individual yet ceremonial, carved with restraint, patience, and inwardness."
     },
     {
       "aic_id": 6385,
@@ -1293,7 +1869,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 728
+      "slot": 728,
+      "tags_from_enrichment": [
+        "figurative",
+        "eerie"
+      ],
+      "description": "I made this vessel as a compact, seated presence, turning a drinking vessel into a body with a watchful, almost animal face. The raised handle and spout become part of the figure, so utility and character are fused rather than separate. Its dark surface and restrained modeling give the object a grave, charged stillness."
     },
     {
       "aic_id": 7503,
@@ -1309,7 +1890,15 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 61
+      "slot": 61,
+      "tags_from_enrichment": [
+        "figurative",
+        "romantic",
+        "serene",
+        "dreamlike",
+        "contemplative"
+      ],
+      "description": "I wanted to place a figure on the threshold between earthly field and unseen vision, where the lilies become a quiet language of purity and foreboding. The girl’s stillness, veil, and faint halo suggest inward sight rather than ordinary portraiture; the surrounding greenery and pale flowers carry the emotional weight, turning the scene into something devotional, secretive, and dreamlike."
     },
     {
       "aic_id": 8248,
@@ -1324,7 +1913,12 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 732
+      "slot": 732,
+      "tags_from_enrichment": [
+        "figurative",
+        "contemplative"
+      ],
+      "description": "I wanted to preserve the hush of a private moment, a woman absorbed in a letter as if the page has drawn her into another world. The soft folds of white, blue, and orange, the pink accents, and the delicate gilded detail create a graceful, intimate charm, with the figure’s lowered gaze giving the whole work a quiet sense of thought and feeling."
     },
     {
       "aic_id": 8308,
@@ -1339,7 +1933,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 645
+      "slot": 645,
+      "tags_from_enrichment": [
+        "figurative",
+        "contemplative"
+      ],
+      "description": "I have treated the oval frame as a private theatrical space, gathering a seated figure, rich drapery, and a distant landscape into one intimate relief. The raised surfaces preserve the pressure of the hand, while the softened contours and ornamental folds open a space between portraiture and invention."
     },
     {
       "aic_id": 8332,
@@ -1353,7 +1952,15 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 213
+      "slot": 213,
+      "tags_from_enrichment": [
+        "figurative",
+        "realism",
+        "solemn",
+        "contemplative",
+        "eerie"
+      ],
+      "description": "I made this oval portrait as a quiet study of presence: a pale relief figure held behind glass, framed by dark wood and caught in the uneven shine of reflection. The surface preserves the softness of modelling—flowers, lace, and ruffled cloth rendered almost as breath—while the cracked glass and shadowed ground give the figure an eerie, suspended stillness."
     },
     {
       "aic_id": 8528,
@@ -1365,7 +1972,13 @@
         "oil painting"
       ],
       "image_width": 843,
-      "slot": 669
+      "slot": 669,
+      "tags_from_enrichment": [
+        "dramatic",
+        "contemplative",
+        "realism"
+      ],
+      "description": "I wanted the sitter’s presence to feel immediate but not theatrical: a face held between illumination and shadow, rendered with enough looseness that the flesh seems to emerge from the ground rather than merely rest upon it. The dark, fur-trimmed costume and the subdued surround give the portrait its gravity, while the restrained warmth of the skin and the unsmiling gaze keep the figure human, self-contained, and quietly formidable."
     },
     {
       "aic_id": 8964,
@@ -1378,7 +1991,16 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 277
+      "slot": 277,
+      "tags_from_enrichment": [
+        "figurative",
+        "expressionist",
+        "gestural",
+        "dramatic",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I have pressed the head into being through a dense, dark surface, letting the planes of the face carry both weight and agitation. The brow, cheek, and beard are worked with a restless intensity, so the portrait feels less like a likeness than a concentrated human presence—vulnerable, inward, and charged."
     },
     {
       "aic_id": 8991,
@@ -1391,7 +2013,15 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 528
+      "slot": 528,
+      "tags_from_enrichment": [
+        "abstract",
+        "expressionist",
+        "dramatic",
+        "energetic",
+        "dreamlike"
+      ],
+      "description": "I wanted the canvas to vibrate like an inner storm, with color and line set against one another until form, atmosphere, and emotion became inseparable. Cloud, water, and earth dissolve into a charged rhythm of arcs, lines, and luminous planes, suggesting renewal and upheaval at once."
     },
     {
       "aic_id": 10411,
@@ -1405,7 +2035,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 477
+      "slot": 477,
+      "tags_from_enrichment": [
+        "figurative",
+        "dramatic",
+        "contemplative"
+      ],
+      "description": "Two gold coins, each suspended by a small looped mount, present paired medallions of sovereign authority. The obverse carries a crowned profile in profile, while the reverse bears a heraldic composition enclosed by inscriptions and ornamental borders. Their polished surfaces, incised lettering, and carefully modeled relief give the pair a ceremonial dignity and a quiet luminosity."
     },
     {
       "aic_id": 10976,
@@ -1421,7 +2057,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 816
+      "slot": 816,
+      "tags_from_enrichment": [
+        "figurative",
+        "dramatic",
+        "tense"
+      ],
+      "description": "I wanted to give the moment a charged, almost theatrical stillness: the figure carried through a leafy, earthy setting, caught between resistance and surrender, with the small attendant and urn anchoring the scene in a kind of antique theatricality. The glossy surfaces and jeweled greens and reds make the relief feel both decorative and intimate, as if a dramatic episode has been compressed into a private relic."
     },
     {
       "aic_id": 11022,
@@ -1435,7 +2077,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 951
+      "slot": 951,
+      "tags_from_enrichment": [
+        "expressionist",
+        "figurative",
+        "dramatic",
+        "contemplative"
+      ],
+      "description": "In this composition, figures cluster around a central body in a charged, shadowed space, their gestures and gazes forming a dense emotional architecture. I have treated the scene with broad, expressive handling, allowing light and darkness to carry much of the drama. The figures are rendered with a loose, immediate vitality rather than polished finish, emphasizing feeling, movement, and the solemn intensity of the moment."
     },
     {
       "aic_id": 11274,
@@ -1448,7 +2097,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 103
+      "slot": 103,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I sought a quiet room as a vessel of presence, letting the dim wall, old furniture, and small relics gather the weight of an absent life. The space is spare but charged, its worn surfaces and fragile light holding memory in a state both still and restless."
     },
     {
       "aic_id": 11282,
@@ -1461,7 +2116,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 880
+      "slot": 880,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn",
+        "nostalgic"
+      ],
+      "description": "I sought to preserve a family in its quietest ceremonial stillness: the parents’ careful dress and the child’s uncertain poise held together by the discipline of the lens. The softened faces, darkened edges, and aged surface give the portrait a sense of memory rather than mere likeness, as if the sitters have passed slowly toward us through time."
     },
     {
       "aic_id": 11291,
@@ -1474,7 +2135,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 253
+      "slot": 253,
+      "tags_from_enrichment": [
+        "minimalist",
+        "geometric",
+        "serene",
+        "nostalgic"
+      ],
+      "description": "A quiet, dignified binding whose weathered green leather and restrained gilt lines give the volume an air of deliberate simplicity. Its worn edges and softened surfaces suggest long handling, careful shelving, and the accumulated grace of an object made to be read rather than merely displayed."
     },
     {
       "aic_id": 11321,
@@ -1488,7 +2156,15 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 547
+      "slot": 547,
+      "tags_from_enrichment": [
+        "figurative",
+        "expressionist",
+        "gestural",
+        "solemn",
+        "melancholic"
+      ],
+      "description": "I shaped the figure as a body bowed by weight, its strength and collapse held in the same gesture. The stone is not an addition but a fate: it presses the head down, bends the spine, and turns the pose into both endurance and surrender. I wanted the surface to keep the pressure of making—smooth where the body carries strain, rough where it seems to merge with the burden—so that the figure feels less like an idealized form than a living act of bearing."
     },
     {
       "aic_id": 11335,
@@ -1501,7 +2177,15 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 692
+      "slot": 692,
+      "tags_from_enrichment": [
+        "realism",
+        "street art",
+        "dramatic",
+        "tense",
+        "contemplative"
+      ],
+      "description": "The piece presents a candid, human-scale street encounter, grounded in the everyday textures of an older urban neighborhood. Its tonal restraint and observed gestures keep the moment close to documentary realism, while the clustered figures and uneven rhythms of the scene introduce a quiet narrative tension. The composition balances informality with a measured visual architecture, allowing the photograph to feel both immediate and quietly enduring."
     },
     {
       "aic_id": 11343,
@@ -1514,7 +2198,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 177
+      "slot": 177,
+      "tags_from_enrichment": [
+        "figurative",
+        "realism",
+        "contemplative",
+        "dramatic"
+      ],
+      "description": "A family gathers in a cramped room, its quiet endurance set against worn wood, patched walls, and the vulnerable faces of its children. The photograph holds hardship close without turning it into spectacle: there is weariness in the scene, but also tenderness, alertness, and a stubborn human presence."
     },
     {
       "aic_id": 11348,
@@ -1527,7 +2218,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 474
+      "slot": 474,
+      "tags_from_enrichment": [
+        "realism",
+        "nostalgic",
+        "contemplative"
+      ],
+      "description": "I framed the pawnbroker’s storefront as a dense little theatre of urban life, where signs, glass, hanging goods, and passing bodies all press against one another. The mannequin stands like a silent customer, dressed for a life it cannot inhabit, while the shopkeeper’s world spills onto the pavement in trunks, tools, and old promises."
     },
     {
       "aic_id": 11390,
@@ -1542,7 +2239,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 200
+      "slot": 200,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I have made the figure's black veil and mantle a field of inward authority, where restraint becomes a kind of grandeur. The dark drapery gathers around her like a solemn architecture, while the small crucifix beside her gives the silence its spiritual weight. Light falls with quiet severity on the face and hands, revealing devotion not as spectacle, but as a composed and enduring act of the soul."
     },
     {
       "aic_id": 11695,
@@ -1555,7 +2258,10 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 941
+      "slot": 941,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 11965,
@@ -1568,7 +2274,10 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 36
+      "slot": 36,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 12201,
@@ -1582,7 +2291,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 884
+      "slot": 884,
+      "tags_from_enrichment": [
+        "geometric",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I shaped this small glazed vessel as a quiet architecture of box and plinth, its square lid resting like a roof over a hollow base. The green glaze is allowed to thin, stain, and gather at the edges, so that the surface feels handled by time rather than perfected by it. I wanted the piece to hold a restrained tension between container and structure, domestic and monumental, with its hard geometry softened by age and earth."
     },
     {
       "aic_id": 12497,
@@ -1596,7 +2311,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 9
+      "slot": 9,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I sought to give form to a presence both tender and inexhaustible: a many-armed figure gathered in meditation, crowned and seated upon the open petals of a lotus. The white body gathers light without ornament, allowing the repeated hands, implements, and layered drapery to unfold like a quiet language of protection. Around the base, the earth and water rise in miniature, supporting the figure with a sense of stillness, vigilance, and grace."
     },
     {
       "aic_id": 12535,
@@ -1609,7 +2330,10 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 397
+      "slot": 397,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 12702,
@@ -1623,7 +2347,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 705
+      "slot": 705,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn"
+      ],
+      "description": "I shape the horse as a study in quiet strength, giving the body a measured dignity rather than a moment of frantic motion. The dark surface gathers light along the shoulder, flank, and mane, while the saddle and ornate base give the figure a formal, enduring presence."
     },
     {
       "aic_id": 13120,
@@ -1636,7 +2365,10 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 521
+      "slot": 521,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 13454,
@@ -1650,7 +2382,10 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 73
+      "slot": 73,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 14027,
@@ -1663,7 +2398,14 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 158
+      "slot": 158,
+      "tags_from_enrichment": [
+        "figurative",
+        "illustrative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I have set two women in a hush of verse and pattern, their dark kimono and pale sleeves held against the quiet architecture of the room. The calligraphy moves through the space like weather, giving the figures a private stillness and drawing the eye toward the distant shore beyond the screen. The scene is meant to feel intimate and suspended, a small poetic breath between action and memory."
     },
     {
       "aic_id": 14325,
@@ -1677,7 +2419,15 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 677
+      "slot": 677,
+      "tags_from_enrichment": [
+        "figurative",
+        "realism",
+        "contemplative",
+        "dramatic",
+        "melancholic"
+      ],
+      "description": "I sought to catch the inward life of the sitter, allowing shadow to gather around her face like a second presence. The veil, the pale highlight, and the quiet turn of the gaze become the true subject: a brief encounter with thought, memory, and vulnerability."
     },
     {
       "aic_id": 14438,
@@ -1692,7 +2442,10 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 526
+      "slot": 526,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 14591,
@@ -1706,7 +2459,10 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 892
+      "slot": 892,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 14780,
@@ -1718,7 +2474,14 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 336
+      "slot": 336,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene",
+        "romantic",
+        "contemplative"
+      ],
+      "description": "I conceived the screen as a gilded field in which courtly life unfolds across shifting seasons and vantage points, the gold leaf carrying both atmosphere and architecture. Figures move between pavilions, gardens, bridges, and trees, their gestures and garments giving the composition its rhythm. I was drawn to the tension between decorative richness and quiet narrative, using layered space and seasonal motifs to suggest memory, ritual, and the passage of time."
     },
     {
       "aic_id": 14845,
@@ -1731,7 +2494,10 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 566
+      "slot": 566,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 15451,
@@ -1744,7 +2510,10 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 620
+      "slot": 620,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 15720,
@@ -1761,7 +2530,12 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 147
+      "slot": 147,
+      "tags_from_enrichment": [
+        "realism",
+        "serene"
+      ],
+      "description": "I have tried to preserve the hush of a rural crossing, where figures and horse pass over an old stone bridge while the river gathers its light beneath them. The trees close around the scene like a shelter, and the distant house and pale sky open it toward a calm, reflective distance. Warm earth and leaf-green tones carry the eye from shadow into the soft air beyond the arches, making a simple journey feel quiet and enduring."
     },
     {
       "aic_id": 15722,
@@ -1774,7 +2548,14 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 480
+      "slot": 480,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I cast this figure in gilded bronze as a devotional presence rather than a likeness of ordinary life: the relaxed posture, jeweled ornaments, and composed gaze invite quiet reverence. Darkened recesses in the patina sharpen the richness of the gold, while the lotus seat and elaborate costume give the body ceremonial weight and grace. I wanted the surface to feel worn by devotion, so age, polish, and ritual use become part of the form itself."
     },
     {
       "aic_id": 15744,
@@ -1787,7 +2568,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 344
+      "slot": 344,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene",
+        "dramatic"
+      ],
+      "description": "Seated in meditative poise yet armed with bow, arrow, and sword, the deity radiates disciplined power: ornate, jewel-bright, and serene, with a warm metallic glow and a quietly dramatic presence."
     },
     {
       "aic_id": 16127,
@@ -1800,7 +2587,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 859
+      "slot": 859,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I have made a small devotional relief in which Mary and the Child are drawn into one tender, inward movement, as though the room around them has fallen silent. The softened faces, worn colors, and aged surface are part of the work’s tenderness: not mere age, but the memory of hands, prayers, and time. The little angels behind them hover like breaths of incense, while the dark wooden frame closes around the scene like a private chapel."
     },
     {
       "aic_id": 16169,
@@ -1814,7 +2607,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 150
+      "slot": 150,
+      "tags_from_enrichment": [
+        "figurative",
+        "dramatic",
+        "solemn",
+        "tense"
+      ],
+      "description": "I set the martyrdom within a severe architecture of barred windows and pale stone, letting the hard geometry contain the violence of the scene. The figures move with measured gravity: the blade, the blood, and the offered head become the emotional center, while the distant figure and open court keep the moment both public and intimate."
     },
     {
       "aic_id": 16207,
@@ -1830,7 +2630,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 983
+      "slot": 983,
+      "tags_from_enrichment": [
+        "figurative",
+        "realism",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I have set the risen Christ before Mary Magdalene in a quiet rocky landscape, where earthly grief meets divine presence in a moment of restrained recognition. The figures are arranged with deliberate stillness, their gestures opening a space of contemplation rather than spectacle, and the tomb behind them becomes both a literal place and a threshold of grace."
     },
     {
       "aic_id": 16253,
@@ -1845,7 +2652,14 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 8
+      "slot": 8,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene",
+        "contemplative",
+        "romantic"
+      ],
+      "description": "I have made a devotional image of the Holy Family at rest: Mary nurses the Christ Child with a tenderness that is both human and sacred, while Joseph reads in the quiet background. The open book, the flowers, the knife, and the fruit are not mere accessories but quiet signs of Scripture, purity, Passion, and earthly life. I wanted the intimacy of the domestic moment to carry a solemn spiritual weight, held in a restrained palette of blue, red, and green, with attention to the folds of cloth, the softness of the child, and the stillness of the room."
     },
     {
       "aic_id": 16303,
@@ -1859,7 +2673,14 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 560
+      "slot": 560,
+      "tags_from_enrichment": [
+        "figurative",
+        "realism",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I have painted the Mother and Child as a tender meeting of flesh and spirit, where the Virgin’s lowered gaze gathers the scene into quiet devotion and the Child’s bright attention opens it toward the world. The deep red ground presses against the blue mantle, giving the figures a jewel-like presence, while the delicate handling of hands, linen, and hair seeks the softness of human tenderness within a sacred intimacy."
     },
     {
       "aic_id": 16329,
@@ -1873,7 +2694,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 241
+      "slot": 241,
+      "tags_from_enrichment": [
+        "figurative",
+        "realism",
+        "solemn"
+      ],
+      "description": "I gather the sacred figures in a measured devotional arrangement, binding Virgin, Child, elder saint, armored guardian, and kneeling patron into one ordered vision of lineage and prayer. The radiant dove and gilded veil lift the scene toward divine presence, while the quiet landscape and carefully rendered faces hold earthly devotion in solemn balance."
     },
     {
       "aic_id": 16365,
@@ -1888,7 +2715,14 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 656
+      "slot": 656,
+      "tags_from_enrichment": [
+        "figurative",
+        "expressionist",
+        "dramatic",
+        "tense"
+      ],
+      "description": "The work is a violent and intimate encounter: a cloaked figure protects a wounded man while another assailant advances in the background. The loose, forceful handling of paint and the stark, blood-red detail give the scene a raw emotional charge, balancing tenderness with brutality."
     },
     {
       "aic_id": 16413,
@@ -1902,7 +2736,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 289
+      "slot": 289,
+      "tags_from_enrichment": [
+        "figurative",
+        "realism",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I have rendered a courtier in a restrained field of shadow, allowing the lace, fabric, and steady gaze to carry the presence of the sitter. The portrait seeks dignity rather than ornament, with light gathered around the face and hands so that composure, rank, and inward attention emerge through quiet contrast."
     },
     {
       "aic_id": 17165,
@@ -1916,7 +2757,13 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 317
+      "slot": 317,
+      "tags_from_enrichment": [
+        "realism",
+        "contemplative",
+        "melancholic"
+      ],
+      "description": "I carved the head and shoulders with an inward, restrained presence, letting the polished dark surface hold shadow across the brow, cheek, and draped cloth. The gathered hair and softened folds give the figure a quiet gravity, as though caught in a moment of thought rather than display."
     },
     {
       "aic_id": 18852,
@@ -1930,7 +2777,13 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 135
+      "slot": 135,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "A serene, monumental stone bust, its closed eyes and softly modeled features turning inward in quiet repose. The carved headdress and weathered surface lend the portrait both intimacy and solemnity, as though preserving a presence beyond ordinary time."
     },
     {
       "aic_id": 18967,
@@ -1943,7 +2796,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 713
+      "slot": 713,
+      "tags_from_enrichment": [
+        "realism",
+        "nostalgic",
+        "contemplative",
+        "melancholic"
+      ],
+      "description": "I framed an old stone figure at the edge of a winter park, letting bare branches and a slumped chair interrupt its ceremonial poise. The soft sepia haze keeps the scene between memory and reportage, with the statue’s stillness weighed against the crooked furniture and the long, quiet shadow of the trees."
     },
     {
       "aic_id": 20223,
@@ -1958,7 +2818,13 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 511
+      "slot": 511,
+      "tags_from_enrichment": [
+        "figurative",
+        "playful",
+        "serene"
+      ],
+      "description": "I modelled this small ceramic figure as a softly dressed woman in a rose-toned coat and dark hat, carrying a bowl of flowers. The painted outlines, patterned skirt, and bright accents give her a delicate, playful presence, poised between ceremony and everyday charm."
     },
     {
       "aic_id": 20338,
@@ -1971,7 +2837,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 726
+      "slot": 726,
+      "tags_from_enrichment": [
+        "realism",
+        "nostalgic",
+        "playful",
+        "tense"
+      ],
+      "description": "I wanted to hold that strange threshold between play and distress: a small child crouched in the sand, caught between a cry and a game, reaching toward a twig figure with the seriousness of ritual. The soft, worn surface turns an ordinary moment into something tender, uncertain, and quietly theatrical."
     },
     {
       "aic_id": 23016,
@@ -1984,7 +2857,10 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 659
+      "slot": 659,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 23030,
@@ -1997,7 +2873,12 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 151
+      "slot": 151,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn"
+      ],
+      "description": "I aimed to record a monumental façade after destruction, letting its broken arches, chimneys, and exposed interiors speak to the fragility of grandeur. The empty plaza and pale sky give the ruin a quiet dignity, emphasizing what remains rather than what has been lost."
     },
     {
       "aic_id": 23166,
@@ -2010,7 +2891,10 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 54
+      "slot": 54,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 23186,
@@ -2023,7 +2907,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 942
+      "slot": 942,
+      "tags_from_enrichment": [
+        "realism",
+        "nostalgic",
+        "playful"
+      ],
+      "description": "I framed this group shoulder to shoulder, headlamps bright against worn faces and work-wrinkled clothes, to hold a brief moment of fellowship within the heavier truth of labor. Their smiles are small but unguarded, a loosening of the body after strain, and the faded warmth of the tones keeps the scene intimate, sturdy, and alive with the dignity of the people rather than the machinery of their trade."
     },
     {
       "aic_id": 23205,
@@ -2036,7 +2926,10 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 169
+      "slot": 169,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 23226,
@@ -2049,7 +2942,12 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 181
+      "slot": 181,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn"
+      ],
+      "description": "I made this photograph to record the working conditions and character of the mine, with two men and their equipment framed by timber supports, rails, and the rough earth around them. The composition is direct and unadorned, emphasizing the material reality of labor, the heaviness of the setting, and the quiet presence of the workers within it."
     },
     {
       "aic_id": 23238,
@@ -2062,7 +2960,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 236
+      "slot": 236,
+      "tags_from_enrichment": [
+        "realism",
+        "contemplative",
+        "solemn"
+      ],
+      "description": "I wanted the worker and the machine to share the frame, each absorbed in the other's scale and motion. The belts, chains, and ironwork become a kind of architecture of labor, while the muted light keeps the scene quiet rather than heroic."
     },
     {
       "aic_id": 23269,
@@ -2075,7 +2979,10 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 847
+      "slot": 847,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 23285,
@@ -2088,7 +2995,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 264
+      "slot": 264,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn",
+        "dramatic"
+      ],
+      "description": "I wanted the mine’s darkness to gather around the men rather than swallow them, letting the lamp and the small windows carve faces out of the gloom. Their bodies, stacked through the shaft like strata, become a record of labor, patience, and the heavy dignity of a shared place."
     },
     {
       "aic_id": 23306,
@@ -2101,7 +3014,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 72
+      "slot": 72,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I wanted to hold the face of a man who knows the dark by heart, not as a symbol but as a working life carried in the eyes. The lamp on his cap becomes a small, stubborn sun, and the worn cloth, the heavy shoulders, the quiet severity of his expression all speak of endurance, labor, and the dignity of someone accustomed to hardship without asking for it."
     },
     {
       "aic_id": 23326,
@@ -2114,7 +3033,10 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 956
+      "slot": 956,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 23338,
@@ -2127,7 +3049,14 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 860
+      "slot": 860,
+      "tags_from_enrichment": [
+        "realism",
+        "nostalgic",
+        "melancholic",
+        "tense"
+      ],
+      "description": "I set the family in the room where life had gathered—chairs, cloth, glass, clock, and child all pressed into the same narrow breath. Their faces hold different silences, some steady, some startled, and I wanted that tension to remain rather than soften it. The clutter is not background but evidence: a household made visible through use, care, and fatigue."
     },
     {
       "aic_id": 23747,
@@ -2140,7 +3069,10 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 238
+      "slot": 238,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 23762,
@@ -2153,7 +3085,10 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 463
+      "slot": 463,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 23781,
@@ -2166,7 +3101,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 979
+      "slot": 979,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn",
+        "contemplative",
+        "tense"
+      ],
+      "description": "I have framed a broad Parisian thoroughfare in the aftermath of unrest, where barricades and rubble interrupt the disciplined façades of the city. The quiet street, the distant dome, and the pale sky give the scene a solemn historical weight, caught between civic order and the memory of struggle."
     },
     {
       "aic_id": 23797,
@@ -2179,7 +3121,14 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 492
+      "slot": 492,
+      "tags_from_enrichment": [
+        "realism",
+        "solemn",
+        "nostalgic",
+        "contemplative"
+      ],
+      "description": "Set before the severe colonnades, the fountain stands as a quiet counterweight to the architecture: carved stone, shadowed niches, and animal spouts give the monument a tactile, almost human presence. I am interested in the way public stone gathers memory and stillness, turning a civic space into a measured study of weight, light, and endurance."
     },
     {
       "aic_id": 23811,
@@ -2192,7 +3141,10 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 734
+      "slot": 734,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 25000,
@@ -2205,7 +3157,13 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 749
+      "slot": 749,
+      "tags_from_enrichment": [
+        "art nouveau",
+        "serene",
+        "romantic"
+      ],
+      "description": "A narrow band of white lace unfolds like a quiet procession of flowers and curling stems, its openwork breathing against the darkness. I wanted the piece to feel both ornamental and intimate, a delicate architecture of thread that turns repetition into rhythm and surface into a kind of quiet music."
     },
     {
       "aic_id": 25004,
@@ -2217,7 +3175,10 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 482
+      "slot": 482,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 25041,
@@ -2230,7 +3191,13 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 88
+      "slot": 88,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I wanted the shore to feel like a held breath—water, reeds, and distant trees gathered into a quiet rhythm, with small figures moving through the pale blue light. The scene leans on open space and delicate color, letting distance, mist, and the curve of the land carry the emotion rather than any single event."
     },
     {
       "aic_id": 25083,
@@ -2242,7 +3209,10 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 271
+      "slot": 271,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 25104,
@@ -2255,7 +3225,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 896
+      "slot": 896,
+      "tags_from_enrichment": [
+        "folk art",
+        "serene",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I built this textile as a dark ground filled with a continuous, light-filled lattice of scrolling vines and blossoms, gathered around a central urn that gives the whole field its quiet axis. The surface moves between ornament and emblem, using repetition and symmetry to turn floral growth into a ceremonial pattern. Its restrained palette lets the pale forms emerge with a soft luminosity, making the piece feel at once decorative, contemplative, and still."
     },
     {
       "aic_id": 25117,
@@ -2267,7 +3244,12 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 312
+      "slot": 312,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene"
+      ],
+      "description": "I set the blossoms against a quiet field of yellow, allowing the pale heads to accumulate into repeated, almost mosaic clusters. A dark bird cuts across the composition with swift, graphic force, balancing the softness of stems, leaves, and bloom. I wanted the work to feel seasonal and enduring at once: a fleeting meeting of flower and wing held in decorative stillness."
     },
     {
       "aic_id": 25152,
@@ -2280,7 +3262,10 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 373
+      "slot": 373,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 25175,
@@ -2292,7 +3277,10 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 685
+      "slot": 685,
+      "tags_from_enrichment": [],
+      "description": null,
+      "enrichment_failed": "rate_limited"
     },
     {
       "aic_id": 25207,
@@ -2306,7 +3294,13 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 304
+      "slot": 304,
+      "tags_from_enrichment": [
+        "art nouveau",
+        "figurative",
+        "serene"
+      ],
+      "description": "Please upload the artwork image so I can write a catalogue-style description and select tags from your provided vocabulary."
     },
     {
       "aic_id": 25218,
@@ -2318,7 +3312,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 578
+      "slot": 578,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene",
+        "nostalgic"
+      ],
+      "description": "I wanted to catch the measured drama of a road journey: a richly dressed carriage moving through autumn air, its curved roof and patterned panels held against the open sky. The attendants, lanterns, ox, and scattered maple leaves give the scene a sense of ceremony and motion, while the pale distance and steady trees keep the moment calm, orderly, and quietly nostalgic."
     },
     {
       "aic_id": 25221,
@@ -2331,7 +3331,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 575
+      "slot": 575,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn",
+        "dramatic",
+        "contemplative"
+      ],
+      "description": "I carved the marble as a field of grief and grace, where the body of Christ falls through a space filled with mourning figures, angels, and sacred light. The folded stone becomes both altar and threshold, holding sorrow without resolving it—only allowing the eye to move from the broken body to the cross, and from grief toward the faint promise above."
     },
     {
       "aic_id": 25244,
@@ -2344,7 +3351,13 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 717
+      "slot": 717,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn",
+        "dramatic"
+      ],
+      "description": "I conceived this ceremonial textile as a field of mirrored dragons, phoenixes, clouds, and flowering forms, worked in dense metallic embroidery so that rank and protection seem to shimmer across the surface. Its central axis gives the ornament a ritual architecture, while the borders and hem repeat protective emblems like a visual invocation; the garment is meant to make the body feel crowned, guarded, and charged with ancestral authority."
     },
     {
       "aic_id": 25256,
@@ -2356,7 +3369,12 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 257
+      "slot": 257,
+      "tags_from_enrichment": [
+        "serene",
+        "contemplative"
+      ],
+      "description": "I wanted the broad marsh to breathe with quiet water, wind, and the passing of birds, letting the small figures and clustered trees feel woven into a larger rhythm of shore and sky. The low horizon opens the scene outward, while the inked reeds, sails, and dark trees give the landscape its structure and pulse."
     },
     {
       "aic_id": 25278,
@@ -2370,7 +3388,13 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 486
+      "slot": 486,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn",
+        "contemplative"
+      ],
+      "description": "I made this figure as a small, corpulent presence with a solemn, almost watchful face, simplified into broad planes and softened contours. The worn surface and traces of paint are part of the work’s character, suggesting age, handling, and a quiet dignity rather than polish. Its compact body and folded posture give it a grounded, protective stillness, as if it has been waiting in one place for a long time."
     },
     {
       "aic_id": 25296,
@@ -2382,7 +3406,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 77
+      "slot": 77,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I wished to hold winter in a breath: snow settling over the slope, the dark limbs of trees, the small travelers passing beneath their umbrellas, and the quiet architecture of the village below. The scene is spare, but alive with movement—the horse, the figures, the falling flakes—so that stillness becomes a kind of listening."
     },
     {
       "aic_id": 25298,
@@ -2395,7 +3425,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 815
+      "slot": 815,
+      "tags_from_enrichment": [
+        "folk art",
+        "serene",
+        "romantic"
+      ],
+      "description": "I made this textile as an ornamental field of flowers, letting the blooms and scrolling leaves move through a quiet, rhythmic structure. The warm ground carries the brighter blossoms and greenery, giving the surface a ceremonial richness without losing its soft, garden-like character."
     },
     {
       "aic_id": 25327,
@@ -2407,7 +3443,15 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 835
+      "slot": 835,
+      "tags_from_enrichment": [
+        "illustrative",
+        "realism",
+        "figurative",
+        "serene",
+        "nostalgic"
+      ],
+      "description": "I composed the Kyoto gate as a place of quiet movement, where evening blue gathers above warm roofs and figures pass through the street with the rhythm of ordinary life. The architecture anchors the scene, while small gestures—a carried load, a gathered group, the bright stall—give the moment its human current. I wanted the familiar gate to feel orderly and lived-in, caught between daily labor and a lingering sense of place."
     },
     {
       "aic_id": 25362,
@@ -2420,7 +3464,13 @@
         "green dominant"
       ],
       "image_width": 843,
-      "slot": 137
+      "slot": 137,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I wanted Mount Fuji to stand as a silent center of gravity, its snowed summit held between sky and water while travelers move along the foreground path. The slope of the hill carries the eye upward, and the red cartouches punctuate the composition like small pulses of human presence within a vast, breathing landscape."
     },
     {
       "aic_id": 25370,
@@ -2433,7 +3483,12 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 579
+      "slot": 579,
+      "tags_from_enrichment": [
+        "folk art",
+        "joyful"
+      ],
+      "description": "I conceived this ceramic plate as a radiance of color and ornament, with the botanical scrollwork blooming outward from the central portrait as if the vessel itself were flowering. The vivid blues, yellows, greens, and warm browns are meant to feel lively and celebratory, while the profile medallion gives the surface an intimate, almost personal presence."
     },
     {
       "aic_id": 25390,
@@ -2445,7 +3500,13 @@
         "muted"
       ],
       "image_width": 843,
-      "slot": 697
+      "slot": 697,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I composed the scene as a quiet movement through cultivated land, where bent figures, a winding path, trees, and temple roofs share one measured rhythm. The open sky and layered fields draw the eye gently inward, balancing labor, shelter, and nature in a calm seasonal hush."
     },
     {
       "aic_id": 25404,
@@ -2458,7 +3519,12 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 457
+      "slot": 457,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene"
+      ],
+      "description": "I shaped this ceramic plate as a small courtly portrait, setting a calm young woman against a deep blue ground so that her pale face, golden hair, and white garment would carry the eye. The scrolling inscription and decorative borders give the piece a heraldic, emblem-like presence, while the restrained expression keeps the figure dignified and composed."
     },
     {
       "aic_id": 25431,
@@ -2471,7 +3537,13 @@
         "blue dominant"
       ],
       "image_width": 843,
-      "slot": 997
+      "slot": 997,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I present Akabane in winter as a quiet passage of snow through the city, where the dark water carries the eye past bridges, tiled roofs, lanterns, and travelers wrapped against the cold. The scene balances the stillness of snow-laden roofs and trees with the small movements of daily life, giving the wintry hour both calm and human warmth."
     },
     {
       "aic_id": 25446,
@@ -2484,7 +3556,12 @@
         "blue dominant"
       ],
       "image_width": 843,
-      "slot": 423
+      "slot": 423,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn"
+      ],
+      "description": "I return to an old devotional grief and place it inside a fragile, gilded enclosure, where the bent angels and the recumbent body become a kind of private liturgy. The gold, umber, and bruised blue carry the feeling of an object worn by handling and memory, while the added strips and studs around the frame make the surface feel assembled like a relic rather than simply decorated. I wanted the scene to remain tender and severe at once: mournful, intimate, and suspended between ritual and present feeling."
     },
     {
       "aic_id": 25466,
@@ -2498,7 +3575,12 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 255
+      "slot": 255,
+      "tags_from_enrichment": [
+        "figurative",
+        "playful"
+      ],
+      "description": "I carved this small wooden group as a study of movement and mischief: a winged child perched above a carved head, one hand lifting the bird so its feathers sweep upward like flame. The dark, burnished surface lets the grain and incised detail carry the warmth of the piece, while the tilted faces keep the whole thing light, almost teasing."
     },
     {
       "aic_id": 25468,
@@ -2510,7 +3592,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 684
+      "slot": 684,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I composed the scene as an evening excursion along the shore of Ueno Pond, where bare trees, passing pedestrians, and distant buildings settle into a quiet rhythm against the water. The flattened perspective and decorative color keep the view intimate and atmospheric, with the warm horizon and deep blue lake giving the season a restrained, contemplative stillness."
     },
     {
       "aic_id": 25501,
@@ -2523,7 +3611,13 @@
         "blue dominant"
       ],
       "image_width": 843,
-      "slot": 258
+      "slot": 258,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I gave the moon a quiet authority over the harbor, letting the blue water open into distance while boats, shore, and the lantern-lit inn hold the eye near the shore. Sails and ripples suggest passage, but the dark tree line and pale sky settle the night into a measured, watchful stillness."
     },
     {
       "aic_id": 25541,
@@ -2535,7 +3629,12 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 569
+      "slot": 569,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene"
+      ],
+      "description": "At Otsu I wanted the traveler’s path to feel both temporary and timeless: temple roofs and trees in the foreground, boats and reeds across the water, and Fuji holding the distant air in quiet authority. The scene moves gently from human passage to vast landscape, so that a brief journey becomes an act of looking."
     },
     {
       "aic_id": 25552,
@@ -2548,7 +3647,13 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 485
+      "slot": 485,
+      "tags_from_enrichment": [
+        "figurative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I have shaped a tender devotional embrace, where the mother’s veil and heavy drapery gather around the child in a quiet rhythm of folds, weight, and gesture. The worn surfaces and softened features give the figures a sense of age and endurance, as though tenderness has been preserved through time as much as through carving."
     },
     {
       "aic_id": 25579,
@@ -2561,7 +3666,13 @@
         "blue dominant"
       ],
       "image_width": 843,
-      "slot": 398
+      "slot": 398,
+      "tags_from_enrichment": [
+        "illustrative",
+        "dramatic",
+        "contemplative"
+      ],
+      "description": "I set the traveler's road against a rain-soaked plain, where the slant of the weather draws the eye toward the clustered roofs and the dark line of the trees. The figures pass through the scene with quiet purpose, their forms simplified by wind and rain, while the broad fields, steep slopes, and patterned rain create a rhythm of movement across the composition. I aimed for a moment of everyday journeying to feel both transient and enduring: weather in motion, human passage, and the hush of a landscape held between storm and stillness."
     },
     {
       "aic_id": 25614,
@@ -2573,7 +3684,14 @@
         "monochrome"
       ],
       "image_width": 843,
-      "slot": 111
+      "slot": 111,
+      "tags_from_enrichment": [
+        "illustrative",
+        "figurative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I set the triptych in a winter air of pale snow and deep blue shadow, letting the travelers’ patterned robes and the lantern’s small warmth answer the white roofs, the bridge, and the dark, laden branches. I wanted the city to feel held in a suspended hush, where movement is measured by the weight of snow and the quiet passage of birds across the cold sky."
     },
     {
       "aic_id": 25653,
@@ -2586,7 +3704,13 @@
         "red dominant"
       ],
       "image_width": 843,
-      "slot": 866
+      "slot": 866,
+      "tags_from_enrichment": [
+        "impressionist",
+        "dramatic",
+        "energetic"
+      ],
+      "description": "I wanted the print to feel like a great journey breathing through the landscape: the river sweeps across the scene with a force that is both beautiful and dangerous, while the travelers and market figures give human scale to the flood. The composition is crowded, but I tried to keep the movement unified, so that the water, the path, and the people all seem caught in one restless current."
     },
     {
       "aic_id": 25710,
@@ -2598,7 +3722,12 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 305
+      "slot": 305,
+      "tags_from_enrichment": [
+        "illustrative",
+        "contemplative"
+      ],
+      "description": "Travelers pass through a hushed rural landscape beneath a pale sky, their small figures set against broad fields and wind-stirred vegetation. The composition balances quiet movement with expansive stillness, using rhythmic trees, diagonal ground, and layered space to evoke the measured pace of the road and the contemplative solitude of the journey."
     },
     {
       "aic_id": 25751,
@@ -2610,7 +3739,13 @@
         "desaturated"
       ],
       "image_width": 843,
-      "slot": 913
+      "slot": 913,
+      "tags_from_enrichment": [
+        "illustrative",
+        "serene",
+        "contemplative"
+      ],
+      "description": "I wanted the sea road to feel alive with air, salt, and motion, carrying the eye from the pale horizon to the dark sails and the restless wave. The boats, the clustered houses, and the rocky shore become a small world of passage, where the traveler’s journey feels both ordinary and vast."
     },
     {
       "aic_id": 25772,
@@ -2623,7 +3758,13 @@
         "blue dominant"
       ],
       "image_width": 843,
-      "slot": 906
+      "slot": 906,
+      "tags_from_enrichment": [
+        "illustrative",
+        "tense",
+        "dramatic"
+      ],
+      "description": "Rain falls in long, driving lines across the bridge, hardening the scene into a rhythm of bent figures, dark trunks, and rushing water. I wanted the journey itself to feel exposed—body and spirit alike—caught between shelter and passage, with Mount Fuji held beyond the weather as a silent presence."
     },
     {
       "aic_id": 25790,
@@ -2637,7 +3778,13 @@
         "vivid"
       ],
       "image_width": 843,
-      "slot": 461
+      "slot": 461,
+      "tags_from_enrichment": [
+        "figurative",
+        "solemn",
+        "dramatic"
+      ],
+      "description": "I have composed this devotional altarpiece as a union of solid architecture and heavenly vision: columns, arches, and the dark central shrine gather the eye, while angels, clouds, and kneeling saints raise the whole into an atmosphere of worship and revelation."
     },
     {
       "aic_id": 25804,

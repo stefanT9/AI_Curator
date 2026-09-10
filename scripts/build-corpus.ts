@@ -16,7 +16,15 @@
  *
  * Run through the npm scripts, never with bare `node`:
  *
- *   npm run db:seed:fetch
+ *   npm run db:seed:fetch            sample and download
+ *   npm run db:seed:enrich           enrich, resuming where the last run stopped
+ *   npm run db:seed:enrich:resume    the same thing, named for what it does
+ *   npm run db:seed:enrich:retry     reopen pieces pinned as failed
+ *
+ * `enrich` resumes by default and is safe to re-run: a piece is done once it
+ * carries a `tags_from_enrichment` field, so a re-run over a finished manifest
+ * makes no model calls at all. `--limit N` bounds one run; `--retry-failed`
+ * reopens pinned failures, which resume alone deliberately never does.
  *
  * which is `tsx --conditions=react-server`. Both halves are load-bearing. `tsx`
  * resolves the extensionless relative imports inside `src/lib/**` that Node ESM
@@ -36,8 +44,11 @@ import {
   writeFile,
 } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import * as z from "zod";
-import { TAXONOMY_BY_FACET, type Facet } from "@/lib/ai/taxonomy";
+import { enrichFromImage, type EnrichmentFailure } from "@/lib/ai";
+import { FACETS, TAXONOMY_BY_FACET, type Facet } from "@/lib/ai/taxonomy";
+import { MAX_TAGS } from "@/lib/artworks/tags";
 
 // ---------------------------------------------------------------------------
 // Source and layout
@@ -369,6 +380,21 @@ export type CorpusPiece = {
   image_width: number;
   /** The deterministic-shuffle rank that becomes the `created_at` offset. */
   slot: number;
+  /**
+   * Style and mood terms from the enrichment stage. Written once and pinned:
+   * its presence — empty array included — is what marks a piece as enriched, so
+   * a re-run makes no model call. A piece that has never been through the
+   * `enrich` stage has this field absent, not empty.
+   */
+  tags_from_enrichment?: string[];
+  /** The model's own description, or null when enrichment failed. */
+  description?: string | null;
+  /**
+   * Why enrichment produced nothing, present only on failure. Pinned alongside
+   * an empty `tags_from_enrichment` so a failure is a recorded outcome rather
+   * than an absence indistinguishable from "not yet run".
+   */
+  enrichment_failed?: EnrichmentFailure;
 };
 
 export type CorpusManifest = {
@@ -608,6 +634,85 @@ export function allocate(available: number[], total: number): number[] {
   return out;
 }
 
+/**
+ * The two facets enrichment is asked for. Museum metadata supplies the other
+ * three, and it supplies them better — `classification_titles` knows the piece
+ * is a lithograph, a model looking at a photograph of one is guessing. So the
+ * model's medium / subject / palette terms are discarded rather than merged.
+ */
+const ENRICHED_FACETS: readonly Facet[] = ["style", "mood"];
+
+/** Which facet a term belongs to, or `null` for a term outside the taxonomy. */
+export function facetOf(term: string): Facet | null {
+  return FACETS.find((facet) => facetTerms(facet).includes(term)) ?? null;
+}
+
+/**
+ * Keep only what the enrich stage asked the model for.
+ *
+ * The prompt asks for tags across all five facets and there is no way to ask
+ * for two, so the filtering happens here. A term outside the taxonomy cannot
+ * occur — `ModelOutputSchema` validates against `ARTWORK_TAGS` — but it is
+ * dropped rather than trusted, because this function is also the boundary a
+ * hand-edited manifest crosses.
+ */
+export function enrichedTags(tags: readonly string[]): string[] {
+  return tags.filter((tag) => {
+    const facet = facetOf(tag);
+    return facet !== null && ENRICHED_FACETS.includes(facet);
+  });
+}
+
+/**
+ * Merge the museum's tags with the model's into the array that reaches the
+ * database, within `artworks_tags_length`.
+ *
+ * Under the ceiling this is a plain deduplicated concatenation. Over it, the
+ * trim is round-robin across the facets rather than a truncation of the
+ * concatenation — and that distinction is the whole point of the function.
+ * Metadata leads the concatenation and is medium/subject/palette-heavy, so a
+ * flat `slice(0, 20)` would drop mood first and completely: it is the facet
+ * with the fewest terms per piece and it sits last. Round-robin costs each
+ * facet its own tail instead, so an over-full piece stays spread across five
+ * facets — which is what makes `.overlaps("tags", terms)` match on more than
+ * one axis. A term outside the taxonomy cannot arrive from this pipeline (both
+ * sources are vocabulary-constrained) but is given a bucket of its own, so a
+ * hand-edited manifest keeps it rather than losing it without a word.
+ */
+export function combineTags(
+  fromMetadata: readonly string[],
+  fromEnrichment: readonly string[],
+  max = MAX_TAGS,
+): string[] {
+  const deduped = Array.from(new Set([...fromMetadata, ...fromEnrichment]));
+  if (deduped.length <= max) return deduped;
+
+  // Facet order follows `FACETS`, with a trailing bucket for anything outside
+  // the taxonomy so it takes a turn rather than silently vanishing.
+  const buckets = new Map<Facet | "other", string[]>();
+  for (const facet of FACETS) buckets.set(facet, []);
+  buckets.set("other", []);
+  for (const tag of deduped) buckets.get(facetOf(tag) ?? "other")!.push(tag);
+
+  const out: string[] = [];
+  const lists = [...buckets.values()];
+  for (let round = 0; out.length < max; round += 1) {
+    let took = 0;
+    for (const list of lists) {
+      if (out.length === max) break;
+      if (round < list.length) {
+        out.push(list[round]);
+        took += 1;
+      }
+    }
+    // Cannot happen while `deduped.length > max`, but a round that takes
+    // nothing would otherwise spin forever.
+    if (took === 0) break;
+  }
+
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Manifest IO
 // ---------------------------------------------------------------------------
@@ -658,6 +763,13 @@ async function writeManifest(manifest: CorpusManifest): Promise<void> {
         tags_from_metadata: piece.tags_from_metadata,
         image_width: piece.image_width,
         slot: piece.slot,
+        // Optional, and reading them back off the same piece is what makes
+        // that safe: an absent field re-assigns `undefined`, which
+        // `JSON.stringify` omits, so it pins the key order of the pieces that
+        // do carry enrichment without inventing keys on the ones that do not.
+        tags_from_enrichment: piece.tags_from_enrichment,
+        description: piece.description,
+        enrichment_failed: piece.enrichment_failed,
       })),
   };
 
@@ -681,6 +793,9 @@ const CorpusPieceSchema = z.looseObject({
   tags_from_metadata: z.array(z.string()),
   image_width: z.number().positive(),
   slot: z.number().int().nonnegative(),
+  tags_from_enrichment: z.array(z.string()).optional(),
+  description: z.string().nullable().optional(),
+  enrichment_failed: z.string().optional(),
 });
 
 const CorpusManifestSchema = z.looseObject({
@@ -1157,16 +1272,334 @@ async function runFetch(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Stage: enrich
+// ---------------------------------------------------------------------------
+
+/**
+ * Parallel model calls.
+ *
+ * The plan said four. Four is measurably too many: OpenRouter caps `:free`
+ * models at roughly 20 requests per minute, and a measured ~10s per call means
+ * four in flight is `60 * 4 / 10` = ~24 requests a minute. A 500-piece run
+ * proved it — clean for ~120 pieces on burst allowance, then 429s, and because
+ * a pinned failure is never retried those pieces would have been permanently
+ * metadata-only. Two in flight is ~12 a minute, under the cap with room for the
+ * fallback chain to spend a second and third request on a struggling piece.
+ *
+ * Halving this halves throughput to ~24 pieces a minute; that is the trade, and
+ * the stage is resumable precisely so a slower run costs nothing but wall-clock.
+ */
+const ENRICH_CONCURRENCY = 2;
+
+/** Progress every N pieces, so a run measured in tens of minutes is not silent. */
+const ENRICH_PROGRESS_EVERY = 25;
+
+type EnrichOutcome = { ok: true } | { ok: false; reason: EnrichmentFailure };
+
+/**
+ * Enrich one piece and write the result onto it in place.
+ *
+ * The image goes in as a `data:` URL rather than its IIIF URL on purpose: an
+ * https source is fetched by the model provider, and the provider hits the same
+ * `403 text/html` block page a bare `curl` does. The bytes are already on disk
+ * from the fetch stage, so they are read and inlined.
+ */
+async function enrichPiece(piece: CorpusPiece): Promise<EnrichOutcome> {
+  const bytes = await readFile(path.join(ASSET_DIR, `${piece.piece_uuid}.jpg`));
+  const result = await enrichFromImage(
+    `data:image/jpeg;base64,${bytes.toString("base64")}`,
+  );
+
+  if (!result.ok) {
+    // Recorded, not thrown. An empty array plus a reason is a pinned outcome:
+    // the piece is skipped by the next run rather than retried forever, and it
+    // reaches Phase 3 as part of the untagged tail rather than as a hole.
+    piece.tags_from_enrichment = [];
+    piece.description = null;
+    piece.enrichment_failed = result.reason;
+    return { ok: false, reason: result.reason };
+  }
+
+  piece.tags_from_enrichment = enrichedTags(result.data.tags);
+  piece.description = result.data.description;
+  delete piece.enrichment_failed;
+  return { ok: true };
+}
+
+/**
+ * `--limit N` / `--limit=N`, bounding how many pieces this run enriches.
+ *
+ * It exists so the full run can be sized by trial rather than by estimate:
+ * enrich 25, measure latency and tag quality, then decide the real number. It
+ * composes with resume — a limited run pins what it produced, and the next run
+ * picks up from there.
+ */
+export function parseLimit(argv: readonly string[]): number | null {
+  const index = argv.findIndex(
+    (arg) => arg === "--limit" || arg.startsWith("--limit="),
+  );
+  if (index === -1) return null;
+
+  const raw = argv[index].startsWith("--limit=")
+    ? argv[index].slice("--limit=".length)
+    : argv[index + 1];
+
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(
+      `--limit needs a positive whole number, got "${raw ?? ""}".`,
+    );
+  }
+  return value;
+}
+
+/**
+ * Which pieces this run should call the model for, in the order it should do it.
+ *
+ * Resume is the default and needs no flag: a piece is done once it carries a
+ * `tags_from_enrichment` field, so a plain re-run picks up exactly where the
+ * last one stopped and makes zero calls for anything already pinned.
+ *
+ * `--retry-failed` is the opt-in that reopens pinned failures. It has to be
+ * opt-in: a pinned failure counts as done, which is what lets a re-run over a
+ * finished manifest be a true no-op, and quietly retrying would spend model
+ * calls every time anyone re-ran the stage. Retries lead the queue so
+ * `--retry-failed --limit N` is a way to clear the failures and nothing else.
+ */
+export function selectPending(
+  pieces: readonly CorpusPiece[],
+  options: { retryFailed?: boolean; limit?: number | null } = {},
+): CorpusPiece[] {
+  const retries = options.retryFailed
+    ? pieces.filter((piece) => piece.enrichment_failed !== undefined)
+    : [];
+  const fresh = pieces.filter(
+    (piece) => piece.tags_from_enrichment === undefined,
+  );
+
+  const queue = [...retries, ...fresh];
+  const limit = options.limit ?? null;
+  return limit === null ? queue : queue.slice(0, limit);
+}
+
+/**
+ * Assert the invariants the enriched manifest is supposed to hold, over the
+ * whole file rather than over this run's slice.
+ *
+ * `enrichedTags` and `combineTags` already guarantee both by construction, so
+ * this can only fire on a hand-edited manifest, a taxonomy term that has since
+ * been renamed, or a regression in either function. That is the point: the
+ * manifest is the durable artifact and is meant to be reviewed and occasionally
+ * edited by hand, and the next stage to read it writes SQL against a table with
+ * a `CHECK` constraint. Failing here is cheaper than failing in `db reset`.
+ */
+function verifyEnrichment(manifest: CorpusManifest): void {
+  const problems: string[] = [];
+
+  for (const piece of manifest.pieces) {
+    if (piece.tags_from_enrichment === undefined) continue;
+
+    for (const tag of piece.tags_from_enrichment) {
+      const facet = facetOf(tag);
+      if (facet !== "style" && facet !== "mood") {
+        problems.push(
+          `aic ${piece.aic_id}: "${tag}" is ${facet ?? "outside the taxonomy"}, not style or mood`,
+        );
+      }
+    }
+
+    const combined = combineTags(
+      piece.tags_from_metadata,
+      piece.tags_from_enrichment,
+    );
+    if (combined.length > MAX_TAGS) {
+      problems.push(
+        `aic ${piece.aic_id}: ${combined.length} combined tags exceeds the ${MAX_TAGS} ceiling`,
+      );
+    }
+  }
+
+  if (problems.length > 0) {
+    throw new Error(
+      `Manifest invariants violated:\n  ${problems.join("\n  ")}`,
+    );
+  }
+}
+
+async function runEnrich(): Promise<void> {
+  // Up front, not per piece: without the key `enrichFromImage` returns
+  // `unconfigured` for every call, and the run would pin a thousand failures
+  // in seconds and look like it had done its job.
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error(
+      "OPENROUTER_API_KEY is not set. The enrich stage needs it — put it in .env.local, which `npm run db:seed:enrich` loads.",
+    );
+  }
+
+  const manifest = await readManifest();
+  if (!manifest) {
+    throw new Error(
+      `No manifest at ${path.relative(REPO_ROOT, MANIFEST_PATH)} — run \`npm run db:seed:fetch\` first.`,
+    );
+  }
+
+  // Up front too, not just at the end: this validates what is already pinned,
+  // so a hand-edited manifest is caught on a no-op re-run rather than silently
+  // carried into the generate stage.
+  verifyEnrichment(manifest);
+
+  const args = process.argv.slice(3);
+  const limit = parseLimit(args);
+  const retryFailed = args.includes("--retry-failed");
+
+  const fresh = manifest.pieces.filter(
+    (piece) => piece.tags_from_enrichment === undefined,
+  ).length;
+  const pinnedFailures = manifest.pieces.filter(
+    (piece) => piece.enrichment_failed !== undefined,
+  ).length;
+  const todo = selectPending(manifest.pieces, { retryFailed, limit });
+
+  console.log(
+    `${manifest.pieces.length} pieces in the manifest; ${fresh} never enriched, ${pinnedFailures} pinned as failed` +
+      `${retryFailed ? " (retrying)" : " (use --retry-failed to reopen)"}; ` +
+      `enriching ${todo.length}${limit === null ? "" : ` (--limit ${limit})`}.`,
+  );
+
+  if (todo.length === 0) {
+    console.log("Nothing to do.");
+    return;
+  }
+
+  const started = Date.now();
+  const failures = new Map<EnrichmentFailure, number>();
+  let done = 0;
+  let missingImage = 0;
+
+  // Batched rather than a free-running pool so the manifest can be flushed
+  // between batches. A run measured in tens of minutes must survive Ctrl-C
+  // with everything finished so far already pinned — at most one batch of
+  // model work is ever lost.
+  for (let i = 0; i < todo.length; i += ENRICH_CONCURRENCY) {
+    const batch = todo.slice(i, i + ENRICH_CONCURRENCY);
+
+    await Promise.all(
+      batch.map(async (piece) => {
+        try {
+          const outcome = await enrichPiece(piece);
+          if (!outcome.ok) {
+            failures.set(
+              outcome.reason,
+              (failures.get(outcome.reason) ?? 0) + 1,
+            );
+          }
+        } catch (error) {
+          // A missing or unreadable JPEG is a fetch-stage problem, not a model
+          // one. Left unpinned so `db:seed:fetch` can repair it and a later
+          // enrich run picks the piece up.
+          missingImage += 1;
+          console.warn(
+            `  aic ${piece.aic_id}: image unreadable, left unenriched — ${
+              error instanceof Error ? error.message : error
+            }`,
+          );
+        }
+        done += 1;
+      }),
+    );
+
+    await writeManifest(manifest);
+
+    if (done % ENRICH_PROGRESS_EVERY < ENRICH_CONCURRENCY) {
+      const elapsed = (Date.now() - started) / 1000;
+      console.log(
+        `  ${done}/${todo.length} — ${elapsed.toFixed(0)}s elapsed, ` +
+          `${(elapsed / done).toFixed(1)}s per piece`,
+      );
+    }
+  }
+
+  verifyEnrichment(manifest);
+
+  const elapsed = (Date.now() - started) / 1000;
+  const enriched = todo.filter(
+    (piece) => piece.tags_from_enrichment !== undefined,
+  );
+  const succeeded = enriched.filter(
+    (piece) => piece.enrichment_failed === undefined,
+  );
+  const failed = enriched.length - succeeded.length;
+
+  console.log(
+    `\nEnriched ${enriched.length} piece(s) in ${elapsed.toFixed(0)}s ` +
+      `(${(elapsed / Math.max(1, enriched.length)).toFixed(1)}s per piece): ` +
+      `${succeeded.length} tagged, ${failed} failed.`,
+  );
+
+  if (failures.size > 0) {
+    console.warn("Failure reasons:");
+    for (const [reason, count] of [...failures].sort((a, b) => b[1] - a[1])) {
+      console.warn(`  ${reason.padEnd(17)} ${count}`);
+    }
+  }
+  if (missingImage > 0) {
+    console.warn(
+      `${missingImage} piece(s) had no readable image; run \`npm run db:seed:fetch\` to repair, then re-run.`,
+    );
+  }
+
+  const tagTotal = succeeded.reduce(
+    (n, p) => n + (p.tags_from_enrichment?.length ?? 0),
+    0,
+  );
+  if (succeeded.length > 0) {
+    console.log(
+      `Style/mood tags: ${tagTotal} total, ${(tagTotal / succeeded.length).toFixed(1)} per tagged piece.`,
+    );
+  }
+
+  // The closing state of the whole manifest, not of this run, so an operator
+  // coming back to a half-finished corpus days later is told what to type.
+  const remaining = manifest.pieces.filter(
+    (piece) => piece.tags_from_enrichment === undefined,
+  ).length;
+  const stillFailed = manifest.pieces.filter(
+    (piece) => piece.enrichment_failed !== undefined,
+  ).length;
+
+  if (remaining > 0) {
+    console.log(
+      `${remaining} piece(s) still unenriched — \`npm run db:seed:enrich:resume\` continues; pinned pieces are never re-called.`,
+    );
+  }
+  if (stillFailed > 0) {
+    console.log(
+      `${stillFailed} piece(s) pinned as failed — \`npm run db:seed:enrich:retry\` reopens them.`,
+    );
+  }
+
+  // Exit non-zero only when nothing at all worked. A minority of failures is
+  // an expected free-tier outcome and becomes part of the untagged tail; a
+  // total failure means the model roster has churned and `MODELS` in
+  // `src/lib/ai/enrich.ts` needs re-checking before the run is repeated.
+  if (enriched.length > 0 && succeeded.length === 0) {
+    throw new Error(
+      "Every piece failed enrichment — re-check the free model roster in src/lib/ai/enrich.ts before re-running.",
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Dispatcher
 // ---------------------------------------------------------------------------
 
 const STAGES: Record<string, () => Promise<void>> = {
   fetch: runFetch,
+  enrich: runEnrich,
 };
 
 /** Stages the npm scripts expose that later phases of this change still owe. */
 const PLANNED_STAGES: Record<string, string> = {
-  enrich: "phase 2",
   coverage: "phase 3",
   generate: "phase 4",
 };
@@ -1191,7 +1624,19 @@ async function main(): Promise<void> {
   );
 }
 
-main().catch((error: unknown) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exitCode = 1;
-});
+/**
+ * Only when run as the script, never on import.
+ *
+ * `test/build-corpus.test.ts` imports the pure helpers from this file. Without
+ * the guard that import would run `main()`, which sees vitest's argv, fails on
+ * an unknown stage and sets a non-zero exit code on a passing suite.
+ */
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  main().catch((error: unknown) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exitCode = 1;
+  });
+}
