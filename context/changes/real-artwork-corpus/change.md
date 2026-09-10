@@ -31,3 +31,9 @@ regardless of what this corpus contains — so the picker, not the seed data, is
 deletes the placeholder PNGs that `seed.sql` still references 54 times; only Phase 4's `generate`
 stage rewrites those rows. The branch is intentionally non-functional for local dev in between.
 See the plan's "Known Intermediate State" section.
+
+**2026-09-10, before Phase 2 — trial first.** Enrich 25 pieces, measure per-piece latency,
+failure rate and tag quality, then choose the full number. Requires a `--limit` option on the
+enrich stage. OpenRouter account measured: credits present (not free-tier), so the cap is 1000
+free-model requests/day; `:free` models cost nothing. `enrichFromImage` can spend up to 3
+requests per piece via its fallback chain.

@@ -326,6 +326,28 @@ proceeding to the next phase.
 
 ## Phase 2: Enrichment top-up
 
+> **Amended 2026-09-10, before Phase 2 starts.** Two things changed since this phase was
+> written.
+>
+> **Size is no longer forced.** The data-driven picker (see the Phase 3 amendment) means
+> enrichment no longer has to reach 20/20 style coverage, so the number of pieces to enrich is a
+> free choice rather than a target. **Decision: run a 25-piece trial first, measure, then choose
+> the full number with evidence.** The trial measures the four things worth knowing before
+> committing an hour — per-piece wall-clock, failure rate, whether the tags are defensible, and
+> which style terms real CC0 art actually produces. It also discharges manual step 2.12, which
+> asks for exactly that latency measurement.
+>
+> **This requires a `--limit` (or equivalent) option on the `enrich` stage**, which the original
+> contract below does not mention. Add it: without one there is no way to run a trial.
+>
+> **Measured account facts (2026-09-10), so nobody re-derives them:** `OPENROUTER_API_KEY` is
+> present in `.env.local`; the account is **not** free-tier (credits present, $10 limit, $0
+> used), so the cap is **1000 free-model requests per day**. The `:free` models cost nothing —
+> the credit balance only unlocks the higher daily tier. Note that `enrichFromImage` falls back
+> across up to three models, so a failure-heavy run makes **more than one request per piece** and
+> 1000 pieces can exceed the daily cap. That is survivable precisely because the stage is
+> resumable, which is why resumability is non-negotiable here.
+
 ### Overview
 
 Fill the two facets museum metadata cannot supply — style and mood — by running each downloaded
@@ -341,8 +363,8 @@ image through the real enrichment pipeline, and pin the results.
 path production uses, and make the run survivable across tens of minutes and a flaky free tier.
 
 **Contract**: An `enrich` stage that imports `enrichFromImage` from `@/lib/ai` — the only module
-permitted to talk to a model — and for each piece lacking `tags_from_enrichment` reads its
-downloaded JPEG, encodes it as a `data:image/jpeg;base64,…` URL, and calls the function. From the
+permitted to talk to a model — and for each piece lacking `tags_from_enrichment`, **up to an
+optional `--limit N` (default: all)**, reads its downloaded JPEG, encodes it as a `data:image/jpeg;base64,…` URL, and calls the function. From the
 returned `Enrichment` it keeps the style and mood terms and the description, discarding generated
 medium / subject / palette terms in favour of the museum's own. Results are written into the
 manifest incrementally, so an interrupted run resumes. Concurrency is bounded at 4. A piece
