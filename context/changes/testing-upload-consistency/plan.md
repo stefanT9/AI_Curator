@@ -345,13 +345,13 @@ The `check` constraint is the only schema change and it lands `not valid` delibe
 
 #### Automated
 
-- [x] 2.1 `npm run test:integration` passes with the storage-boundary file
-- [x] 2.2 `lint` and `typecheck` pass
+- [x] 2.1 `npm run test:integration` passes with the storage-boundary file — de36745
+- [x] 2.2 `lint` and `typecheck` pass — de36745
 
 #### Manual
 
-- [ ] 2.3 Recorded `.exists()` behavior reviewed; keep-or-replace decision noted
-- [ ] 2.4 Decide whether a `select` policy on `storage.objects` belongs to rollout Phase 3
+- [x] 2.3 Recorded `.exists()` behavior reviewed; keep-or-replace decision noted — de36745
+- [x] 2.4 Decide whether a `select` policy on `storage.objects` belongs to rollout Phase 3 — de36745
 
 ### Phase 3: Prove Risk #1 (red)
 
