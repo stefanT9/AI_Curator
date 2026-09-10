@@ -14,13 +14,19 @@ after S-01 ships and compare.
 
 Cluster cheat-sheet (identify a card by its image and title, not its tags):
 
-| Cluster          | Image  | Title style                          |
-| ---------------- | ------ | ------------------------------------ |
-| Blue abstraction | a1.png | "Cobalt Grid", "Azure Partition", …  |
-| Warm portraiture | a2.png | "Ochre Portrait…", "Sitter in Amber" |
-| Muted landscape  | a3.png | "Grey Estuary Morning", "Fog Over…"  |
-| Neon street      | a4.png | "Rain on Sixth Avenue", "Arcade…"    |
-| Untagged         | a0.png | "Untitled Study I–VI"                |
+| Cluster          | Code | Image  | Title style                               |
+| ---------------- | ---- | ------ | ----------------------------------------- |
+| Blue abstraction | 1    | a1.png | "[1] Cobalt Grid", "[1] Azure Partition"  |
+| Warm portraiture | 2    | a2.png | "[2] Ochre Portrait…", "[2] Sitter in…"   |
+| Muted landscape  | 3    | a3.png | "[3] Grey Estuary Morning", "[3] Fog…"    |
+| Neon street      | 4    | a4.png | "[4] Rain on Sixth Avenue", "[4] Arcade…" |
+| Untagged         | U    | a0.png | "[U] Untitled Study I–VI"                 |
+
+> **Amended 2026-09-10 by `personalized-deck-ranking` (S-01).** `seed.sql` titles
+> originally carried no prefix, which made a walk a matter of telling four
+> near-identical placeholder images apart. Each title now leads with its cluster
+> code, so a card states its own code and the walk is a transcription rather than
+> a judgment call. Recording is unaffected — the codes are the same.
 
 ## Walk A — warm collector
 
@@ -49,9 +55,25 @@ clusters as a partial match. Liked pieces never reappear (FR-006).
 
 1. Open `/discover`. Record the first 20 clusters the same way.
 
-**Pre- and post-S-01 expectation:** identical. With no likes there is nothing to
-match on, so the cold-start deck should stay newest-first and **not change**
-between the two runs. If S-01 alters this deck, that is a cold-start regression.
+**Pre-S-01 expectation:** identical to Walk A. With no likes there is nothing to
+match on, so the cold-start deck stays newest-first.
+
+> **Amended 2026-09-10 by `personalized-deck-ranking` (S-01).** This expectation
+> originally read "identical pre- and post-S-01 … if S-01 alters this deck, that is
+> a cold-start regression." S-01 demotes untagged artworks below every tagged piece
+> by design, which changes the cold-start deck, so the original expectation would
+> read correct behavior as a regression.
+>
+> **Post-S-01 expectation:** tagged pieces **newest-first**, with the **untagged
+> tail** below all of them. A collector with no likes scores zero against every
+> piece, so the tag-overlap key ties everywhere and `created_at desc` remains the
+> effective ordering _within_ the tagged tier. Untagged pieces no longer appear
+> mid-deck (baseline slots 7, 13, 16) — that is the intended change, not a
+> regression. A cold-start regression is now: tagged pieces out of `created_at`
+> order, or an untagged piece appearing above a tagged one.
+>
+> The recorded baseline measurements below are untouched — only this
+> forward-looking expectation changed.
 
 ## Recorded baseline (pre-S-01)
 

@@ -392,27 +392,27 @@ again (demoted), and untagged artworks move to the bottom of every deck.
 
 #### Automated
 
-- [x] 2.1 Integration lane passes: `npm run test:integration`
-- [x] 2.2 Default gate still passes: test, lint, typecheck, format:check
-- [x] 2.3 Spec observed failing when the skip-tier expression is made non-null-safe
+- [x] 2.1 Integration lane passes: `npm run test:integration` — fd9f9d9
+- [x] 2.2 Default gate still passes: test, lint, typecheck, format:check — fd9f9d9
+- [x] 2.3 Spec observed failing when the skip-tier expression is made non-null-safe — fd9f9d9
 
 #### Manual
 
-- [x] 2.4 Local stack running and `.env.test.local` points at loopback
-- [x] 2.5 Failure output names the broken ordering rule
+- [x] 2.4 Local stack running and `.env.test.local` points at loopback — fd9f9d9
+- [x] 2.5 Failure output names the broken ordering rule — fd9f9d9
 
 ### Phase 3: Judgment walk and decision record
 
 #### Automated
 
-- [ ] 3.1 Formatting passes: `npm run format:check`
-- [ ] 3.2 Full gate passes: lint, typecheck, test, build
+- [x] 3.1 Formatting passes: `npm run format:check`
+- [x] 3.2 Full gate passes: lint, typecheck, test, build
 
 #### Manual
 
-- [ ] 3.3 Walk A shows Blue abstraction concentrated at the front
-- [ ] 3.4 The four unliked Blue-abstraction pieces lead the warm deck
-- [ ] 3.5 `oil`-sharing pieces rank above unrelated clusters
-- [ ] 3.6 No previously-liked piece appears in either walk
-- [ ] 3.7 Walk B matches the amended expectation
-- [ ] 3.8 Roadmap no longer lists Open Question 4 as blocking S-03
+- [x] 3.3 Walk A shows Blue abstraction concentrated at the front
+- [x] 3.4 The four unliked Blue-abstraction pieces lead the warm deck
+- [x] 3.5 `oil`-sharing pieces rank above unrelated clusters
+- [x] 3.6 No previously-liked piece appears in either walk
+- [x] 3.7 Walk B matches the amended expectation
+- [x] 3.8 Roadmap no longer lists Open Question 4 as blocking S-03
