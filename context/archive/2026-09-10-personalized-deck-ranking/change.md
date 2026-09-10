@@ -1,10 +1,10 @@
 ---
 change_id: personalized-deck-ranking
 title: Deck ordered by tag-match to the collector's own likes
-status: implemented
+status: archived
 created: 2026-09-10
 updated: 2026-09-10
-archived_at: null
+archived_at: 2026-09-10T15:42:17Z
 ---
 
 ## Notes

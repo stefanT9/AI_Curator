@@ -167,3 +167,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Done
 
 - **F-01: (foundation) a seeded set of tagged artworks and a collector like-history exists in the development environment, so a tag-match ordering can be exercised and judged rather than guessed at.** — Archived 2026-09-10 → `context/archive/2026-09-10-ranking-eval-corpus/`. Lesson: —.
+- **S-01: A collector who has liked several pieces is served their next cards ordered by how well each piece's tags match the tags on the pieces they liked, instead of newest-first — and pieces they previously passed on return below all fresh matches, rather than being gone for good.** — Archived 2026-09-10 → `context/archive/2026-09-10-personalized-deck-ranking/`. Lesson: —.
