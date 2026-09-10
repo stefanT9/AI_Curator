@@ -76,6 +76,14 @@ A pure `src/lib/ai/` module owns the taxonomy, the response schema, and the Open
 
 Raise the tag ceiling from 10 to 20 across all three places that state it, then build a self-contained `src/lib/ai/` module that turns image bytes into a validated `{ description, tags }` object, or fails cleanly. The service has no knowledge of forms, actions, or Supabase.
 
+**Revised during implementation.** Three details below were superseded by what live measurement and the installed SDK actually required. The contracts stand; these specifics do not:
+
+- **Timeout is 25s, not 12s.** Roughly one call in three still timed out at 12s even with the chain reordered and the SDK's own retries disabled, because free-tier latency is highly variable. A timeout is non-blocking by design, so a longer ceiling costs a slower worst case, never a blocked publish. See the comment at `src/lib/ai/enrich.ts` and PRD Open Question 3.
+- **`MODELS` order is `mini, dots, pro`, not `pro, mini, dots`.** Ordered by measured latency rather than catalogue position — `pro` is the strongest model but alone ate most of the budget.
+- **`generateText` + `Output.object`, not `generateObject`.** The AI SDK v7 equivalent for structured output on this provider.
+
+Also correcting an internal contradiction: §8's test case says "schema rejects 11 tags" while §5 caps generated tags at 12. §5 is correct. The shipped test asserts rejection at `MAX_GENERATED_TAGS + 1` rather than a literal, so it follows the cap wherever it moves.
+
 The ceiling rises first because everything downstream — the response schema's tag count, the publish-time merge cap — is sized against it.
 
 ### Changes Required
@@ -132,11 +140,11 @@ The 12-tag cap is deliberately below the new 20-tag storage ceiling: it leaves r
 
 **File**: `src/lib/ai/enrich.ts`
 
-**Intent**: Issue one structured-output call against OpenRouter with an image and a prompt, walking a fallback chain of free models and abandoning the attempt at 12 seconds.
+**Intent**: Issue one structured-output call against OpenRouter with an image and a prompt, walking a fallback chain of free models and abandoning the attempt at 12 seconds. _(Superseded: 25 seconds — see the revision note above.)_
 
 **Contract**: `enrichFromImage(dataUrl: string): Promise<EnrichmentResult>` where the result discriminates success from a typed failure (`"unconfigured" | "timeout" | "rate_limited" | "unavailable" | "invalid_response"`). Returning a typed failure rather than throwing is what lets callers decide whether to surface or swallow it.
 
-Behaviour: return `unconfigured` immediately when `OPENROUTER_API_KEY` is absent, so an unconfigured environment costs nothing. Try each model in `MODELS` in order; advance to the next on a 429 or an unavailability error; do not advance on a schema-validation failure, which indicates a prompt problem rather than a model problem. Apply a single 12-second budget across the whole chain via `AbortSignal.timeout`, not per attempt — a per-attempt timeout would let a three-model chain run for 36 seconds and break the guardrail.
+Behaviour: return `unconfigured` immediately when `OPENROUTER_API_KEY` is absent, so an unconfigured environment costs nothing. Try each model in `MODELS` in order; advance to the next on a 429 or an unavailability error; do not advance on a schema-validation failure, which indicates a prompt problem rather than a model problem. Apply a single budget across the whole chain via `AbortSignal.timeout`, not per attempt — a per-attempt timeout would let a three-model chain run for three times as long and break the guardrail. _(Planned at 12 seconds, shipped at 25 — see the revision note above.)_
 
 `MODELS` is an ordered constant, verified against the live catalogue on 2026-09-09:
 `["nex-agi/nex-n2.5-pro:free", "nex-agi/nex-n2.5-mini:free", "dots-studio/dots-3-note-preview:free"]`
@@ -159,7 +167,7 @@ The prompt must instruct the model to describe the artwork in the artist's regis
 
 **Intent**: Cover the logic most likely to break — malformed model output and the failure ladder — with the AI SDK mocked.
 
-**Contract**: Mock `ai`'s `generateObject` via `vi.hoisted` (module-level consts are not visible inside hoisted `vi.mock` factories — see AGENTS.md). Cases: taxonomy terms all within 30 characters and unique; schema rejects an off-taxonomy tag; schema rejects 11 tags; `unconfigured` returned with no key set and `generateObject` never called; a 429 on the first model advances to the second; a schema failure does not advance; a timeout maps to the `timeout` failure.
+**Contract**: Mock `ai`'s `generateObject` via `vi.hoisted` (module-level consts are not visible inside hoisted `vi.mock` factories — see AGENTS.md). Cases: taxonomy terms all within 30 characters and unique; schema rejects an off-taxonomy tag; schema rejects a tag count above the cap of 12; `unconfigured` returned with no key set and `generateObject` never called; a 429 on the first model advances to the second; a schema failure does not advance; a timeout maps to the `timeout` failure.
 
 ### Success Criteria
 
@@ -433,7 +441,7 @@ Do not add a top-up to `updateArtwork`: editing has no image in hand, and the PR
 
 **Intent**: Close the open questions this planning session answered and correct the stale storage claim.
 
-**Contract**: Resolve Open Question 1 (controlled vocabulary for generated tags), 2 (N = 5), 3 (12-second budget), and 5 (an explicit control click authorises replacement, with Undo). Record Open Question 4 as accepted risk: the OpenRouter free tier carries no data-retention or no-training guarantee, which was knowingly traded for zero cost — note that Vercel AI Gateway offers `zdr=all` / `no_training=all` models from about $0.03 per million input tokens should that become a requirement. Correct the Scope of Change note that says this change "does add a persisted tag list on the artwork record": the column already existed.
+**Contract**: Resolve Open Question 1 (controlled vocabulary for generated tags), 2 (N = 5), 3 (25-second budget — see Phase 1's revision note), and 5 (moot under the shipped design — a suggestion fills a field only when empty, so nothing is ever displaced; see Phase 3's revision note). Record Open Question 4 as accepted risk: the OpenRouter free tier carries no data-retention or no-training guarantee, which was knowingly traded for zero cost — note that Vercel AI Gateway offers `zdr=all` / `no_training=all` models from about $0.03 per million input tokens should that become a requirement. Correct the Scope of Change note that says this change "does add a persisted tag list on the artwork record": the column already existed.
 
 ### Success Criteria
 
@@ -483,7 +491,7 @@ Not applicable — the project has no integration test layer, and AGENTS.md scop
 
 ## Performance Considerations
 
-Client downscaling to a 768px JPEG is the main lever: it cuts a 10 MB upload to roughly 100 KB, which dominates both latency and image-token cost. The 12-second budget spans the entire fallback chain rather than each attempt, bounding worst-case wait.
+Client downscaling to a 768px JPEG is the main lever: it cuts a 10 MB upload to roughly 100 KB, which dominates both latency and image-token cost. The budget spans the entire fallback chain rather than each attempt, bounding worst-case wait. _(25 seconds as shipped — see Phase 1's revision note.)_
 
 Publish latency is unaffected in the common cases: a well-tagged piece makes no call, and an under-tagged piece whose artist already ran a suggestion reuses that result. Only an under-tagged piece with no prior suggestion pays a model call before insert — the one path where publish is measurably slower, and the reason the top-up is capped at a single attempt.
 
