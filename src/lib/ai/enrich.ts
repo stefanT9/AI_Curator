@@ -85,9 +85,26 @@ ${taxonomyForPrompt()}
 
 Spread the tags across the facets rather than picking several near-synonyms from one. Prefer what is clearly true of the piece over what is merely plausible.`;
 
-/** `data:image/jpeg;base64,...` → `image/jpeg`. */
-const mediaTypeOf = (dataUrl: string) =>
-  dataUrl.match(/^data:([^;,]+)[;,]/)?.[1] ?? "image/jpeg";
+const EXTENSION_MEDIA_TYPES: Record<string, string> = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+};
+
+/**
+ * Works for both accepted inputs: `data:image/jpeg;base64,...` carries its own
+ * type, while an `https://…/piece.png` is typed from its extension. Getting
+ * this wrong is not cosmetic — a PNG announced as JPEG is rejected by some
+ * providers outright.
+ */
+const mediaTypeOf = (source: string) => {
+  const fromDataUrl = source.match(/^data:([^;,]+)[;,]/)?.[1];
+  if (fromDataUrl) return fromDataUrl;
+
+  const extension = source.split("?")[0].split(".").pop()?.toLowerCase();
+  return (extension && EXTENSION_MEDIA_TYPES[extension]) || "image/jpeg";
+};
 
 /**
  * Map a thrown error onto a failure reason. Schema failures are the model
@@ -119,8 +136,13 @@ const classify = (error: unknown): EnrichmentFailure => {
 const isTerminal = (reason: EnrichmentFailure) =>
   reason === "timeout" || reason === "invalid_response";
 
+/**
+ * @param source a `data:image/...;base64,...` URL, or an https URL the model
+ * provider can fetch. The upload form sends a downscaled data URL; the
+ * publish-time top-up sends the public Storage URL of the uploaded piece.
+ */
 export async function enrichFromImage(
-  dataUrl: string,
+  source: string,
 ): Promise<EnrichmentResult> {
   // Read lazily, never at module scope: `next build` imports this file and CI
   // has no key. An unset key must degrade at call time, not break the build.
@@ -146,8 +168,8 @@ export async function enrichFromImage(
               { type: "text", text: PROMPT },
               {
                 type: "file",
-                data: dataUrl,
-                mediaType: mediaTypeOf(dataUrl),
+                data: source,
+                mediaType: mediaTypeOf(source),
               },
             ],
           },

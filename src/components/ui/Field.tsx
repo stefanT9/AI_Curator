@@ -15,6 +15,20 @@ type FieldProps = {
   hint?: string;
   /** Input-only; the file field uses it to drive a local preview. */
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  /**
+   * Renders the field controlled, so a parent can fill it programmatically.
+   * When supplied, `defaultValue` is ignored and `onValueChange` is required to
+   * keep the field editable. Omit both and the field behaves exactly as before.
+   *
+   * Decide once per call site and hold it: a `value` that starts `undefined`
+   * and later becomes a string flips the field from uncontrolled to
+   * controlled, which React warns about and which discards the value on the
+   * switch. Seed the parent's state with `""` rather than `undefined`.
+   */
+  value?: string;
+  onValueChange?: (value: string) => void;
+  /** Rendered next to the label — progress or status for this field alone. */
+  action?: React.ReactNode;
 };
 
 export function Field({
@@ -30,30 +44,52 @@ export function Field({
   accept,
   hint,
   onChange,
+  value,
+  onValueChange,
+  action,
 }: FieldProps) {
   const errorId = `${name}-error`;
   const hintId = `${name}-hint`;
 
-  // A field can be described by its hint, its errors, or both.
+  // A field can be described by its hint, its errors, or both. `errors?.length`
+  // rather than `errors` — an empty array is truthy, which would point
+  // aria-describedby at an element that never renders.
+  const hasErrors = Boolean(errors?.length);
+
   const describedBy =
-    [hint ? hintId : null, errors ? errorId : null].filter(Boolean).join(" ") ||
-    undefined;
+    [hint ? hintId : null, hasErrors ? errorId : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
+
+  // Controlled and uncontrolled are mutually exclusive in React: passing both
+  // `value` and `defaultValue` warns and the field stops accepting input.
+  const controlled = value !== undefined;
 
   const shared = {
     id: name,
     name,
     placeholder,
-    defaultValue,
-    "aria-invalid": errors ? (true as const) : undefined,
+    ...(controlled
+      ? {
+          value,
+          onChange: (
+            event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+          ) => onValueChange?.(event.target.value),
+        }
+      : { defaultValue }),
+    "aria-invalid": hasErrors ? (true as const) : undefined,
     "aria-describedby": describedBy,
     className: fieldClass,
   };
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={name} className="text-sm font-medium">
-        {label}
-      </label>
+      <div className="flex items-baseline justify-between gap-3">
+        <label htmlFor={name} className="text-sm font-medium">
+          {label}
+        </label>
+        {action}
+      </div>
       {hint ? (
         <p id={hintId} className="text-xs opacity-60">
           {hint}
@@ -67,18 +103,25 @@ export function Field({
           type={type}
           autoComplete={autoComplete}
           accept={accept}
-          onChange={onChange}
+          // Spreading `onChange` here unconditionally would clobber the
+          // controlled handler in `shared` and freeze the field.
+          {...(controlled ? {} : { onChange })}
         />
       )}
-      {errors?.map((error) => (
-        <p
-          key={error}
-          id={errorId}
-          className="text-xs text-red-600 dark:text-red-400"
-        >
-          {error}
-        </p>
-      ))}
+      {/*
+        One wrapper carries the id, not each message. Repeating the id per
+        message produced duplicate DOM ids, and aria-describedby resolves to
+        the first match only — so a second error was never announced.
+      */}
+      {hasErrors ? (
+        <div id={errorId} className="flex flex-col gap-1.5">
+          {errors?.map((error) => (
+            <p key={error} className="text-xs text-red-600 dark:text-red-400">
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

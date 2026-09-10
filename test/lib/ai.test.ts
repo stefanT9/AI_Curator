@@ -201,4 +201,31 @@ describe("enrichFromImage", () => {
       mediaType: "image/png",
     });
   });
+
+  // The publish-time top-up passes a public Storage URL rather than bytes.
+  // Mislabelling a PNG as JPEG is rejected outright by some providers, so the
+  // extension branch is worth pinning.
+  it.each([
+    ["png", "image/png"],
+    ["jpg", "image/jpeg"],
+    ["webp", "image/webp"],
+  ])("derives the media type from a .%s public URL", async (ext, expected) => {
+    generateText.mockResolvedValue({ output: validOutput });
+
+    await enrichFromImage(
+      `https://ref.supabase.co/storage/v1/object/public/artworks/a/b.${ext}`,
+    );
+
+    const filePart = generateText.mock.calls[0][0].messages[0].content[1];
+    expect(filePart).toMatchObject({ type: "file", mediaType: expected });
+  });
+
+  it("falls back to jpeg for a URL with an unrecognised extension", async () => {
+    generateText.mockResolvedValue({ output: validOutput });
+
+    await enrichFromImage("https://ref.supabase.co/storage/v1/object/x.tiff");
+
+    const filePart = generateText.mock.calls[0][0].messages[0].content[1];
+    expect(filePart).toMatchObject({ mediaType: "image/jpeg" });
+  });
 });

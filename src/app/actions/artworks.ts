@@ -1,13 +1,14 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { requireArtist } from "@/lib/auth/dal";
 import { createClient } from "@/utils/supabase/server";
 import { ARTWORKS_BUCKET, IMAGE_PATH_PATTERN } from "@/lib/artworks/images";
 import { MAX_TAGS, MAX_TAG_LENGTH } from "@/lib/artworks/tags";
-import { enrichFromImage } from "@/lib/ai";
+import { topUpTags } from "@/lib/artworks/top-up";
 
 export type ArtworkFormState =
   | {
@@ -18,6 +19,12 @@ export type ArtworkFormState =
         image?: string[];
       };
       message?: string;
+      /**
+       * Tells the form to leave the uploaded object in place. Set when the
+       * failure says nothing about whether the upload succeeded, so a retry
+       * can reuse it instead of re-sending up to 10 MB.
+       */
+      keepImage?: boolean;
     }
   | undefined;
 
@@ -101,7 +108,6 @@ export async function createArtwork(
   }
 
   const { title, description, tags, image: imagePath } = validatedFields.data;
-  const enrichment = await enrichFromImage(imagePath);
 
   // The key came from the client, so neither of these can be assumed. The
   // folder check is the security one: the bucket is public, so without it an
@@ -112,9 +118,22 @@ export async function createArtwork(
 
   const supabase = await createClient();
 
-  const { data: uploaded } = await supabase.storage
+  const { data: uploaded, error: existsError } = await supabase.storage
     .from(ARTWORKS_BUCKET)
     .exists(imagePath);
+
+  // `exists` reports a transient failure as `data: false`, which is
+  // indistinguishable from a genuinely missing object unless the error is
+  // read. That distinction matters: the form deletes the uploaded object
+  // whenever it sees a field error, so treating a Storage blip as "missing"
+  // would destroy a good upload and force a re-upload of up to 10 MB. A
+  // `message` keeps the object alive for the retry.
+  if (existsError) {
+    return {
+      message: "Could not verify the upload. Try again.",
+      keepImage: true,
+    };
+  }
 
   if (!uploaded) {
     return {
@@ -122,26 +141,45 @@ export async function createArtwork(
     };
   }
 
-  const { error: insertError } = await supabase.from("artworks").insert({
-    artist_id: artist.id,
-    title,
-    description:
-      description?.length || enrichment.ok === false
-        ? description
-        : enrichment.data.description,
-    tags: [
-      ...tags,
-      ...(enrichment.ok === true ? (enrichment.data.tags ?? []) : []),
-    ].slice(0, 20),
-    image_path: imagePath,
-  });
+  const { data: inserted, error: insertError } = await supabase
+    .from("artworks")
+    .insert({
+      artist_id: artist.id,
+      title,
+      description,
+      tags,
+      image_path: imagePath,
+    })
+    .select("id")
+    .single();
 
-  if (insertError) {
+  if (insertError || !inserted) {
     // The file is already in the bucket. Without this the bucket would collect
     // orphans no row ever points at.
     await supabase.storage.from(ARTWORKS_BUCKET).remove([imagePath]);
-    return { message: `Could not save the artwork: ${insertError.message}` };
+    return {
+      message: `Could not save the artwork: ${insertError?.message ?? "unknown error"}`,
+    };
   }
+
+  // The piece is saved with the artist's own tags before this runs. `after`
+  // defers the model call until the response has been sent, so publishing is
+  // never slower for it — the PRD guardrail says no step in the upload flow
+  // blocks waiting on an AI response, and awaiting it here would be that step.
+  //
+  // Both /studio and /discover render dynamically, so the later tags show up
+  // on the next request without an explicit revalidate.
+  after(async () => {
+    const toppedUp = await topUpTags(tags, imagePath);
+
+    if (toppedUp.length > tags.length) {
+      await supabase
+        .from("artworks")
+        .update({ tags: toppedUp })
+        .eq("id", inserted.id)
+        .eq("artist_id", artist.id);
+    }
+  });
 
   revalidatePath("/studio");
   revalidatePath("/discover");

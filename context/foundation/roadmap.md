@@ -1,9 +1,9 @@
 ---
 project: ArtSwipe
 version: 1
-status: draft
+status: locked
 created: 2026-09-09
-updated: 2026-09-09
+updated: 2026-09-10
 prd_version: 1
 main_goal: market-feedback
 top_blocker: external
@@ -30,6 +30,10 @@ swipe ranking belongs to a separate future change.
 **S-01: Artist fills the tags field from the image** — the first moment a human judges real
 model output, which is the one thing Phase 1 could not prove on its own.
 
+**Reached 2026-09-10.** S-01 shipped along with S-02 and S-03; the bet below has been
+tested against real model output rather than argued about. Every slice on this roadmap is
+now `done`, so this document is a closed record rather than a plan — see `## Done`.
+
 > "North star" here means: the smallest end-to-end slice whose successful delivery would
 > prove the core product bet — placed as early as its Prerequisites allow, because
 > everything downstream only matters if this works. The bet is that image-derived tags are
@@ -41,9 +45,9 @@ model output, which is the one thing Phase 1 could not prove on its own.
 
 | ID   | Change ID                      | Outcome (user can …)                                             | Prerequisites | PRD refs                       | Status   |
 | ---- | ------------------------------ | ---------------------------------------------------------------- | ------------- | ------------------------------ | -------- |
-| S-01 | `tags-assist-on-upload`        | Fill the tags field from the uploaded image and edit the result   | —             | US-01, FR-001, FR-002, FR-004, FR-005, FR-006 | ready    |
-| S-02 | `description-assist-on-upload` | Fill the description field from the uploaded image and edit it    | S-01          | US-01, FR-001, FR-002, FR-005, FR-006 | proposed |
-| S-03 | `publish-time-baseline-tagging`| Publish a thinly-tagged piece and still have it land well tagged  | S-01          | FR-003, FR-004, FR-005, FR-006 | proposed |
+| S-01 | `tags-assist-on-upload`        | Fill the tags field from the uploaded image and edit the result   | —             | US-01, FR-001, FR-002, FR-004, FR-005, FR-006 | done     |
+| S-02 | `description-assist-on-upload` | Fill the description field from the uploaded image and edit it    | S-01          | US-01, FR-001, FR-002, FR-005, FR-006 | done     |
+| S-03 | `publish-time-baseline-tagging`| Publish a thinly-tagged piece and still have it land well tagged  | S-01          | FR-003, FR-004, FR-005, FR-006 | done     |
 
 ## Baseline
 
@@ -63,13 +67,14 @@ Foundations below assume these are present and do NOT re-scaffold them.
   `migrations.yml` green on every push.
 - **Observability:** partial — `@vercel/analytics` only. No error tracking and no logging of
   enrichment outcomes (see Open Roadmap Question 6).
-- **AI enrichment service:** present — Phase 1 of `context/changes/ai-artwork-enrichment`
+- **AI enrichment service:** present — Phase 1 of `context/archive/2026-09-09-ai-artwork-enrichment`
   merged in PR #4. `src/lib/ai/enrich.ts` is a complete OpenRouter vision call (three-model
   fallback chain, 25s shared budget, never throws — failure is returned as data),
   `src/lib/ai/schema.ts` holds the JSON contract and `MIN_GENERATED_TAGS = 5`,
   `src/lib/ai/taxonomy.ts` holds a 5-facet controlled vocabulary. Unit-tested in
   `test/lib/ai.test.ts` with an opt-in live harness at `test/smoke/enrich.live.ts`.
-  **Not wired to anything** — no transport, no form controls, no publish-time top-up.
+  **Fully wired as of 2026-09-10** — suggestion transport, automatic form fill on image
+  select, and the publish-time top-up all landed with the archived change.
 
 ## Foundations
 
@@ -114,7 +119,7 @@ to a foundation that would deliver no user-visible outcome of its own.
   keep. The thing that could go wrong is a quality verdict, not a technical one — if tags
   read as generic, that finding arrives before S-02 and S-03 are built on the same pattern,
   which is precisely why it goes first.
-- **Status:** ready
+- **Status:** done
 
 ### S-02: Artist fills the description field from the image
 
@@ -136,7 +141,7 @@ to a foundation that would deliver no user-visible outcome of its own.
   most likely to reject on voice grounds, and it carries its own concerns — the 2000-char
   cap in `MAX_DESCRIPTION_LENGTH`, and partial-edit overwrite semantics on a long field.
   Running it against S-01's verdict is cheaper than discovering both problems at once.
-- **Status:** proposed
+- **Status:** done
 
 ### S-03: No piece is published under-tagged
 
@@ -160,15 +165,15 @@ to a foundation that would deliver no user-visible outcome of its own.
   publish path, and the PRD guardrail says publishing must not get visibly slower, so a
   top-up failure has to be swallowed rather than surfaced. Parallel with S-02 because
   neither touches the other's surface — a separate agent run can take it.
-- **Status:** proposed
+- **Status:** done
 
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                       | Suggested issue title                                        | Ready for `/10x-plan` | Notes |
 | ---------- | ------------------------------- | ------------------------------------------------------------ | --------------------- | ----- |
-| S-01       | `tags-assist-on-upload`         | Add AI tag assistance to the artwork upload form              | yes                   | Overlaps Phases 2 + 3 (tags half) of the existing `context/changes/ai-artwork-enrichment` plan — continue that change with `/10x-implement` instead of re-planning, unless you want the narrower slice boundary. |
-| S-02       | `description-assist-on-upload`  | Add AI description assistance to the artwork upload form      | no                    | Blocked on S-01 only. Corresponds to the description half of that plan's Phase 3. |
-| S-03       | `publish-time-baseline-tagging` | Top up artwork tags at publish when the artist supplied few   | no                    | Blocked on S-01 only. Corresponds to that plan's Phase 4. Runs parallel with S-02. |
+| S-01       | `tags-assist-on-upload`         | Add AI tag assistance to the artwork upload form              | done                  | Delivered by `ai-artwork-enrichment` (archived). |
+| S-02       | `description-assist-on-upload`  | Add AI description assistance to the artwork upload form      | done                  | Delivered by the same change; the automatic trigger filled both fields from one call, so S-01 and S-02 landed together rather than in sequence. |
+| S-03       | `publish-time-baseline-tagging` | Top up artwork tags at publish when the artist supplied few   | done                  | Delivered by the same change. Runs after the response via `after()`, not on the publish path. |
 
 ## Open Roadmap Questions
 
@@ -177,8 +182,10 @@ to a foundation that would deliver no user-visible outcome of its own.
    the one open question that could invalidate the current free-model roster outright and
    therefore every slice; it was not selected as a hard requirement during shaping, so
    confirm whether it belongs in the PRD at all.
-2. **Which fields' prior AI suggestions count as "content the artist entered" for the
-   no-overwrite rule?** — Owner: user. Block: S-01, S-02 (non-blocking; a default exists).
+2. ~~**Which fields' prior AI suggestions count as "content the artist entered" for the
+   no-overwrite rule?**~~ **Resolved 2026-09-10** — moot under the shipped design.
+   Enrichment runs once when an image is selected and fills a field only if that field is
+   empty, so nothing is ever displaced and there is no re-run to arbitrate.
 3. **Is there a Secondary success outcome for this change?** `### Secondary` in the PRD is
    still a TODO after the original nice-to-have became a Non-Goal — Owner: user. Block: none.
 4. **What happens to artworks uploaded before this change — is retro-tagging planned as a
@@ -190,7 +197,11 @@ to a foundation that would deliver no user-visible outcome of its own.
    — Owner: user. Block: none. Raised by this roadmap, not the PRD: the guardrail "the
    number of AI operations triggered by one artwork upload is bounded and known" implies
    some signal, and `## Baseline` reports observability as partial. Not scoped as a slice
-   here because no PRD requirement demands it.
+   here because no PRD requirement demands it. Still open — and sharper now that
+   enrichment fires on every image selection rather than on an explicit request.
+7. **Are the enrichment quota caps right?** 30/hour and 200/day were set without usage data
+   when the per-user quota shipped; the OpenRouter free tier's 50/day is the binding limit
+   until credits land. — Owner: user. Block: none.
 
 **Resolved by shipped code — recorded for PRD reconciliation, no action needed:**
 PRD Open Question 1 (controlled vocabulary vs free text) — answered: generated tags draw
@@ -218,5 +229,10 @@ Question 9 — resolved during shaping.
 
 ## Done
 
-(Empty on first generation. `/10x-archive` appends here when a change whose Change ID
-matches a roadmap item is archived.)
+All three slices were delivered by a single change, `ai-artwork-enrichment`, whose Change
+ID did not match any roadmap item — so `/10x-archive` could not close them automatically
+and these entries were written by hand on 2026-09-10.
+
+- **S-01: Fill the tags field from the uploaded image and edit the result** — Archived 2026-09-10 → `context/archive/2026-09-09-ai-artwork-enrichment/`. Lesson: —.
+- **S-02: Fill the description field from the uploaded image and edit it** — Archived 2026-09-10 → `context/archive/2026-09-09-ai-artwork-enrichment/`. Lesson: —.
+- **S-03: Publish a thinly-tagged piece and still have it land well tagged** — Archived 2026-09-10 → `context/archive/2026-09-09-ai-artwork-enrichment/`. Lesson: [Never block a user-visible mutation on a third-party AI call](lessons.md).
