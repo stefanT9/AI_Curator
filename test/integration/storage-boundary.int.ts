@@ -223,6 +223,38 @@ describe("Storage RLS policies", () => {
     expect(stillExists).toBe(true);
   });
 
+  it("does NOT let an artist delete an object in their own folder (recorded)", async () => {
+    // Recorded, not desired. `.remove()` returns no error, but the object
+    // survives — even for its owner. `storage-api` lists matching objects
+    // before deleting them, and that list is gated by a SELECT policy on
+    // `storage.objects` that no migration defines (only insert/update/delete
+    // exist). With nothing to list, nothing is deleted.
+    //
+    // Consequence: the compensating `remove()` in `createArtwork` and the
+    // `remove()` in `deleteArtwork` are BOTH silent no-ops today. Deleted
+    // artworks leave their image in the bucket forever, and the pre-Phase-4
+    // "cleanup orphans a live row's image" path (Risk #1 / P1) is not actually
+    // reachable through either deleter while this holds. Add a SELECT policy to
+    // make cleanup work and P1 becomes reachable — at which point the Phase 4
+    // guard in `createArtwork` is what stops it. Tracked as a follow-up.
+    const imagePath = await artist1.upload(TINY_PNG);
+
+    const { error: deleteError } = await artist1.client.storage
+      .from(ARTWORKS_BUCKET)
+      .remove([imagePath]);
+
+    expect(deleteError).toBeNull();
+
+    const { data: existsAfter } = await artist1.client.storage
+      .from(ARTWORKS_BUCKET)
+      .exists(imagePath);
+    expect(existsAfter).toBe(true);
+
+    const response = await fetch(publicImageUrl(imagePath));
+    expect(response.status).toBe(200);
+    await response.arrayBuffer();
+  });
+
   it("rejects an upload larger than 10 MiB", async () => {
     // 10 MiB + 1 byte.
     const oversized = new Uint8Array(10 * 1024 * 1024 + 1);

@@ -323,6 +323,38 @@ The `check` constraint is the only schema change and it lands `not valid` delibe
 - Upload-fix rationale: `context/changes/ai-artwork-enrichment/plan.md:198`
 - Seeding facts to reuse later: `context/changes/ranking-eval-corpus/plan.md`
 
+## Phase 2 findings & decisions (recorded post-implementation, impl-review F3)
+
+Observed behavior of the storage boundary against the local stack, pinned by
+`test/integration/storage-boundary.int.ts` (verified 2026-09-10):
+
+- **`.exists()` agrees with the collector's route for an owned object.**
+  `.exists(key)` returns `true` and `fetch(publicImageUrl(key))` returns 200 for
+  a freshly uploaded object. The feared disagreement (authenticated route denies
+  while the public route serves) did not occur.
+- **`.exists()` does not throw** for a key never uploaded or a key in another
+  user's folder — it returns `false`. Research concern P3 did not materialize.
+- **`.exists()` is HEAD-only** — returns `true` for a zero-byte object and a
+  MIME-mismatched object; says nothing about whether the bytes render (P4).
+- **`.remove()` is a silent no-op — even for the object's owner.** It returns no
+  error and the object survives. `storage-api` lists matching objects before
+  deleting, and that list is gated by a `select` policy on `storage.objects`
+  that no migration defines. So the compensating `remove()` in `createArtwork`
+  and the `remove()` in `deleteArtwork` do nothing today.
+
+Decisions:
+
+- **2.3 — leave `.exists()` as-is.** It agrees with the collector's route for the
+  case that matters. Revisit only if a storage-api upgrade or a policy change
+  breaks the agreement — the characterization test will catch that.
+- **2.4 — a `select` policy on `storage.objects` IS needed**, but it is
+  deliberately **out of scope for this change**: adding it makes cleanup
+  actually delete, which makes the P1 "cleanup orphans a live row's image" path
+  reachable — at which point the Phase 4 guard in `createArtwork` becomes
+  load-bearing (it is defense-in-depth until then). Tracked in
+  `follow-ups/storage-cleanup-noop.md`; belongs to rollout Phase 3 (Risk #3)
+  alongside the read-path work, not here.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
