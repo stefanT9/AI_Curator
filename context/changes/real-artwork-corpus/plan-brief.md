@@ -38,7 +38,7 @@ non-empty starter pool. A fresh clone regenerates the identical corpus from a co
 | Corpus shape | Sample naturally, clusters emerge | The honest test of ranking on real data, rather than on a designed instrument. |
 | Tagging | Museum metadata + enrichment top-up | Metadata knows medium/subject/palette; `style_titles` is period labels, so style and mood must come from the model. |
 | Judging | Derive group labels after sampling | Keeps a walk a transcription, as F-01's was, without pretending the groups were planted. |
-| Style coverage | Verify after enrichment, override gaps | Public domain predates `street art` and `pop art`; an override is a reviewable manifest line, not a hidden fudge. |
+| Style coverage | Measure and report; never override | ~~Public domain predates `street art`; an override is a reviewable manifest line~~ — reversed 2026-09-10: gaps are findings, and the picker offers only populated terms (separate change). |
 | Size | ~950 tagged + ~50 untagged | Exceeds the 20-card deck for S-02 refill; the untagged tail keeps S-01's demotion key observable. |
 | Manifest → rows | Script generates `seed.sql`; both committed | `seed.sql` stays the single mechanism `db reset` applies, and regeneration is a reviewable SQL diff. |
 | Runner | `tsx` devDependency | Plain Node cannot resolve the extensionless imports inside `src/lib/ai/enrich.ts`. |
@@ -82,7 +82,7 @@ stays above the marker, untouched.
 | --- | --- | --- |
 | 1. Fetch script and manifest | `tsx`, the script, 1000 pinned pieces + local JPEGs | The IIIF 403 returns HTML with a success-shaped pipeline; must assert `content-type` |
 | 2. Enrichment top-up | Style, mood and descriptions pinned into the manifest | ~1000 free-tier calls at a 25 s ceiling — non-resumable would mean restarting from zero |
-| 3. Coverage and overrides | 20/20 style terms guaranteed; the untagged tail chosen | Overrides becoming a way to hit the number rather than an honest gap record |
+| 3. Coverage reporting | Per-facet coverage measured; the untagged tail chosen | Reporting a gap and then quietly closing it anyway |
 | 4. `seed.sql` generation | A generated corpus region; re-derived like history | Slots ordered by tag group would make a broken ranking look correct |
 | 5. Judgment and docs | Emergent cheat-sheet, walks, recorded baseline | Leaving the baseline as an unfilled template |
 
@@ -111,7 +111,7 @@ Phase 1 is the bulk of the writing.
 
 ## Success Criteria (Summary)
 
-- A collector picking any of the 20 onboarding style terms gets a non-empty starter set.
+- Coverage is measured per facet and its gaps recorded. (The "no empty starter set" promise moved to the data-driven picker change on 2026-09-10.)
 - `/discover` shows recognisable real artwork with real titles, visibly interleaved across tag
   groups rather than grouped.
 - A fresh clone plus `db:seed:fetch` and `db:reset` reproduces the corpus identically, and a

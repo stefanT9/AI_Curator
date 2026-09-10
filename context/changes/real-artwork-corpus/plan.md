@@ -107,20 +107,25 @@ a corpus larger than the 20-card deck.
 A developer runs `npm run db:seed:fetch` once (network), then `npm run db:reset`, and lands in a
 local app whose catalogue is 1000 real artworks by real artists — recognisable paintings,
 prints, ceramics, photographs and sculpture — tagged with terms drawn entirely from
-`src/lib/ai/taxonomy.ts` across all five facets. Every one of the 20 onboarding style terms
-returns a non-empty starter pool. A fresh clone regenerates the identical corpus from the
+`src/lib/ai/taxonomy.ts` across all five facets. A fresh clone regenerates the identical corpus from the
 committed manifest, because every AIC object id, every tag and every UUID is pinned in it.
 
-Verified by: `npm run db:seed:coverage` reporting 20/20 style terms covered; the full verify
-gate passing; and a recorded judgment walkthrough over the emergent tag groups.
+Verified by: `npm run db:seed:coverage` reporting per-facet term coverage; the full verify gate
+passing; and a recorded judgment walkthrough over the emergent tag groups. Note the 2026-09-10
+amendment: "every one of the 20 onboarding style terms returns a non-empty starter pool" is no
+longer this change's promise — it is delivered by the data-driven picker change, which offers
+only populated terms. This change's job is that the corpus is real and its coverage is measured.
 
 ## What We're NOT Doing
 
 - **No schema change and no migration.** The corpus fits the existing tables and constraints.
 - **No type regeneration.** `db:types:local` is the user's to run and no schema changes here.
-- **No application code changes.** Not `swipe_deck`, not `getStarterDeck`, not the onboarding
-  picker, not the upload flow. If coverage cannot be met by data, it is met by a manifest
-  override — never by narrowing what production collectors are offered.
+- **No application code changes in this change.** Not `swipe_deck`, not `getStarterDeck`, not
+  the onboarding picker, not the upload flow. The original rider — "if coverage cannot be met by
+  data, it is met by a manifest override" — was reversed on 2026-09-10 (see the Phase 3
+  amendment): coverage gaps are now recorded as findings, and the empty-starter-pool defect is
+  fixed by making the picker data-driven in a **separate change**. The guardrail it protected
+  still stands: nothing here narrows the vocabulary production collectors are offered.
 - **No second seeding mechanism.** `supabase/seed.sql` remains the single thing `db reset`
   applies. The script generates that file; it does not insert rows itself.
 - **No committed image bytes.** The asset directory is gitignored; the manifest is the durable
@@ -339,8 +344,8 @@ exits 0 unless *every* piece failed. `OPENROUTER_API_KEY` absent is a clear up-f
 **Intent**: Merge the two tag sources into the array that reaches the database, within the
 schema's limit and without letting one facet crowd out the others.
 
-**Contract**: A pure function combining `tags_from_metadata`, `tags_from_enrichment` and (from
-Phase 3) `tag_overrides` into a deduplicated array capped at 20 to satisfy
+**Contract**: A pure function combining `tags_from_metadata` and `tags_from_enrichment` into a
+deduplicated array capped at 20 to satisfy
 `artworks_tags_length`. When over the cap it trims by taking terms round-robin across the five
 facets rather than truncating the concatenation — a flat truncation would drop mood entirely,
 which is the facet with the fewest terms per piece. Exported and unit-tested.
@@ -390,12 +395,21 @@ proceeding to the next phase.
 
 ---
 
-## Phase 3: Coverage verification and overrides
+## Phase 3: Coverage reporting and the untagged tail
+
+> **Amended 2026-09-10, after Phase 1.** Curatorial overrides are dropped and the coverage
+> stage stops gating. The owner chose to fix the empty-starter-pool defect at its root
+> instead: the onboarding picker will offer only terms that have artworks behind them,
+> computed from the catalogue, in a separate change. That makes 20/20 the wrong target here
+> — a public-domain corpus that lacks `street art` should say so, not be tagged into
+> claiming otherwise. What this phase owed the product (no collector meets an empty pool) is
+> now owed by the picker; what it still owes is an honest measurement and the untagged tail.
+> The dropped work is recorded below rather than deleted, so the reversal stays legible.
 
 ### Overview
 
-Turn "every style term returns a non-empty starter pool" from a hope into a checked property,
-close the gaps AIC cannot fill with explicit manifest overrides, and choose the untagged tail.
+Measure which vocabulary terms the corpus can actually serve, record the gaps as findings
+rather than closing them, and choose the untagged tail.
 
 ### Changes Required:
 
@@ -403,28 +417,24 @@ close the gaps AIC cannot fill with explicit manifest overrides, and choose the 
 
 **File**: `scripts/build-corpus.ts`
 
-**Intent**: Report exactly which of the 20 onboarding style terms the corpus can serve, so a gap
-is a visible number rather than a bug a collector discovers.
+**Intent**: Report exactly which vocabulary terms the corpus can serve, so the shape of a real
+public-domain collection is a visible measurement — and so the picker change downstream has a
+number to be checked against.
 
-**Contract**: A `coverage` stage that, for each term in
-`TAXONOMY_BY_FACET[ONBOARDING_FACET]`, counts manifest pieces whose combined tags contain it —
-the same overlap `getStarterDeck` performs. Prints a per-term table and exits non-zero if any
-term has zero pieces. The threshold is deliberately 1, matching the query: `getStarterDeck`
-returns rows or it does not, and `ONBOARDING_POOL_SIZE` is only a ceiling.
+**Contract**: A `coverage` stage that, for every term in all five facets, counts manifest pieces
+whose combined tags contain it — the same overlap `getStarterDeck` performs. Prints a per-facet
+table and **always exits 0**: a term with no pieces is a finding about public-domain art, not a
+build failure. The threshold for "covered" is 1, matching the query — `getStarterDeck` returns
+rows or it does not, and `ONBOARDING_POOL_SIZE` is only a ceiling.
 
-#### 2. Curatorial overrides
+#### 2. Curatorial overrides — DROPPED
 
-**File**: `supabase/seed-assets/corpus.json`
-
-**Intent**: Guarantee coverage for the terms a public-domain collection genuinely lacks — the
-modern movements (`street art`, `pop art`, `psychedelic`, and likely `brutalist`) that postdate
-most CC0 material — while keeping every such decision visible.
-
-**Contract**: A `tag_overrides` array on the small number of pieces that need one, each paired
-with an `override_reason` string. These are curatorial by construction: the piece is the closest
-real match, not an instance of the movement. The manifest's `source` block gains an
-`overrides_note` stating that plainly, so nobody later mistakes an override for an observation.
-Overrides flow through the same combiner and the same vocabulary assertion as every other tag.
+**Superseded by the amendment above.** The original contract added a `tag_overrides` array with
+an `override_reason` to the handful of pieces needed to reach 20/20 on the style facet. It is
+dropped: with a data-driven picker there is no number to hit, and tagging a 19th-century etching
+`street art` because it is "the closest real match" would put a false tag on a real artwork to
+satisfy a check that no longer exists. `tag_overrides` and `override_reason` are therefore never
+added to the manifest, and the combiner has no third tag source.
 
 #### 3. The untagged tail
 
@@ -448,14 +458,14 @@ the reason Open Roadmap Question 4 existed.
 - `npm run typecheck` passes
 - `npm run test` passes
 - `npm run build` passes
-- `npm run db:seed:coverage` exits 0 and reports 20/20 style terms with at least one piece
-- ~50 pieces (5%) carry `untagged: true`, and none of them carries a `tag_overrides` entry
-- Every override carries a non-empty `override_reason`
+- `npm run db:seed:coverage` exits 0 and reports per-facet term coverage across all five facets
+- ~50 pieces (5%) carry `untagged: true`
+- No piece carries a `tag_overrides` entry — the manifest has no override mechanism
 
 #### Manual Verification:
 
-- Read the override list: it is a handful of pieces, each with an honest reason, not a mechanism
-  for hitting the number
+- Read the coverage report: the uncovered terms are ones public-domain art genuinely lacks, and
+  they are recorded as findings rather than closed
 - The untagged tail includes at least one piece in the newest 20 slots, so a walk will encounter
   one
 
@@ -753,21 +763,21 @@ steps exist to make that failure self-explaining rather than mysterious.
 
 #### Automated
 
-- [x] 1.1 `npm run format:check` passes
-- [x] 1.2 `npm run lint` passes
-- [x] 1.3 `npm run typecheck` passes
-- [x] 1.4 `npm run test` passes
-- [x] 1.5 `npm run build` passes
-- [x] 1.6 `npm run db:seed:fetch` exits 0 and writes 1000 pieces to the manifest
-- [x] 1.7 Every `tags_from_metadata` entry is a member of `ARTWORK_TAGS`
-- [x] 1.8 Every downloaded filename matches `^[0-9a-f-]{36}\.jpg$` and is a real JPEG
-- [x] 1.9 `git status` shows no untracked files under the artist asset directory
+- [x] 1.1 `npm run format:check` passes — 03d7e7f
+- [x] 1.2 `npm run lint` passes — 03d7e7f
+- [x] 1.3 `npm run typecheck` passes — 03d7e7f
+- [x] 1.4 `npm run test` passes — 03d7e7f
+- [x] 1.5 `npm run build` passes — 03d7e7f
+- [x] 1.6 `npm run db:seed:fetch` exits 0 and writes 1000 pieces to the manifest — 03d7e7f
+- [x] 1.7 Every `tags_from_metadata` entry is a member of `ARTWORK_TAGS` — 03d7e7f
+- [x] 1.8 Every downloaded filename matches `^[0-9a-f-]{36}\.jpg$` and is a real JPEG — 03d7e7f
+- [x] 1.9 `git status` shows no untracked files under the artist asset directory — 03d7e7f
 
 #### Manual
 
-- [x] 1.10 Five pieces spot-checked against their AIC page
-- [x] 1.11 Metadata-derived tags read as true of the piece
-- [x] 1.12 Re-running `db:seed:fetch` is a no-op and leaves the manifest byte-identical
+- [x] 1.10 Five pieces spot-checked against their AIC page — 03d7e7f
+- [x] 1.11 Metadata-derived tags read as true of the piece — 03d7e7f
+- [x] 1.12 Re-running `db:seed:fetch` is a no-op and leaves the manifest byte-identical — 03d7e7f
 
 ### Phase 2: Enrichment top-up
 
@@ -798,13 +808,13 @@ steps exist to make that failure self-explaining rather than mysterious.
 - [ ] 3.3 `npm run typecheck` passes
 - [ ] 3.4 `npm run test` passes
 - [ ] 3.5 `npm run build` passes
-- [ ] 3.6 `npm run db:seed:coverage` exits 0 reporting 20/20 style terms covered
-- [ ] 3.7 ~50 pieces (5%) carry `untagged: true`, none with overrides
-- [ ] 3.8 Every override carries a non-empty `override_reason`
+- [ ] 3.6 `npm run db:seed:coverage` exits 0 reporting per-facet term coverage
+- [ ] 3.7 ~50 pieces (5%) carry `untagged: true`
+- [ ] 3.8 No piece carries `tag_overrides` — the override mechanism is not built
 
 #### Manual
 
-- [ ] 3.9 Override list reviewed: a handful, each with an honest reason
+- [ ] 3.9 Coverage report reviewed: gaps recorded as findings, not closed
 - [ ] 3.10 At least one untagged piece falls in the newest 20 slots
 
 ### Phase 4: seed.sql generation
