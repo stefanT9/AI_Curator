@@ -871,38 +871,38 @@ steps exist to make that failure self-explaining rather than mysterious.
 
 #### Automated
 
-- [x] 4.1 `npm run format:check` passes
-- [x] 4.2 `npm run lint` passes
-- [x] 4.3 `npm run typecheck` passes
-- [x] 4.4 `npm run test` passes
-- [x] 4.5 `npm run build` passes
-- [x] 4.6 `db:seed:generate` rewrites only below the marker; identities section untouched
-- [x] 4.7 Re-running `db:seed:generate` leaves `seed.sql` byte-identical
-- [x] 4.8 `npx supabase db reset` applies the seed with no SQL error
-- [x] 4.9 Row counts: 1000 artworks, 8 warm likes, 0 cold, ~50 with `tags = '{}'`
-- [x] 4.10 Every `image_path` satisfies `image_path_pattern`
-- [x] 4.11 `db:seed:images` uploads every file; storage lists 1000 objects
+- [x] 4.1 `npm run format:check` passes — 50e5b58
+- [x] 4.2 `npm run lint` passes — 50e5b58
+- [x] 4.3 `npm run typecheck` passes — 50e5b58
+- [x] 4.4 `npm run test` passes — 50e5b58
+- [x] 4.5 `npm run build` passes — 50e5b58
+- [x] 4.6 `db:seed:generate` rewrites only below the marker; identities section untouched — 50e5b58
+- [x] 4.7 Re-running `db:seed:generate` leaves `seed.sql` byte-identical — 50e5b58
+- [x] 4.8 `npx supabase db reset` applies the seed with no SQL error — 50e5b58
+- [x] 4.9 Row counts: 1000 artworks, 8 warm likes, 0 cold, ~50 with `tags = '{}'` — 50e5b58
+- [x] 4.10 Every `image_path` satisfies `image_path_pattern` — 50e5b58
+- [x] 4.11 `db:seed:images` uploads every file; storage lists 1000 objects — 50e5b58
 
 #### Manual
 
-- [x] 4.12 Warm collector's `/discover` shows real artwork with images rendering
-- [x] 4.13 First 20 cards are visibly interleaved across tag groups
-- [x] 4.14 Every style term tried in onboarding produces a non-empty starter set
-- [x] 4.15 Seeded artist's own work is absent from their deck
+- [x] 4.12 Warm collector's `/discover` shows real artwork with images rendering — 50e5b58
+- [x] 4.13 First 20 cards are visibly interleaved across tag groups — 50e5b58
+- [x] 4.14 Every style term tried in onboarding produces a non-empty starter set — 50e5b58
+- [x] 4.15 Seeded artist's own work is absent from their deck — 50e5b58
 
 ### Phase 5: Judgment walkthrough and docs
 
 #### Automated
 
-- [ ] 5.1 `npm run format:check` passes
-- [ ] 5.2 `npm run lint` passes
-- [ ] 5.3 `npm run typecheck` passes
-- [ ] 5.4 `npm run test` passes
-- [ ] 5.5 `npm run build` passes
-- [ ] 5.6 `judgment.md` exists and cheat-sheet counts sum to the tagged-piece count
+- [x] 5.1 `npm run format:check` passes
+- [x] 5.2 `npm run lint` passes
+- [x] 5.3 `npm run typecheck` passes
+- [x] 5.4 `npm run test` passes
+- [x] 5.5 `npm run build` passes
+- [x] 5.6 `judgment.md` exists and cheat-sheet counts sum to the tagged-piece count
 
 #### Manual
 
-- [ ] 5.7 Walk A and Walk B run end to end from the cheat-sheet alone
-- [ ] 5.8 Recorded baseline filled in with real observations
-- [ ] 5.9 Archived F-01 walkthrough marked superseded within its first screen
+- [x] 5.7 Walk A and Walk B run end to end from the cheat-sheet alone
+- [x] 5.8 Recorded baseline filled in with real observations
+- [x] 5.9 Archived F-01 walkthrough marked superseded within its first screen

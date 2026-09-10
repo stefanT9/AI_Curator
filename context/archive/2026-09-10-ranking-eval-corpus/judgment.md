@@ -1,5 +1,24 @@
 # Judgment walkthrough — tag-match ordering
 
+> **SUPERSEDED 2026-09-10 by `real-artwork-corpus`. Nothing below is retracted.**
+>
+> The corpus this walkthrough measures no longer exists. The 54 synthetic pieces, the five
+> placeholder PNGs and the four designed clusters were replaced wholesale by 1000 real
+> public-domain artworks sampled from the Art Institute of Chicago, tagged from museum metadata
+> plus the enrichment pipeline. **The `[1]`–`[4]` and `[U]` title prefixes are gone**, so the
+> cluster cheat-sheet below identifies nothing and the two walks are **not runnable** as written.
+> Their recorded measurements are not comparable to anything current.
+>
+> **The live instrument is `context/changes/real-artwork-corpus/judgment.md`.** It runs the same
+> two walks — warm collector, cold collector — against emergent groups read off the card's tag
+> chips instead of authored cluster codes.
+>
+> **What stays valid:** everything recorded here remains accurate history of the synthetic
+> corpus, and the two amendments below (S-01's untagged-tail expectation, S-04's onboarding-gate
+> premise) remain the correct account of how those slices changed this walk. They are preserved
+> because the reasoning carries forward even though the fixture does not.
+
+
 F-01 exists so a tag-match ordering can be _judged_ by swiping, not guessed at.
 This is the procedure S-01 uses to check whether its ranking beats today's
 newest-first deck. Run it once now to record the pre-S-01 baseline, then again
