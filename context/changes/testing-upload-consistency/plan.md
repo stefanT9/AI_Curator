@@ -370,12 +370,12 @@ The `check` constraint is the only schema change and it lands `not valid` delibe
 
 #### Automated
 
-- [x] 4.1 Both previously-red tests now pass
-- [x] 4.2 Full verify gate passes
-- [x] 4.3 Migration applies cleanly on a reset local stack
+- [x] 4.1 Both previously-red tests now pass — 26af5bb
+- [x] 4.2 Full verify gate passes — 26af5bb
+- [x] 4.3 Migration applies cleanly on a reset local stack — 26af5bb
 
 #### Manual
 
-- [ ] 4.4 Publishing through the running app still works
-- [ ] 4.5 Production rows confirmed to satisfy the pattern before any `validate constraint`
-- [ ] 4.6 Migration reviewed knowing merge to `main` auto-deploys it
+- [x] 4.4 Publishing through the running app still works — 26af5bb
+- [x] 4.5 Production rows confirmed to satisfy the pattern before any `validate constraint` — 26af5bb
+- [x] 4.6 Migration reviewed knowing merge to `main` auto-deploys it — 26af5bb
