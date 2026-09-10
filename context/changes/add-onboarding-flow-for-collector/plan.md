@@ -712,11 +712,11 @@ auto-deploys it via `.github/workflows/migrations.yml`; never edit it after it a
 
 #### Automated
 
-- [x] 6.1 Formatting is clean: `npm run format:check`
-- [x] 6.2 No source changes — `npm run test` and `npm run build` still pass
+- [x] 6.1 Formatting is clean: `npm run format:check` — 573c412
+- [x] 6.2 No source changes — `npm run test` and `npm run build` still pass — 573c412
 
 #### Manual
 
-- [x] 6.3 `prd-v2.md` no longer contradicts shipped behavior on any of the three cited lines
-- [x] 6.4 `roadmap.md` states what replaced Open Question 2 and why
-- [x] 6.5 Walk B in `judgment.md` is annotated, not deleted, and still usable for an S-01 re-run
+- [x] 6.3 `prd-v2.md` no longer contradicts shipped behavior on any of the three cited lines — 573c412
+- [x] 6.4 `roadmap.md` states what replaced Open Question 2 and why — 573c412
+- [x] 6.5 Walk B in `judgment.md` is annotated, not deleted, and still usable for an S-01 re-run — 573c412
