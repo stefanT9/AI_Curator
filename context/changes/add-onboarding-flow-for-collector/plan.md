@@ -693,20 +693,20 @@ auto-deploys it via `.github/workflows/migrations.yml`; never edit it after it a
 
 #### Automated
 
-- [ ] 5.1 Type checking passes: `npm run typecheck`
-- [ ] 5.2 Linting passes: `npm run lint`
-- [ ] 5.3 Formatting is clean: `npm run format:check`
-- [ ] 5.4 Unit tests pass: `npm run test`
-- [ ] 5.5 Existing `test/lib/deck.test.ts` still passes unmodified
-- [ ] 5.6 Build succeeds: `npm run build`
+- [x] 5.1 Type checking passes: `npm run typecheck`
+- [x] 5.2 Linting passes: `npm run lint`
+- [x] 5.3 Formatting is clean: `npm run format:check`
+- [x] 5.4 Unit tests pass: `npm run test`
+- [x] 5.5 Existing `test/lib/deck.test.ts` still passes unmodified
+- [x] 5.6 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 5.7 The hint appears on the first card after onboarding and not on subsequent cards
-- [ ] 5.8 Dismissing it persists across a page reload
-- [ ] 5.9 With site data cleared the hint returns, and nothing throws in a private window
-- [ ] 5.10 Drag, buttons and arrow keys all still register verdicts with the hint on screen
-- [ ] 5.11 `EmptyDeck` copy is byte-identical to before this phase
+- [x] 5.7 The hint appears on the first card after onboarding and not on subsequent cards
+- [x] 5.8 Dismissing it persists across a page reload
+- [x] 5.9 With site data cleared the hint returns, and nothing throws in a private window
+- [x] 5.10 Drag, buttons and arrow keys all still register verdicts with the hint on screen
+- [x] 5.11 `EmptyDeck` copy is byte-identical to before this phase
 
 ### Phase 6: Decision record
 
