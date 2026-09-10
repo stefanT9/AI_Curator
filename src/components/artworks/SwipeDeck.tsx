@@ -29,6 +29,9 @@ export function SwipeDeck({ deck }: { deck: ArtworkWithArtist[] }) {
   const pointerStartX = useRef<number | null>(null);
   const { current, remaining } = selectNextCard(deck, decidedIds);
 
+  // The keydown effect below passes a `current` reference that can be one
+  // render stale (same id, possibly a different object) by the time this
+  // fires — reading anything but `artwork.id` here would be unsafe.
   const decide = useCallback((artwork: Artwork, action: InteractionAction) => {
     setError(null);
     setDragX(0);
