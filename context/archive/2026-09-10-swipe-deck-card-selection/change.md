@@ -1,10 +1,10 @@
 ---
 change_id: swipe-deck-card-selection
 title: Swipe deck picks the next card by artwork id, not by ordinal index
-status: impl_reviewed
+status: archived
 created: 2026-09-10
 updated: 2026-09-10
-archived_at: null
+archived_at: 2026-09-10T16:39:10Z
 ---
 
 ## Notes
