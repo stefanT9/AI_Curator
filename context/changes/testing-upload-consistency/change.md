@@ -1,7 +1,7 @@
 ---
 change_id: testing-upload-consistency
 title: Real-boundary test lane and upload/publish consistency
-status: implemented
+status: impl_reviewed
 created: 2026-09-10
 updated: 2026-09-10
 archived_at: null
