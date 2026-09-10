@@ -43,6 +43,7 @@ Node is pinned in `.nvmrc` / `engines` (currently 24 LTS — `nvm use` picks it 
 - Add a migration: create `supabase/migrations/<timestamp>_<name>.sql`. Migrations apply in timestamp order.
 - After changing schema, regenerate types: `npm run db:types:local` (local) or `npm run db:types` (linked).
 - Pushing migration files to `main` auto-deploys them via `.github/workflows/migrations.yml`. Never edit an already-applied migration — add a new one.
+- `supabase/seed.sql` is the local ranking-evaluation corpus, not a migration. It is applied by `supabase db reset` after all migrations and targets the local dev database only. See `supabase/seed-assets/README.md` for the reset + image-upload workflow. Do not add a second seeding mechanism.
 
 ### Validation
 

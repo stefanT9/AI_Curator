@@ -469,32 +469,32 @@ database rows, so the image upload is part of the reset workflow rather than one
 
 #### Automated
 
-- [x] 3.1 Formatting check passes: `npm run format:check`
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Type checking passes: `npm run typecheck`
-- [x] 3.4 Unit tests pass: `npm run test`
-- [x] 3.5 Production build succeeds: `npm run build`
+- [x] 3.1 Formatting check passes: `npm run format:check` — 468c803
+- [x] 3.2 Linting passes: `npm run lint` — 468c803
+- [x] 3.3 Type checking passes: `npm run typecheck` — 468c803
+- [x] 3.4 Unit tests pass: `npm run test` — 468c803
+- [x] 3.5 Production build succeeds: `npm run build` — 468c803
 
 #### Manual
 
-- [x] 3.6 Corpus totals 54 artworks, 48 of them tagged
-- [x] 3.7 Warm collector's `/discover` renders a full 20-card deck with cluster imagery
-- [x] 3.8 Warm collector's liked view shows exactly the eight seeded pieces
-- [x] 3.9 Cold collector's liked view is empty and the deck still renders 20 cards
-- [x] 3.10 Neither collector is served an artwork they have already liked
-- [x] 3.11 Untagged pieces appear in the deck and are visually identifiable
-- [x] 3.12 Re-running the seed produces no duplicate-key error
+- [x] 3.6 Corpus totals 54 artworks, 48 of them tagged — 468c803
+- [x] 3.7 Warm collector's `/discover` renders a full 20-card deck with cluster imagery — 468c803
+- [x] 3.8 Warm collector's liked view shows exactly the eight seeded pieces — 468c803
+- [x] 3.9 Cold collector's liked view is empty and the deck still renders 20 cards — 468c803
+- [x] 3.10 Neither collector is served an artwork they have already liked — 468c803
+- [x] 3.11 Untagged pieces appear in the deck and are visually identifiable — 468c803
+- [x] 3.12 Re-running the seed produces no duplicate-key error — 468c803
 
 ### Phase 4: Workflow Documentation and Judgment Walkthrough
 
 #### Automated
 
-- [ ] 4.1 Formatting check passes: `npm run format:check`
-- [ ] 4.2 Linting passes: `npm run lint`
-- [ ] 4.3 Full verify gate passes: `npm run typecheck`, `npm run test`, `npm run build`
+- [x] 4.1 Formatting check passes: `npm run format:check`
+- [x] 4.2 Linting passes: `npm run lint`
+- [x] 4.3 Full verify gate passes: `npm run typecheck`, `npm run test`, `npm run build`
 
 #### Manual
 
-- [ ] 4.4 Following the README from a clean reset reproduces a working corpus
-- [ ] 4.5 The judgment walkthrough executes end to end and produces a pre-S-01 baseline
-- [ ] 4.6 The baseline confirms clusters are interleaved today, unrelated to the warm collector's likes
+- [x] 4.4 Following the README from a clean reset reproduces a working corpus
+- [x] 4.5 The judgment walkthrough executes end to end and produces a pre-S-01 baseline
+- [x] 4.6 The baseline confirms clusters are interleaved today, unrelated to the warm collector's likes
