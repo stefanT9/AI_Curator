@@ -82,7 +82,10 @@ export function ArtworkForm({ artwork }: { artwork?: Artwork }) {
   useEffect(() => {
     const orphan = orphanRef.current;
 
-    if (orphan && (state?.errors || state?.message)) {
+    // `keepImage` means the failure said nothing about whether the upload
+    // landed — deleting on that would destroy a good object and force the
+    // artist to re-send the whole file.
+    if (orphan && !state?.keepImage && (state?.errors || state?.message)) {
       orphanRef.current = null;
       void removeArtworkImage(orphan);
     }

@@ -19,6 +19,12 @@ export type ArtworkFormState =
         image?: string[];
       };
       message?: string;
+      /**
+       * Tells the form to leave the uploaded object in place. Set when the
+       * failure says nothing about whether the upload succeeded, so a retry
+       * can reuse it instead of re-sending up to 10 MB.
+       */
+      keepImage?: boolean;
     }
   | undefined;
 
@@ -112,9 +118,22 @@ export async function createArtwork(
 
   const supabase = await createClient();
 
-  const { data: uploaded } = await supabase.storage
+  const { data: uploaded, error: existsError } = await supabase.storage
     .from(ARTWORKS_BUCKET)
     .exists(imagePath);
+
+  // `exists` reports a transient failure as `data: false`, which is
+  // indistinguishable from a genuinely missing object unless the error is
+  // read. That distinction matters: the form deletes the uploaded object
+  // whenever it sees a field error, so treating a Storage blip as "missing"
+  // would destroy a good upload and force a re-upload of up to 10 MB. A
+  // `message` keeps the object alive for the retry.
+  if (existsError) {
+    return {
+      message: "Could not verify the upload. Try again.",
+      keepImage: true,
+    };
+  }
 
   if (!uploaded) {
     return {
