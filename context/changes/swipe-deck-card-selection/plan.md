@@ -404,29 +404,29 @@ server-side.
 
 #### Automated
 
-- [x] 2.1 New tests pass: `npm run test`
-- [x] 2.2 Type checking passes: `npm run typecheck`
-- [x] 2.3 Linting passes: `npm run lint`
-- [x] 2.4 Formatting is clean: `npm run format:check`
-- [x] 2.5 Build passes: `npm run build`
+- [x] 2.1 New tests pass: `npm run test` — 37df63f
+- [x] 2.2 Type checking passes: `npm run typecheck` — 37df63f
+- [x] 2.3 Linting passes: `npm run lint` — 37df63f
+- [x] 2.4 Formatting is clean: `npm run format:check` — 37df63f
+- [x] 2.5 Build passes: `npm run build` — 37df63f
 
 #### Manual
 
-- [x] 2.6 Churn tests observed red against ordinal indexing before being accepted green
+- [x] 2.6 Churn tests observed red against ordinal indexing before being accepted green — 37df63f
 
 ### Phase 3: Rewire SwipeDeck to the helper
 
 #### Automated
 
-- [ ] 3.1 Full verify gate passes
-- [ ] 3.2 No ordinal reader survives in `SwipeDeck.tsx`
-- [ ] 3.3 Probe not committed
+- [x] 3.1 Full verify gate passes
+- [x] 3.2 No ordinal reader survives in `SwipeDeck.tsx`
+- [x] 3.3 Probe not committed
 
 #### Manual
 
-- [ ] 3.4 `repro.md` sequence now advances to the correct next card
-- [ ] 3.5 A skipped piece does not reappear despite the demotion tier
-- [ ] 3.6 "N left" agrees with the rendered card across a refetch and never goes negative
-- [ ] 3.7 A failed write returns that specific card with an error
-- [ ] 3.8 Arrow keys, drag, buttons, and `EmptyDeck` all still work
-- [ ] 3.9 Probe reverted and `git status` confirmed before committing
+- [x] 3.4 `repro.md` sequence now advances to the correct next card
+- [x] 3.5 A skipped piece does not reappear despite the demotion tier
+- [x] 3.6 "N left" agrees with the rendered card across a refetch and never goes negative
+- [x] 3.7 A failed write returns that specific card with an error
+- [x] 3.8 Arrow keys, drag, buttons, and `EmptyDeck` all still work
+- [x] 3.9 Probe reverted and `git status` confirmed before committing
