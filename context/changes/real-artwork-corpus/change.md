@@ -64,7 +64,12 @@ a name that says so; `db:seed:enrich:retry` reopens failures. All three invoke `
 an earlier version aliased through `npm run`, which swallows extra args (`--limit 1` was dropped
 and a 1-piece check started all 830).
 
-*Corpus state at Phase 2 close: 197 of 1000 pinned — 174 enriched, 23 failed.* Owner will drive
+*Retry proved the 429s transient.* Running `--retry-failed` over the 23 pinned failures recovered
+**22 of them**, all on the first attempt at concurrency 2. Nothing about those pieces was hard for
+the model; they were casualties of our own request rate. This is the evidence for keeping
+concurrency at 2 and for making retry an ordinary part of the workflow rather than a rescue hatch.
+
+*Corpus state at Phase 2 close: 197 of 1000 pinned — 196 enriched, 1 failed.* Owner will drive
 the remainder manually via the resume/retry scripts. Consequences carried forward:
 
 - **Criteria 2.6 and 2.9 are left unchecked, not claimed.** Both describe a fully-enriched
