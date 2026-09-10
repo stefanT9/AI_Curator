@@ -1,7 +1,7 @@
 ---
 change_id: ranking-eval-corpus
 title: Ranking evaluation corpus — seeded artworks, identities and like history
-status: implementing
+status: implemented
 created: 2026-09-10
 updated: 2026-09-10
 archived_at: null

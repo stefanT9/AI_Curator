@@ -489,12 +489,12 @@ database rows, so the image upload is part of the reset workflow rather than one
 
 #### Automated
 
-- [x] 4.1 Formatting check passes: `npm run format:check`
-- [x] 4.2 Linting passes: `npm run lint`
-- [x] 4.3 Full verify gate passes: `npm run typecheck`, `npm run test`, `npm run build`
+- [x] 4.1 Formatting check passes: `npm run format:check` — 7cd004f
+- [x] 4.2 Linting passes: `npm run lint` — 7cd004f
+- [x] 4.3 Full verify gate passes: `npm run typecheck`, `npm run test`, `npm run build` — 7cd004f
 
 #### Manual
 
-- [x] 4.4 Following the README from a clean reset reproduces a working corpus
-- [x] 4.5 The judgment walkthrough executes end to end and produces a pre-S-01 baseline
-- [x] 4.6 The baseline confirms clusters are interleaved today, unrelated to the warm collector's likes
+- [x] 4.4 Following the README from a clean reset reproduces a working corpus — 7cd004f
+- [x] 4.5 The judgment walkthrough executes end to end and produces a pre-S-01 baseline — 7cd004f
+- [x] 4.6 The baseline confirms clusters are interleaved today, unrelated to the warm collector's likes — 7cd004f
