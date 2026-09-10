@@ -331,22 +331,22 @@ The `check` constraint is the only schema change and it lands `not valid` delibe
 
 #### Automated
 
-- [x] 1.1 `npm run test` still passes with an unchanged file count
-- [x] 1.2 `format:check`, `lint`, `typecheck`, `build` all pass
-- [x] 1.3 `npm run test:integration` passes against a running local stack
-- [x] 1.4 A non-local Supabase URL fails via the guard, not a network error
+- [x] 1.1 `npm run test` still passes with an unchanged file count — 7d582ff
+- [x] 1.2 `format:check`, `lint`, `typecheck`, `build` all pass — 7d582ff
+- [x] 1.3 `npm run test:integration` passes against a running local stack — 7d582ff
+- [x] 1.4 A non-local Supabase URL fails via the guard, not a network error — 7d582ff
 
 #### Manual
 
-- [x] 1.5 Stack stopped: the failure prints the two copy-paste commands
-- [x] 1.6 The AGENTS.md Tests section reads correctly to a newcomer
+- [x] 1.5 Stack stopped: the failure prints the two copy-paste commands — 7d582ff
+- [x] 1.6 The AGENTS.md Tests section reads correctly to a newcomer — 7d582ff
 
 ### Phase 2: Pin the Storage Boundary
 
 #### Automated
 
-- [ ] 2.1 `npm run test:integration` passes with the storage-boundary file
-- [ ] 2.2 `lint` and `typecheck` pass
+- [x] 2.1 `npm run test:integration` passes with the storage-boundary file
+- [x] 2.2 `lint` and `typecheck` pass
 
 #### Manual
 
