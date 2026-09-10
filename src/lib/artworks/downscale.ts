@@ -6,9 +6,13 @@
  * is what keeps a suggestion inside the latency budget — and keeps the request
  * well under the Server Action body cap.
  *
- * Browser-only: uses `createImageBitmap` and a canvas. Never import this from a
- * server module, and never add "server-only" to it.
+ * Browser-only: uses `createImageBitmap` and a canvas. "client-only" is the
+ * mirror of the "server-only" guard on the data-access modules — importing
+ * this from a server module is a build error rather than a runtime
+ * "document is not defined".
  */
+
+import "client-only";
 
 /** Longest edge of the downscaled image, in pixels. Ample for tagging. */
 const MAX_EDGE = 768;

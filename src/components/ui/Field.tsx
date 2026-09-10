@@ -51,10 +51,15 @@ export function Field({
   const errorId = `${name}-error`;
   const hintId = `${name}-hint`;
 
-  // A field can be described by its hint, its errors, or both.
+  // A field can be described by its hint, its errors, or both. `errors?.length`
+  // rather than `errors` — an empty array is truthy, which would point
+  // aria-describedby at an element that never renders.
+  const hasErrors = Boolean(errors?.length);
+
   const describedBy =
-    [hint ? hintId : null, errors ? errorId : null].filter(Boolean).join(" ") ||
-    undefined;
+    [hint ? hintId : null, hasErrors ? errorId : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   // Controlled and uncontrolled are mutually exclusive in React: passing both
   // `value` and `defaultValue` warns and the field stops accepting input.
@@ -72,7 +77,7 @@ export function Field({
           ) => onValueChange?.(event.target.value),
         }
       : { defaultValue }),
-    "aria-invalid": errors ? (true as const) : undefined,
+    "aria-invalid": hasErrors ? (true as const) : undefined,
     "aria-describedby": describedBy,
     className: fieldClass,
   };
@@ -103,15 +108,20 @@ export function Field({
           {...(controlled ? {} : { onChange })}
         />
       )}
-      {errors?.map((error) => (
-        <p
-          key={error}
-          id={errorId}
-          className="text-xs text-red-600 dark:text-red-400"
-        >
-          {error}
-        </p>
-      ))}
+      {/*
+        One wrapper carries the id, not each message. Repeating the id per
+        message produced duplicate DOM ids, and aria-describedby resolves to
+        the first match only — so a second error was never announced.
+      */}
+      {hasErrors ? (
+        <div id={errorId} className="flex flex-col gap-1.5">
+          {errors?.map((error) => (
+            <p key={error} className="text-xs text-red-600 dark:text-red-400">
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
