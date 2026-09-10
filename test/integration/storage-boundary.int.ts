@@ -15,11 +15,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { publicImageUrl, ARTWORKS_BUCKET } from "@/lib/artworks/images";
 import { requireLocalRunningStack } from "./setup";
-import {
-  createTestArtist,
-  TINY_PNG,
-  type TestArtist,
-} from "./helpers";
+import { createTestArtist, TINY_PNG, type TestArtist } from "./helpers";
 
 let artist1: TestArtist;
 let artist2: TestArtist;
@@ -115,7 +111,10 @@ describe("Existence check for unusable objects", () => {
 
     const { error } = await artist1.client.storage
       .from(ARTWORKS_BUCKET)
-      .upload(imagePath, zeroBytes, { contentType: "image/png", upsert: false });
+      .upload(imagePath, zeroBytes, {
+        contentType: "image/png",
+        upsert: false,
+      });
 
     // The bucket permits empty files (the size check is only in the browser).
     expect(error).toBeNull();
@@ -128,7 +127,10 @@ describe("Existence check for unusable objects", () => {
 
     await artist1.client.storage
       .from(ARTWORKS_BUCKET)
-      .upload(imagePath, zeroBytes, { contentType: "image/png", upsert: false });
+      .upload(imagePath, zeroBytes, {
+        contentType: "image/png",
+        upsert: false,
+      });
     artist1.track(imagePath);
 
     const { data } = await artist1.client.storage
@@ -144,7 +146,10 @@ describe("Existence check for unusable objects", () => {
 
     const { error } = await artist1.client.storage
       .from(ARTWORKS_BUCKET)
-      .upload(imagePath, TINY_PNG, { contentType: "image/jpeg", upsert: false });
+      .upload(imagePath, TINY_PNG, {
+        contentType: "image/jpeg",
+        upsert: false,
+      });
 
     // The bucket permits MIME mismatches (the check is only in the browser).
     expect(error).toBeNull();
@@ -156,7 +161,10 @@ describe("Existence check for unusable objects", () => {
 
     await artist1.client.storage
       .from(ARTWORKS_BUCKET)
-      .upload(imagePath, TINY_PNG, { contentType: "image/jpeg", upsert: false });
+      .upload(imagePath, TINY_PNG, {
+        contentType: "image/jpeg",
+        upsert: false,
+      });
     artist1.track(imagePath);
 
     const { data } = await artist1.client.storage
