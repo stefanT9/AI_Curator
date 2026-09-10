@@ -654,40 +654,40 @@ auto-deploys it via `.github/workflows/migrations.yml`; never edit it after it a
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `npm run typecheck`
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Formatting is clean: `npm run format:check`
-- [x] 3.4 Unit tests pass: `npm run test`
-- [x] 3.5 New unit test: `completeOnboarding` redirects without re-stamping when `onboardedAt` is already set
-- [x] 3.6 New unit test: exhaustion with zero likes still reaches completion
-- [x] 3.7 Build succeeds: `npm run build`
+- [x] 3.1 Type checking passes: `npm run typecheck` — 2d782e4
+- [x] 3.2 Linting passes: `npm run lint` — 2d782e4
+- [x] 3.3 Formatting is clean: `npm run format:check` — 2d782e4
+- [x] 3.4 Unit tests pass: `npm run test` — 2d782e4
+- [x] 3.5 New unit test: `completeOnboarding` redirects without re-stamping when `onboardedAt` is already set — 2d782e4
+- [x] 3.6 New unit test: exhaustion with zero likes still reaches completion — 2d782e4
+- [x] 3.7 Build succeeds: `npm run build` — 2d782e4
 
 #### Manual
 
-- [x] 3.8 Liking `ONBOARDING_LIKE_TARGET` starter pieces ends the flow and lands on `/discover`
-- [x] 3.9 Skipping every starter piece also ends the flow and lands on `/discover`
-- [x] 3.10 Choosing terms that match no artworks completes rather than hanging
-- [x] 3.11 The resulting `/discover` deck is visibly ordered by the tags of the pieces just liked
-- [x] 3.12 Starter pieces rated during onboarding do not reappear in the `/discover` deck
+- [x] 3.8 Liking `ONBOARDING_LIKE_TARGET` starter pieces ends the flow and lands on `/discover` — 2d782e4
+- [x] 3.9 Skipping every starter piece also ends the flow and lands on `/discover` — 2d782e4
+- [x] 3.10 Choosing terms that match no artworks completes rather than hanging — 2d782e4
+- [x] 3.11 The resulting `/discover` deck is visibly ordered by the tags of the pieces just liked — 2d782e4
+- [x] 3.12 Starter pieces rated during onboarding do not reappear in the `/discover` deck — 2d782e4
 
 ### Phase 4: Gate wiring
 
 #### Automated
 
-- [ ] 4.1 Type checking passes: `npm run typecheck`
-- [ ] 4.2 Linting passes: `npm run lint`
-- [ ] 4.3 Formatting is clean: `npm run format:check`
-- [ ] 4.4 Unit tests pass: `npm run test`
-- [ ] 4.5 New DAL unit test: `requireOnboarded` redirects when `onboardedAt` is null and returns the profile when set
-- [ ] 4.6 Build succeeds: `npm run build`
+- [x] 4.1 Type checking passes: `npm run typecheck`
+- [x] 4.2 Linting passes: `npm run lint`
+- [x] 4.3 Formatting is clean: `npm run format:check`
+- [x] 4.4 Unit tests pass: `npm run test`
+- [x] 4.5 New DAL unit test: `requireOnboarded` redirects when `onboardedAt` is null and returns the profile when set
+- [x] 4.6 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 4.7 A fresh account navigating directly to `/discover` is redirected to `/onboarding`
-- [ ] 4.8 The same holds for `/liked`, `/account` and `/studio`
-- [ ] 4.9 `/onboarding` itself remains reachable — no redirect loop
-- [ ] 4.10 An account that completed onboarding in Phase 3 reaches `/discover` normally
-- [ ] 4.11 Signing out and back in does not re-trigger onboarding
+- [x] 4.7 A fresh account navigating directly to `/discover` is redirected to `/onboarding`
+- [x] 4.8 The same holds for `/liked`, `/account` and `/studio`
+- [x] 4.9 `/onboarding` itself remains reachable — no redirect loop
+- [x] 4.10 An account that completed onboarding in Phase 3 reaches `/discover` normally
+- [x] 4.11 Signing out and back in does not re-trigger onboarding
 
 ### Phase 5: First-run orientation
 

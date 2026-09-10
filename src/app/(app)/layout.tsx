@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { requireProfile } from "@/lib/auth/dal";
+import { requireOnboarded } from "@/lib/auth/dal";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   // The proxy already redirected signed-out visitors, but that check is
-  // optimistic. This is the one that actually guards the segment.
-  const profile = await requireProfile();
+  // optimistic. This is the one that actually guards the segment — and the one
+  // that makes onboarding mandatory, since a deep link to any page in here
+  // skips the proxy's optimistic pass but never this.
+  const profile = await requireOnboarded();
 
   return (
     <>
