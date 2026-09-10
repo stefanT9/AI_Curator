@@ -871,24 +871,24 @@ steps exist to make that failure self-explaining rather than mysterious.
 
 #### Automated
 
-- [ ] 4.1 `npm run format:check` passes
-- [ ] 4.2 `npm run lint` passes
-- [ ] 4.3 `npm run typecheck` passes
-- [ ] 4.4 `npm run test` passes
-- [ ] 4.5 `npm run build` passes
-- [ ] 4.6 `db:seed:generate` rewrites only below the marker; identities section untouched
-- [ ] 4.7 Re-running `db:seed:generate` leaves `seed.sql` byte-identical
-- [ ] 4.8 `npx supabase db reset` applies the seed with no SQL error
-- [ ] 4.9 Row counts: 1000 artworks, 8 warm likes, 0 cold, ~50 with `tags = '{}'`
-- [ ] 4.10 Every `image_path` satisfies `image_path_pattern`
-- [ ] 4.11 `db:seed:images` uploads every file; storage lists 1000 objects
+- [x] 4.1 `npm run format:check` passes
+- [x] 4.2 `npm run lint` passes
+- [x] 4.3 `npm run typecheck` passes
+- [x] 4.4 `npm run test` passes
+- [x] 4.5 `npm run build` passes
+- [x] 4.6 `db:seed:generate` rewrites only below the marker; identities section untouched
+- [x] 4.7 Re-running `db:seed:generate` leaves `seed.sql` byte-identical
+- [x] 4.8 `npx supabase db reset` applies the seed with no SQL error
+- [x] 4.9 Row counts: 1000 artworks, 8 warm likes, 0 cold, ~50 with `tags = '{}'`
+- [x] 4.10 Every `image_path` satisfies `image_path_pattern`
+- [x] 4.11 `db:seed:images` uploads every file; storage lists 1000 objects
 
 #### Manual
 
-- [ ] 4.12 Warm collector's `/discover` shows real artwork with images rendering
-- [ ] 4.13 First 20 cards are visibly interleaved across tag groups
-- [ ] 4.14 Every style term tried in onboarding produces a non-empty starter set
-- [ ] 4.15 Seeded artist's own work is absent from their deck
+- [x] 4.12 Warm collector's `/discover` shows real artwork with images rendering
+- [x] 4.13 First 20 cards are visibly interleaved across tag groups
+- [x] 4.14 Every style term tried in onboarding produces a non-empty starter set
+- [x] 4.15 Seeded artist's own work is absent from their deck
 
 ### Phase 5: Judgment walkthrough and docs
 

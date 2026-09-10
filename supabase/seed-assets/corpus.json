@@ -14797,5 +14797,18 @@
       "image_width": 843,
       "slot": 945
     }
-  ]
+  ],
+  "like_history": {
+    "tag": "figurative",
+    "piece_uuids": [
+      "02f2ff45-c896-4028-aa48-233c137f2a24",
+      "0393c0ac-7da0-4342-ab8c-659f6ac62267",
+      "060396c9-00df-4805-aa60-0f23a3e874e0",
+      "06c6ad1d-c608-45f6-b0cd-939b7576d10a",
+      "10b55911-6dd5-4498-a516-fc33a137e6b9",
+      "13db739a-8713-4afa-b3ac-1322edb2646f",
+      "1bcda47f-33b8-41f7-ab98-3479f6cdbef7",
+      "21e92a6c-b20d-4615-a218-d6d11507478f"
+    ]
+  }
 }

@@ -98,3 +98,27 @@ Untagged tail: exactly 50 pieces (5.0%), spaced every 20 slots, deterministic fr
 with one piece inside each end-window so the sort key is observable whichever end Phase 4 calls
 newest. Coverage re-runs byte-identical. Style/mood coverage will grow as the owner resumes
 enrichment; the report says so and is the honest way to re-measure.
+
+**2026-09-10, Phase 4 — generated, verified against the local stack, with two numbers worth carrying.**
+
+*The corpus is real and applies cleanly.* `db reset` seeded 1000 artworks, 8 warm likes,
+0 cold, and 0 rows violating `image_path_pattern`; `db:seed:images` put 1000 objects in the
+bucket. The identities section above the marker was proved byte-identical by diff, and a
+second `db:seed:generate` left both `seed.sql` and `corpus.json` unchanged byte for byte.
+
+*`tags = '{}'` reads 54, not 50.* Fifty are the deliberate untagged tail. The other four —
+aic 217672 and 217697 (Xugu calligraphy), 269138, 270369 — are pieces whose AIC metadata
+mapped to no taxonomy term at all and which enrichment has not reached. They will drop out
+of the count as the owner resumes enrichment, because style and mood come only from the
+model. Criterion 4.9 says "~50" and is satisfied, but the number is a reading of the
+half-enriched state, not a stable property of the corpus.
+
+*Criterion 4.14 was confirmed against the terms that have pieces behind them.* With 803 of
+1000 pieces unenriched, roughly 13 of the 20 style terms are populated; the owner confirmed
+the picker works for those. Full style coverage was never this change's promise after the
+2026-09-10 picker reversal — the data-driven picker change is what stops a collector meeting
+an empty pool. Recorded rather than reworded, per the lesson on Progress items.
+
+*The like history is emergent, not designed.* The generator picked `figurative` as the most
+populous style term and liked its eight oldest members, pinning both into the manifest under
+`like_history` so Phase 5's walkthrough can name the group instead of rediscovering it.

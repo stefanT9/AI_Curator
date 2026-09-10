@@ -3,21 +3,46 @@ import { describe, expect, it } from "vitest";
 import {
   combineTags,
   coverageReport,
+  descriptionFor,
   effectiveTags,
   enrichedTags,
   facetOf,
+  imagePathOf,
   mediumTags,
   paletteTags,
   parseLimit,
+  renderGeneratedRegion,
+  selectLikeHistory,
   selectPending,
   selectUntagged,
+  sqlString,
+  sqlTagArray,
   subjectTags,
   truncateTitle,
   type AicArtwork,
+  type CorpusManifest,
   type CorpusPiece,
 } from "../scripts/build-corpus";
 import { ARTWORK_TAGS, TAXONOMY_BY_FACET } from "@/lib/ai/taxonomy";
 import { MAX_TAGS } from "@/lib/artworks/tags";
+
+/**
+ * An ordinary corpus of `n` pieces: slot `i`, a UUID that sorts the same way,
+ * one metadata tag and one style/mood pair. Shared by every suite below that
+ * needs a manifest rather than a hand-built edge case.
+ */
+const corpusPieces = (n: number): CorpusPiece[] =>
+  Array.from({ length: n }, (_, i) => ({
+    aic_id: i,
+    image_id: `image-${i}`,
+    piece_uuid: `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`,
+    title: `Piece ${i}`,
+    artist: null,
+    tags_from_metadata: ["oil painting"],
+    image_width: 843,
+    slot: i,
+    tags_from_enrichment: ["abstract", "serene"],
+  }));
 
 /**
  * The pure decisions inside `scripts/build-corpus.ts`.
@@ -441,18 +466,7 @@ describe("selectPending", () => {
 });
 
 describe("the untagged tail", () => {
-  const corpus = (n: number): CorpusPiece[] =>
-    Array.from({ length: n }, (_, i) => ({
-      aic_id: i,
-      image_id: `image-${i}`,
-      piece_uuid: `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`,
-      title: `Piece ${i}`,
-      artist: null,
-      tags_from_metadata: ["oil painting"],
-      image_width: 843,
-      slot: i,
-      tags_from_enrichment: ["abstract", "serene"],
-    }));
+  const corpus = corpusPieces;
 
   describe("selectUntagged", () => {
     it("holds back five percent of the corpus", () => {
@@ -585,5 +599,246 @@ describe("coverageReport", () => {
     ]);
     expect(report.find((f) => f.facet === "style")!.covered).toBe(1);
     expect(report.find((f) => f.facet === "mood")!.covered).toBe(1);
+  });
+});
+
+describe("SQL literals", () => {
+  it("doubles apostrophes — AIC titles are full of them", () => {
+    expect(sqlString("L'Arlésienne")).toBe("'L''Arlésienne'");
+    expect(sqlString("D'Apres Les Maitres d'Art")).toBe(
+      "'D''Apres Les Maitres d''Art'",
+    );
+  });
+
+  it("leaves an ordinary string alone but for the quotes", () => {
+    expect(sqlString("Sauce Boat")).toBe("'Sauce Boat'");
+  });
+
+  it("double-quotes every array element, multi-word or not", () => {
+    // Over half the vocabulary is multi-word, so quoting only when needed is a
+    // rule with an exception — and the exception is what breaks.
+    expect(sqlTagArray(["oil painting", "muted"])).toBe(
+      '\'{"oil painting","muted"}\'',
+    );
+  });
+
+  it("emits an empty array for the untagged tail", () => {
+    expect(sqlTagArray([])).toBe("'{}'");
+  });
+
+  it("escapes for the array parser and then for SQL", () => {
+    // No taxonomy term needs this today; a hand-edited manifest might.
+    expect(sqlTagArray(['a"b', "c\\d", "e'f"])).toBe(
+      '\'{"a\\"b","c\\\\d","e\'\'f"}\'',
+    );
+  });
+});
+
+describe("imagePathOf", () => {
+  const [piece] = corpusPieces(1);
+
+  it("satisfies image_path_pattern", () => {
+    expect(imagePathOf(piece)).toMatch(
+      /^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(png|jpg|webp)$/,
+    );
+  });
+
+  it("files the piece under the seeded artist, which is what db:seed:images uploads", () => {
+    expect(imagePathOf(piece)).toBe(
+      `00000000-0000-4000-8000-000000000001/${piece.piece_uuid}.jpg`,
+    );
+  });
+});
+
+describe("descriptionFor", () => {
+  const [base] = corpusPieces(1);
+
+  it("appends an attribution line to the model's paragraph", () => {
+    const text = descriptionFor({
+      ...base,
+      artist: "Vincent van Gogh",
+      description: "I painted the room as I remembered sleeping in it.",
+    });
+    expect(text).toBe(
+      "I painted the room as I remembered sleeping in it.\n\n" +
+        "Vincent van Gogh — Art Institute of Chicago, object 0. Public domain (CC0).",
+    );
+  });
+
+  it("names an anonymous artist rather than leaving a dangling dash", () => {
+    expect(
+      descriptionFor({ ...base, artist: null, description: "A study." }),
+    ).toContain("Unknown artist — Art Institute of Chicago");
+  });
+
+  it("carries attribution alone when enrichment produced nothing", () => {
+    const bare: CorpusPiece = { ...base, artist: "Anon" };
+    delete bare.description;
+    expect(descriptionFor(bare)).toBe(
+      "Anon — Art Institute of Chicago, object 0. Public domain (CC0).",
+    );
+  });
+
+  it("drops the description entirely for an untagged-tail piece", () => {
+    // The tail stands in for artworks published before enrichment existed:
+    // no tags and no description, so the same rendering path is exercised.
+    expect(
+      descriptionFor({ ...base, description: "A study.", untagged: true }),
+    ).toBeNull();
+  });
+
+  it("stays inside artworks_description_length", () => {
+    const text = descriptionFor({
+      ...base,
+      artist: "A".repeat(200),
+      description: "x".repeat(5000),
+    })!;
+    expect(text.length).toBeLessThanOrEqual(2000);
+    expect(text).toContain("Public domain (CC0).");
+  });
+});
+
+describe("selectLikeHistory", () => {
+  const styled = (slot: number, style: string[]): CorpusPiece => ({
+    aic_id: slot,
+    image_id: `image-${slot}`,
+    piece_uuid: `00000000-0000-4000-8000-${String(slot).padStart(12, "0")}`,
+    title: `Piece ${slot}`,
+    artist: null,
+    tags_from_metadata: ["oil painting"],
+    image_width: 843,
+    slot,
+    tags_from_enrichment: style,
+  });
+
+  it("picks the most populous style term", () => {
+    const pieces = [
+      ...Array.from({ length: 10 }, (_, i) => styled(i, ["figurative"])),
+      ...Array.from({ length: 3 }, (_, i) => styled(100 + i, ["abstract"])),
+    ];
+    expect(selectLikeHistory(pieces)?.tag).toBe("figurative");
+  });
+
+  it("ignores non-style terms however populous", () => {
+    // `oil painting` is on every piece; a like history there would say nothing
+    // about taste, and the onboarding picker works in the style facet.
+    const pieces = Array.from({ length: 10 }, (_, i) =>
+      styled(i, ["abstract"]),
+    );
+    expect(selectLikeHistory(pieces)?.tag).toBe("abstract");
+  });
+
+  it("takes the oldest members, leaving the group's newest unseen", () => {
+    const pieces = Array.from({ length: 20 }, (_, i) =>
+      styled(i, ["figurative"]),
+    );
+    const history = selectLikeHistory(pieces)!;
+    expect(history.piece_uuids).toHaveLength(8);
+    expect(history.piece_uuids).toEqual(
+      pieces.slice(0, 8).map((piece) => piece.piece_uuid),
+    );
+  });
+
+  it("skips untagged pieces — they reach the database with no tags at all", () => {
+    const pieces = [
+      ...Array.from({ length: 4 }, (_, i) => styled(i, ["figurative"])),
+      ...Array.from({ length: 4 }, (_, i) => ({
+        ...styled(50 + i, ["figurative"]),
+        untagged: true,
+      })),
+    ];
+    expect(selectLikeHistory(pieces)!.piece_uuids).toHaveLength(4);
+  });
+
+  it("breaks a tie on the term, not on tally order", () => {
+    const forwards = [styled(0, ["abstract"]), styled(1, ["figurative"])];
+    const backwards = [...forwards].reverse();
+    expect(selectLikeHistory(forwards)?.tag).toBe("abstract");
+    expect(selectLikeHistory(backwards)?.tag).toBe("abstract");
+  });
+
+  it("returns null when nothing has been enriched yet", () => {
+    const bare = corpusPieces(3).map((piece) => {
+      const copy: CorpusPiece = { ...piece };
+      delete copy.tags_from_enrichment;
+      return copy;
+    });
+    expect(selectLikeHistory(bare)).toBeNull();
+  });
+});
+
+describe("renderGeneratedRegion", () => {
+  const manifest = (pieces: CorpusPiece[]): CorpusManifest => ({
+    version: 1,
+    source: {
+      api: "https://api.artic.edu/api/v1",
+      iiif_url: "https://www.artic.edu/iiif/2",
+      licence: "CC0",
+      query: "test",
+      sampled_at: "2026-01-01T00:00:00.000Z",
+    },
+    pieces,
+    like_history: selectLikeHistory(pieces) ?? undefined,
+  });
+
+  it("opens with the marker so the stage can find its own region again", () => {
+    const sql = renderGeneratedRegion(manifest(corpusPieces(3)));
+    expect(sql.startsWith("-- === GENERATED BY scripts/build-corpus.ts")).toBe(
+      true,
+    );
+  });
+
+  it("emits one artworks row per piece, in slot order", () => {
+    const sql = renderGeneratedRegion(manifest([...corpusPieces(5)].reverse()));
+    const hours = [...sql.matchAll(/interval '(\d+) hour'/g)].map((m) =>
+      Number(m[1]),
+    );
+    expect(hours).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it("is byte-identical across runs — the regeneration contract", () => {
+    const pieces = corpusPieces(20);
+    expect(renderGeneratedRegion(manifest(pieces))).toBe(
+      renderGeneratedRegion(manifest(pieces)),
+    );
+  });
+
+  it("guards both inserts with on conflict do nothing", () => {
+    const sql = renderGeneratedRegion(manifest(corpusPieces(10)));
+    expect(sql).toContain("on conflict (id) do nothing;");
+    expect(sql).toContain("on conflict (user_id, artwork_id) do nothing;");
+  });
+
+  it("likes only for the warm collector", () => {
+    const sql = renderGeneratedRegion(manifest(corpusPieces(10)));
+    const rows = sql
+      .slice(sql.indexOf("insert into public.interactions"))
+      .split("\n")
+      .filter((line) => line.startsWith("  ("));
+    expect(rows.length).toBeGreaterThan(0);
+    expect(
+      rows.every((line) =>
+        line.startsWith("  ('00000000-0000-4000-8000-000000000002', "),
+      ),
+    ).toBe(true);
+  });
+
+  it("omits the interactions insert when there is no like history", () => {
+    const bare = corpusPieces(3).map((piece) => {
+      const copy: CorpusPiece = { ...piece };
+      delete copy.tags_from_enrichment;
+      return copy;
+    });
+    const sql = renderGeneratedRegion(manifest(bare));
+    expect(sql).not.toContain("insert into public.interactions");
+  });
+
+  it("gives untagged pieces an empty tag array and a null description", () => {
+    const [piece] = corpusPieces(1);
+    const sql = renderGeneratedRegion(
+      manifest([{ ...piece, untagged: true, description: "dropped" }]),
+    );
+    expect(sql).toContain(", null, '{}', ");
+    expect(sql).not.toContain("dropped");
   });
 });
