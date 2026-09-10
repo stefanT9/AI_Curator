@@ -166,8 +166,12 @@ export async function createArtwork(
     if (!artwork) {
       await supabase.storage.from(ARTWORKS_BUCKET).remove([imagePath]);
     }
+    // `keepImage` so the form's own cleanup ([ArtworkForm.tsx] orphan effect)
+    // does not delete the object either: an insert error is not proof the row
+    // is absent, and this branch already chose the orphan over the broken card.
     return {
       message: `Could not save the artwork: ${insertError?.message ?? "unknown error"}`,
+      keepImage: true,
     };
   }
 
