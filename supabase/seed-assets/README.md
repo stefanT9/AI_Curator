@@ -10,41 +10,59 @@ The corpus is for the **local development database only**. It writes directly
 into `auth.users` / `auth.identities` and seeds three accounts that share one
 weak password. It must **never** be run against a linked or production project.
 
+## The whole workflow, in one command
+
+With the local stack running:
+
+```bash
+npm run db:reset
+```
+
+That is `supabase db reset` followed by `npm run db:seed:images`. Both halves are
+required — the sections below say why, and either can be run on its own.
+
 ## Applying the corpus
 
 `supabase/seed.sql` is not a migration. It is applied automatically at the end
 of `supabase db reset`, after every migration:
 
-```
+```bash
 npx supabase db reset
 ```
 
 ## Uploading the images
 
 `seed.sql` is pure SQL and cannot create Storage objects, so the placeholder
-images are a separate step. With the local stack running:
+images are a separate step:
 
+```bash
+npm run db:seed:images
 ```
-npx supabase storage cp --local -r \
+
+which runs:
+
+```bash
+npx supabase storage cp --experimental --local -r \
   supabase/seed-assets/00000000-0000-4000-8000-000000000001 \
   ss:///artworks/00000000-0000-4000-8000-000000000001
 ```
 
 The directory is named after the seeded artist's UUID, so this uploads each PNG
-to exactly the `image_path` the seed rows reference.
+to exactly the `image_path` the seed rows reference. The whole `supabase storage`
+command group is gated behind `--experimental` and refuses to run without it.
 
 Verify the upload:
 
-```
-npx supabase storage ls ss:///artworks/00000000-0000-4000-8000-000000000001
+```bash
+npx supabase storage ls --experimental --local ss:///artworks/00000000-0000-4000-8000-000000000001
 ```
 
 ## Re-run the upload after every reset
 
 `supabase db reset` clears Storage objects along with the database. The image
-upload is therefore **part of the reset workflow, not one-time setup** — re-run
-the `storage cp` command above after every `db reset`, or the corpus renders as
-broken images.
+upload is therefore **part of the reset workflow, not one-time setup** — which is
+exactly why `db:reset` chains the two. If you run `npx supabase db reset` by hand,
+run `npm run db:seed:images` after it, or the corpus renders as broken images.
 
 ## Seeded logins
 

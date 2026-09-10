@@ -6,9 +6,11 @@
  * one in this repo, and teardown does not need one — a user can delete its own
  * rows and its own objects through the policies that already exist.
  *
- * Mint **one artist per file**, not per test. `[auth.rate_limit]
+ * Mint users **per file**, not per test. `[auth.rate_limit]
  * sign_in_sign_ups = 30` per five minutes per IP (`supabase/config.toml`), so
- * a signup per test would flake the moment a file grew past thirty cases.
+ * a signup per test would flake the moment a file grew past thirty cases. A
+ * handful per file is fine — the deck spec needs an artist and two collectors,
+ * because `swipe_deck` hides the caller's own work.
  */
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
@@ -60,16 +62,14 @@ const anonymousClient = (stack: LocalStack): TestClient =>
   });
 
 /**
- * Sign up a fresh user and promote it to artist.
+ * Sign up a fresh user and leave it at the default role.
  *
  * `auth.email.enable_confirmations = false` locally, so signUp returns a live
- * session in one call. The promotion goes through the same column-granted
- * `profiles` update that `becomeArtist` uses — the storage insert policy calls
- * `private.is_artist()`, so a collector cannot upload at all.
+ * session in one call.
  */
-export const createTestArtist = async (
+const signUpTestUser = async (
   stack: LocalStack,
-): Promise<TestArtist> => {
+): Promise<{ client: TestClient; userId: string; email: string }> => {
   const client = anonymousClient(stack);
   const email = `artswipe-int-${crypto.randomUUID()}@example.test`;
   const password = `pw-${crypto.randomUUID()}`;
@@ -82,7 +82,20 @@ export const createTestArtist = async (
     );
   }
 
-  const userId = data.user.id;
+  return { client, userId: data.user.id, email };
+};
+
+/**
+ * Sign up a fresh user and promote it to artist.
+ *
+ * The promotion goes through the same column-granted `profiles` update that
+ * `becomeArtist` uses — the storage insert policy calls `private.is_artist()`,
+ * so a collector cannot upload at all.
+ */
+export const createTestArtist = async (
+  stack: LocalStack,
+): Promise<TestArtist> => {
+  const { client, userId, email } = await signUpTestUser(stack);
 
   const { error: promoteError } = await client
     .from("profiles")
@@ -139,4 +152,33 @@ export const createTestArtist = async (
     upload,
     cleanup,
   };
+};
+
+export type TestCollector = {
+  client: TestClient;
+  userId: string;
+  email: string;
+  cleanup: () => Promise<void>;
+};
+
+/**
+ * Sign up a fresh user and leave it a collector.
+ *
+ * The absence of a promotion is the whole point: `swipe_deck` excludes
+ * `a.artist_id = auth.uid()`, so a deck is only observable from an account
+ * that did not upload the catalogue. That makes the artist helper unusable for
+ * deck assertions and this one necessary.
+ */
+export const createTestCollector = async (
+  stack: LocalStack,
+): Promise<TestCollector> => {
+  const { client, userId, email } = await signUpTestUser(stack);
+
+  const cleanup = async () => {
+    // RLS already scopes this delete to the caller; the filter states it.
+    await client.from("interactions").delete().eq("user_id", userId);
+    await client.auth.signOut();
+  };
+
+  return { client, userId, email, cleanup };
 };

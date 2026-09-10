@@ -43,21 +43,21 @@ everything except the ordering itself, so it is the smallest change that proves 
 
 ## At a glance
 
-| ID   | Change ID                           | Outcome (user can …)                                                              | Prerequisites | PRD refs                                    | Status   |
-| ---- | ----------------------------------- | --------------------------------------------------------------------------------- | ------------- | ------------------------------------------- | -------- |
-| F-01 | `ranking-eval-corpus`               | (foundation) tag-match ordering can be exercised and judged, not guessed at       | —             | §Constraints, Open Questions 2 and 4        | done     |
-| S-01 | `personalized-deck-ranking`         | be served cards ordered by tag-match to their likes, with passed pieces demoted   | F-01          | US-01, FR-002, FR-003, FR-004, FR-006, OQ-3 | proposed |
-| S-02 | `continuous-deck-refill`            | keep swiping past the end of the current cards without hitting a dead end         | —             | US-01, FR-001, FR-007, §Guardrails          | ready    |
-| S-03 | `cold-start-and-untagged-placement` | get a deliberate ordering before they have liked much, and where tags are missing | S-01          | FR-005, Open Questions 2 and 4              | blocked  |
+| ID   | Change ID                           | Outcome (user can …)                                                              | Prerequisites | PRD refs                                    | Status  |
+| ---- | ----------------------------------- | --------------------------------------------------------------------------------- | ------------- | ------------------------------------------- | ------- |
+| F-01 | `ranking-eval-corpus`               | (foundation) tag-match ordering can be exercised and judged, not guessed at       | —             | §Constraints, Open Questions 2 and 4        | done    |
+| S-01 | `personalized-deck-ranking`         | be served cards ordered by tag-match to their likes, with passed pieces demoted   | F-01          | US-01, FR-002, FR-003, FR-004, FR-006, OQ-3 | done    |
+| S-02 | `continuous-deck-refill`            | keep swiping past the end of the current cards without hitting a dead end         | —             | US-01, FR-001, FR-007, §Guardrails          | ready   |
+| S-03 | `cold-start-and-untagged-placement` | get a deliberate ordering before they have liked much, and where tags are missing | S-01          | FR-005, Open Question 2                     | blocked |
 
 ## Streams
 
 Navigation aid — groups items that share a Prerequisites chain. Canonical ordering still lives in the dependency graph below; this table is the proposed reading order across parallel tracks.
 
-| Stream | Theme            | Chain                    | Note                                                                                                          |
-| ------ | ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| A      | Ranking          | `F-01` → `S-01` → `S-03` | The ordering work itself. Ends in the blocked slice, so the stream stalls until OQ-2 and OQ-4 are answered.   |
-| B      | Swipe continuity | `S-02`                   | Standalone — no foundation prerequisite, and deliberately ordering-agnostic so it can run alongside Stream A. |
+| Stream | Theme            | Chain                    | Note                                                                                                                              |
+| ------ | ---------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| A      | Ranking          | `F-01` → `S-01` → `S-03` | The ordering work itself. Ends in the blocked slice, so the stream stalls until OQ-2 is answered (OQ-4 was answered inside S-01). |
+| B      | Swipe continuity | `S-02`                   | Standalone — no foundation prerequisite, and deliberately ordering-agnostic so it can run alongside Stream A.                     |
 
 ## Baseline
 
@@ -105,9 +105,9 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:**
   - How are tags weighted when matching? (PRD Open Question 1) — Owner: user. Block: no. The PRD already resolves v1 to unweighted tag-match ("kept for v1; simple tag-match is what ships in three weeks"), so a default exists and planning can proceed on it.
-- **Decisions folded in:** Open Question 3 is resolved — passed artworks **reappear, demoted**. The ordering therefore has two tiers: unseen pieces by tag-match first, then previously-passed pieces by tag-match below all of them. Liked pieces never return (FR-006). The "after how long?" half of the question is answered structurally rather than by a timer: a demoted piece surfaces only once fresh matches are exhausted.
+- **Decisions folded in:** Open Question 4 is resolved — untagged artworks sit **below every tagged piece**, including previously-passed ones. Decided inside this slice rather than deferred to S-03 because the ordering has to place them somewhere: any sort key that scores tag overlap already puts untagged pieces at zero, so leaving the question open would have shipped an accidental placement and called it a fallback. Demoting them explicitly costs one outermost sort key and makes the placement assertable. This is what narrows S-03 to OQ-2 alone. Open Question 3 is resolved — passed artworks **reappear, demoted**. The ordering therefore has two tiers: unseen pieces by tag-match first, then previously-passed pieces by tag-match below all of them. Liked pieces never return (FR-006). The "after how long?" half of the question is answered structurally rather than by a timer: a demoted piece surfaces only once fresh matches are exhausted.
 - **Risk:** The whole change is the ordering, so getting it wrong is quietly invisible — a bad ranking still returns cards. That is what F-01 is for. This slice also **narrows the existing exclusion predicate**: `swipe_deck` today anti-joins on _any_ `interactions` row, and the demotion decision means it must exclude on `action = 'like'` only. That is a live behavior change, not an addition, and it is the single most likely place to accidentally start re-serving liked pieces and break FR-006. Secondary risk: this slice and S-02 both touch `swipe_deck`, so running them in parallel invites an edit collision in one function even though neither depends on the other.
-- **Status:** proposed
+- **Status:** done
 
 ### S-02: Deck refills as the collector keeps swiping
 
@@ -118,6 +118,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Parallel with:** F-01, S-01
 - **Blockers:** —
 - **Unknowns:** —
+- **Known defect this slice must fix (found 2026-09-10 during S-01's judgment walk):** the deck prop can be swapped underneath the client's cursor. `SwipeDeck.tsx:17` keeps `index` in client state and reads `deck[index]` from a prop; `recordInteraction` calls the cookie-aware server Supabase client, which writes cookies when Supabase rotates the session, and per `node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md:510` a Server Action that sets a cookie makes Next re-render the current page and its layouts — client state preserved (`:512`). `/discover` is `force-dynamic`, so `getSwipeDeck()` re-runs and a freshly ranked array arrives while `index` still counts against the old one, landing the collector on an unrelated card. Intermittent: only when the session cookie actually rotates. Latent before S-01 (the anti-join dropped every interacted piece, so a refetch looked like "the remainder"); S-01's demotion tier keeps skipped pieces in the array, so a stale index can now resurface something already passed. Candidate fixes: key client state to artwork id rather than ordinal, or freeze the deck in client state on mount. Diagnosed from the docs and code, not reproduced in a browser.
 - **Risk:** Genuinely ordering-agnostic, which is why it carries no dependency on S-01: every swiped card writes an `interactions` row and `swipe_deck` anti-joins on it, so a refill is just another call to the same RPC with no cursor to invalidate when S-01 changes the sort key. Cards held in the client stack but not yet swiped are the one overlap case to handle. The part most likely to get quietly skipped is the guardrail — a refill that works but stalls silently satisfies FR-001 and violates the guardrail. Note the interaction with `S-01`: continuous refill against a permanently-excluding deck query would exhaust a small catalogue fast, so if this slice ships before `S-01`'s demotion tier, expect `EmptyDeck` to be reached quickly and do not mistake that for a refill bug.
 - **Status:** ready
 
@@ -130,26 +131,26 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
-  - How many likes switch ranking on? (PRD Open Question 2) — Owner: user. Block: yes. FR-005 has no acceptance criteria a test can assert until this is a number.
-  - Where do untagged artworks sit in the ordering? (PRD Open Question 4) — Owner: user. Block: yes. There is no tag backfill for pre-enrichment artworks, so this is a live population, not an edge case.
+  - How many likes switch ranking on? (PRD Open Question 2) — Owner: user. Block: yes. FR-005 has no acceptance criteria a test can assert until this is a number. **This is now the slice's only remaining blocker.**
+  - ~~Where do untagged artworks sit in the ordering? (PRD Open Question 4)~~ — **Answered 2026-09-10 inside S-01:** untagged pieces sort below every tagged piece, including previously-passed ones. Nothing left for this slice to decide; it inherits the placement.
 - **Risk:** Split out from S-01 precisely because it is the blocked half — S-01 can ship with a naive fallback (a collector with no likes scores zero against everything and lands back on newest-first), while this slice makes that behavior deliberate and testable. Sequencing it inside S-01 instead would have blocked the north star on two decisions that do not actually gate it. The risk in deferring is that "accidentally correct" fallback behavior is mistaken for designed behavior and never revisited.
 - **Status:** blocked
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                           | Suggested issue title                                                                  | Ready for `/10x-plan` | Notes                                                            |
-| ---------- | ----------------------------------- | -------------------------------------------------------------------------------------- | --------------------- | ---------------------------------------------------------------- |
-| F-01       | `ranking-eval-corpus`               | Seed a tagged-artwork corpus and like history for ranking work                         | yes                   | Run `/10x-plan ranking-eval-corpus`                              |
-| S-01       | `personalized-deck-ranking`         | Order the swipe deck by tag-match to the collector's own likes, demoting passed pieces | no                    | Needs F-01 first, to have anything to judge the ordering against |
-| S-02       | `continuous-deck-refill`            | Refill the swipe deck automatically as the collector swipes                            | yes                   | Run `/10x-plan continuous-deck-refill`                           |
-| S-03       | `cold-start-and-untagged-placement` | Define cold-start fallback and untagged-artwork placement                              | no                    | Blocked on Open Questions 2 and 4                                |
+| Roadmap ID | Change ID                           | Suggested issue title                                                                  | Ready for `/10x-plan` | Notes                                                     |
+| ---------- | ----------------------------------- | -------------------------------------------------------------------------------------- | --------------------- | --------------------------------------------------------- |
+| F-01       | `ranking-eval-corpus`               | Seed a tagged-artwork corpus and like history for ranking work                         | yes                   | Run `/10x-plan ranking-eval-corpus`                       |
+| S-01       | `personalized-deck-ranking`         | Order the swipe deck by tag-match to the collector's own likes, demoting passed pieces | done                  | Shipped — F-01 delivered the corpus it was judged against |
+| S-02       | `continuous-deck-refill`            | Refill the swipe deck automatically as the collector swipes                            | yes                   | Run `/10x-plan continuous-deck-refill`                    |
+| S-03       | `cold-start-and-untagged-placement` | Define the cold-start fallback (untagged placement settled by S-01)                    | no                    | Blocked on Open Question 2 alone                          |
 
 ## Open Roadmap Questions
 
 1. **How are tags weighted when matching?** Raw overlap treats every tag as equally important, so "blue" weighs the same as "oil-on-canvas". — Owner: user. Block: none — held as a non-blocking Unknown on `S-01`; the PRD's stated v1 answer (unweighted tag-match) is a usable default.
 2. **How many likes switch ranking on?** FR-005 falls back to the existing ordering until a collector has liked "enough"; the threshold is undefined. — Owner: user. Block: `S-03`.
 3. ~~**Do artworks a collector passed on reappear, and after how long?**~~ — **RESOLVED 2026-09-10 by the user: they reappear, but at lower priority.** Recorded as a two-tier ordering in `S-01` (unseen by tag-match, then previously-passed by tag-match). This is a change to live behavior, not a confirmation of it — `swipe_deck` currently excludes passed artworks permanently, so the exclusion predicate must narrow to `action = 'like'`. Note this decision is not yet reflected in `prd-v2.md`, whose FR-006 still reads "Whether artworks they passed on reappear is unresolved."
-4. **Where do untagged artworks sit in the ordering?** No backfill exists for pre-enrichment artworks, so untagged pieces are a real population. — Owner: user. Block: `S-03`.
+4. ~~**Where do untagged artworks sit in the ordering?**~~ — **RESOLVED 2026-09-10 inside `S-01` (`personalized-deck-ranking`): untagged artworks sort below every tagged piece, including previously-passed ones.** Rationale: the tag-overlap sort key already scores an untagged piece at zero, so the placement existed whether or not anyone decided it — the choice was between an explicit, assertable demotion and an accidental one. Demotion is the outermost key of the four-key sort, so it holds for every collector, cold or warm. Cost: it changes the cold-start deck, so the archived Walk B expectation in `context/archive/2026-09-10-ranking-eval-corpus/judgment.md` was amended (tagged newest-first, untagged tail) rather than preserved. No backfill exists for pre-enrichment artworks, so this remains a real population — but it now has a defined home. Block: none — `S-03` no longer waits on this.
 5. **Two Scope-of-Change items are untestable as written.** Carried from the PRD: the cold-start item depends on Question 2 and the already-liked/passed item on Question 3. — Owner: user. Block: half closed — Question 3 is now decided, so the already-liked/passed item is testable; only the cold-start item remains, held in `S-03` pending Question 2.
 
 ## Parked
@@ -166,3 +167,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Done
 
 - **F-01: (foundation) a seeded set of tagged artworks and a collector like-history exists in the development environment, so a tag-match ordering can be exercised and judged rather than guessed at.** — Archived 2026-09-10 → `context/archive/2026-09-10-ranking-eval-corpus/`. Lesson: —.
+- **S-01: A collector who has liked several pieces is served their next cards ordered by how well each piece's tags match the tags on the pieces they liked, instead of newest-first — and pieces they previously passed on return below all fresh matches, rather than being gone for good.** — Archived 2026-09-10 → `context/archive/2026-09-10-personalized-deck-ranking/`. Lesson: —.
