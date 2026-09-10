@@ -45,3 +45,8 @@ next-env.d.ts
 
 # Live smoke-check output (test/smoke), regenerated on each run.
 test/smoke/.last-result.json
+
+# Seed corpus images — fetched from the Art Institute of Chicago by
+# `npm run db:seed:fetch`, ~260 MB. The durable artifact is the manifest,
+# `supabase/seed-assets/corpus.json`, which is tracked.
+/supabase/seed-assets/00000000-0000-4000-8000-000000000001/

@@ -11,6 +11,10 @@ package-lock.json
 # Generated — owned by `supabase gen types`
 src/types/database.ts
 
+# Generated — owned by `scripts/build-corpus.ts`, which writes its own
+# stable key order so a regeneration diffs as content, not a reshuffle.
+supabase/seed-assets/corpus.json
+
 # Local Supabase scratch
 supabase/.temp/
 
