@@ -46,7 +46,7 @@ it("serves an uploaded object at the collector's public URL", async () => {
   await response.arrayBuffer();
 });
 
-it("returns 400 at the public URL for a key that was never uploaded", async () => {
+it("returns non-200 at the public URL for a key that was never uploaded", async () => {
   const missing = `${artist.userId}/${crypto.randomUUID()}.png`;
 
   const response = await fetch(publicImageUrl(missing));
