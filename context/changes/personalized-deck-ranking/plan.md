@@ -405,14 +405,14 @@ again (demoted), and untagged artworks move to the bottom of every deck.
 
 #### Automated
 
-- [x] 3.1 Formatting passes: `npm run format:check`
-- [x] 3.2 Full gate passes: lint, typecheck, test, build
+- [x] 3.1 Formatting passes: `npm run format:check` — b7f8100
+- [x] 3.2 Full gate passes: lint, typecheck, test, build — b7f8100
 
 #### Manual
 
-- [x] 3.3 Walk A shows Blue abstraction concentrated at the front
-- [x] 3.4 The four unliked Blue-abstraction pieces lead the warm deck
-- [x] 3.5 `oil`-sharing pieces rank above unrelated clusters
-- [x] 3.6 No previously-liked piece appears in either walk
-- [x] 3.7 Walk B matches the amended expectation
-- [x] 3.8 Roadmap no longer lists Open Question 4 as blocking S-03
+- [x] 3.3 Walk A shows Blue abstraction concentrated at the front — b7f8100
+- [x] 3.4 The four unliked Blue-abstraction pieces lead the warm deck — b7f8100
+- [x] 3.5 `oil`-sharing pieces rank above unrelated clusters — b7f8100
+- [x] 3.6 No previously-liked piece appears in either walk — b7f8100
+- [x] 3.7 Walk B matches the amended expectation — b7f8100
+- [x] 3.8 Roadmap no longer lists Open Question 4 as blocking S-03 — b7f8100
