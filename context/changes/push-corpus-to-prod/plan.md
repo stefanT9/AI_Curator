@@ -578,34 +578,34 @@ migration.
 
 #### Automated
 
-- [x] 2.1 Formatting passes: `npm run format:check`
-- [x] 2.2 Linting passes: `npm run lint`
-- [x] 2.3 Type checking passes: `npm run typecheck`
-- [x] 2.4 Default suite passes, including the row-parity test: `npm run test`
-- [x] 2.5 Build passes: `npm run build`
+- [x] 2.1 Formatting passes: `npm run format:check` — c1ae40f
+- [x] 2.2 Linting passes: `npm run lint` — c1ae40f
+- [x] 2.3 Type checking passes: `npm run typecheck` — c1ae40f
+- [x] 2.4 Default suite passes, including the row-parity test: `npm run test` — c1ae40f
+- [x] 2.5 Build passes: `npm run build` — c1ae40f
 
 #### Manual
 
-- [x] 2.6 `--apply` against a fresh local stack lands 1000 rows and 1000 objects; dry-run then reports nothing to do
-- [x] 2.7 A second `--apply` sends no row or object requests; count stays 1000
-- [x] 2.8 A hand-edited description yields exactly one row to replace, applied in place
-- [x] 2.9 An interrupted run resumes and reaches nothing-to-do
-- [x] 2.10 A deleted local JPEG yields exactly one collected failure, a non-zero exit, and no row for that piece
-- [x] 2.11 The local app renders the deck from pushed data with images intact
+- [x] 2.6 `--apply` against a fresh local stack lands 1000 rows and 1000 objects; dry-run then reports nothing to do — c1ae40f
+- [x] 2.7 A second `--apply` sends no row or object requests; count stays 1000 — c1ae40f
+- [x] 2.8 A hand-edited description yields exactly one row to replace, applied in place — c1ae40f
+- [x] 2.9 An interrupted run resumes and reaches nothing-to-do — c1ae40f
+- [x] 2.10 A deleted local JPEG yields exactly one collected failure, a non-zero exit, and no row for that piece — c1ae40f
+- [x] 2.11 The local app renders the deck from pushed data with images intact — c1ae40f
 
 ### Phase 3: Documentation and env scaffolding
 
 #### Automated
 
-- [ ] 3.1 Formatting passes: `npm run format:check`
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Full gate stays green: `npm run typecheck` · `npm run test` · `npm run build`
-- [ ] 3.4 `git status --porcelain` shows no `.env.push.local`
+- [x] 3.1 Formatting passes: `npm run format:check`
+- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.3 Full gate stays green: `npm run typecheck` · `npm run test` · `npm run build`
+- [x] 3.4 `git status --porcelain` shows no `.env.push.local`
 
 #### Manual
 
-- [ ] 3.5 A reader can construct `.env.push.local` and dry-run from the README alone
-- [ ] 3.6 The AGENTS.md sentence is defensible against the existing "no second mechanism" rule
+- [x] 3.5 A reader can construct `.env.push.local` and dry-run from the README alone
+- [x] 3.6 The AGENTS.md sentence is defensible against the existing "no second mechanism" rule
 
 ### Phase 4: The production run
 

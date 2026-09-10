@@ -12,6 +12,9 @@ directly into `auth.users` / `auth.identities` and seeds three accounts that
 share one weak password. It must **never** be run against a linked or
 production project.
 
+`npm run db:push`, below, is the one exception — it does not use `seed.sql`
+at all.
+
 ## After a clone: fetch the images once
 
 The images are **gitignored** — roughly 260 MB across 1000 files. A fresh clone
@@ -63,7 +66,7 @@ hand-authored — the seeded identities, which encode the GoTrue requirement tha
 every text token column be an empty string rather than NULL — and the generator
 never touches it.
 
-## The four stages
+## The five stages
 
 Each stage reads and writes `corpus.json`, so a failure halfway leaves usable
 progress and a later run resumes rather than restarting.
@@ -74,6 +77,7 @@ progress and a later run resumes rather than restarting.
 | `npm run db:seed:enrich`   | network, `OPENROUTER_API_KEY` | Adds style, mood and a description per piece via `src/lib/ai`. Resumes by default; a piece already pinned costs no model call.       |
 | `npm run db:seed:coverage` | —                             | Reports how many pieces each vocabulary term can serve, and pins the untagged tail. Always exits 0: gaps are findings, not failures. |
 | `npm run db:seed:generate` | —                             | Rewrites the generated region of `seed.sql` from the manifest.                                                                       |
+| `npm run db:push`          | network, `.env.push.local`    | Diffs the manifest against a target project and, with `--apply`, writes the rows and objects a demo artist owns. Dry-run by default. |
 
 Enrichment is the long pole and the only stage that needs a key.
 `OPENROUTER_API_KEY` goes in `.env.local`, which the enrich scripts load; no
@@ -87,6 +91,46 @@ npm run db:seed:enrich:retry    # reopen pieces pinned as failed
 A pinned failure counts as done, which is what makes a plain re-run a true
 no-op — `:retry` is the opt-in that reopens them. OpenRouter caps `:free`
 models near 20 requests a minute, which is why `ENRICH_CONCURRENCY` is 2.
+
+## Pushing the corpus to a hosted project
+
+`npm run db:push` writes the manifest to a linked or remote Supabase project —
+a second **sink** on `corpus.json`, not a second seeding mechanism. It never
+touches `seed.sql`, never uses a service-role key, and signs in as a
+dedicated demo artist over the publishable key, crossing the same RLS a real
+artist crosses on every upload. Dry-run by default; `--apply` is the only
+thing that writes.
+
+**Prerequisite: a demo artist account**, created through the app itself, not
+SQL. Sign up in the target deployment with a dedicated address, then use the
+account page's "Become an artist" form (`becomeArtist`,
+`src/app/actions/profile.ts`) with a display name that identifies it as the
+seeded collection account. Every pushed row and object is owned by this
+account, so it must never be a real artist's own profile.
+
+**`.env.push.local`** holds the push's target and is read only by `db:push` —
+never `.env.local`, and none of these are `NEXT_PUBLIC_*`, so a `.env.local`
+swapped between the local and remote pairs cannot redirect a push:
+
+```bash
+PUSH_SUPABASE_URL=...              # the target project's Data API URL
+PUSH_SUPABASE_PUBLISHABLE_KEY=...  # its publishable key
+PUSH_ARTIST_EMAIL=...              # the demo artist's login
+PUSH_ARTIST_PASSWORD=...
+```
+
+**Dry-run, then apply:**
+
+```bash
+npm run db:push              # reports rows to create/replace and objects to upload; writes nothing
+npm run db:push -- --apply   # writes
+```
+
+The push is idempotent and resumable: `piece_uuid` is the row id, so
+re-running after a failure only sends what is still missing, and re-running
+after more enrichment replaces exactly the rows whose tags or description
+changed. A dry-run immediately after an `--apply` reporting nothing to do is
+the verification step — run it and confirm zero rows and zero objects.
 
 ## Licence and courtesy
 

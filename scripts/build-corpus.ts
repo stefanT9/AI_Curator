@@ -2,12 +2,13 @@
  * Builds the local ranking-evaluation corpus from the Art Institute of Chicago's
  * public-domain collection.
  *
- * Four stages over one file, `supabase/seed-assets/corpus.json`:
+ * Five stages over one file, `supabase/seed-assets/corpus.json`:
  *
  *   fetch     network  → manifest + gitignored JPEGs
  *   enrich    images   → manifest (style / mood / description)
  *   coverage  manifest → onboarding style-term report
  *   generate  manifest → the generated region of `supabase/seed.sql`
+ *   push      manifest → rows + objects on a target Supabase project
  *
  * The manifest is the source of truth and the unit of review. Every later stage
  * reads and writes it, so a failure halfway leaves usable progress, and a
@@ -22,6 +23,8 @@
  *   npm run db:seed:enrich:retry     reopen pieces pinned as failed
  *   npm run db:seed:coverage         report per-facet vocabulary coverage
  *   npm run db:seed:generate         write the generated region of seed.sql
+ *   npm run db:push                  dry-run against .env.push.local's target
+ *   npm run db:push -- --apply       write the rows and objects
  *
  * `enrich` resumes by default and is safe to re-run: a piece is done once it
  * carries a `tags_from_enrichment` field, so a re-run over a finished manifest
@@ -33,7 +36,10 @@
  * rejects, and `--conditions=react-server` maps `import "server-only"` onto its
  * empty stub instead of the bare `throw` its default export is.
  *
- * LOCAL DEVELOPMENT ONLY. This writes seed data for `supabase db reset`.
+ * `fetch`, `enrich`, `coverage` and `generate` are LOCAL DEVELOPMENT ONLY —
+ * they write seed data for `supabase db reset`. `push` is the exception: it
+ * writes to whatever project `.env.push.local` names, local or hosted, and is
+ * dry-run unless invoked with `--apply`. See supabase/seed-assets/README.md.
  */
 
 import { createHash } from "node:crypto";
