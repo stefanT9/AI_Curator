@@ -1,7 +1,7 @@
 ---
 change_id: real-artwork-corpus
 title: Real artwork corpus
-status: implementing
+status: impl_reviewed
 created: 2026-09-10
 updated: 2026-09-10
 archived_at: null
@@ -26,3 +26,8 @@ report that always exits 0; Phase 2 no longer has to reach 20/20, so a subset of
 legitimate corpus rather than a gap to paper over. Rationale: a 19th-century-heavy CC0 corpus
 genuinely lacks `street art`, and a brand-new production deployment has the same empty-pool bug
 regardless of what this corpus contains — so the picker, not the seed data, is where it belongs.
+
+**2026-09-10, Phase 1 impl review — merge constraint.** Phases 1-4 must land together. Phase 1
+deletes the placeholder PNGs that `seed.sql` still references 54 times; only Phase 4's `generate`
+stage rewrites those rows. The branch is intentionally non-functional for local dev in between.
+See the plan's "Known Intermediate State" section.

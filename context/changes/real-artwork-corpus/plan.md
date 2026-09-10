@@ -248,9 +248,12 @@ statement, the sampling query and the date sampled) and a `pieces` array. Each p
 `aic_id`, `image_id`, `piece_uuid` (the artwork row id and image filename stem), `title`
 (truncated to 120), `artist` (AIC `artist_title`, nullable), `tags_from_metadata`,
 `tags_from_enrichment` (absent until Phase 2), `tag_overrides` (absent until Phase 3),
-`description` (absent until Phase 2), `slot` (the `created_at` offset), and `untagged` (a
-boolean set in Phase 3). Field order is stable and the file is written with sorted keys and a
-trailing newline so a regeneration diff is reviewable rather than a reshuffle.
+`description` (absent until Phase 2), `slot` (the `created_at` offset), `image_width` (the IIIF
+width actually requested, so a re-download needs no API call), and `untagged` (a boolean set in
+Phase 3). The `pieces` array is sorted by `aic_id` and each piece is written in a fixed key order
+with a trailing newline, so a regeneration diff is reviewable rather than a reshuffle. Keys are
+in declared order, not alphabetical. Both the reader and the writer preserve keys they do not
+know, so a stage that re-reads the manifest can never delete another stage's work.
 
 #### 5. The generator: fetch stage
 
@@ -260,9 +263,14 @@ trailing newline so a regeneration diff is reviewable rather than a reshuffle.
 metadata reliably knows onto our vocabulary, and download each image once.
 
 **Contract**: A stage dispatcher plus the `fetch` stage. Sampling spreads across AIC
-`classification_titles` families (painting, print, drawing, photograph, textile, ceramic,
-sculpture) with `query[term][is_public_domain]=true` and `fields` limited to what the mapping
-consumes, sampling to 1000 pieces with `image_id` non-null. Three mappers, each producing only
+`classification_titles` families (painting, print, drawing, photograph, **ceramics** — the
+spelling the index uses — textile, sculpture) with `is_public_domain` true and `fields` limited
+to what the mapping consumes, sampling to 1000 pieces with `image_id` non-null. AIC refuses any
+offset above 1000, so a 24,740-piece family cannot be paged through: each family is instead
+partitioned into six accession-id buckets and sampled from the head of each. Family targets are
+allocated with a per-family cap and the shortfall redistributed, because `drawing` holds only 31
+public-domain works in total. Resume is additive — pieces already in the manifest are pinned,
+never re-sampled and never re-downloaded, and only the shortfall is fetched. Three mappers, each producing only
 taxonomy terms:
 
 - **medium** ← `classification_titles` / `medium_display`, matched against
@@ -272,16 +280,22 @@ taxonomy terms:
   table (`"interiors"` → `interior`, `"bedrooms"` → `interior`).
 - **palette** ← `color` HSL. Saturation and lightness thresholds give `monochrome`,
   `desaturated`, `muted` or `vivid`; hue buckets give `red dominant` / `green dominant` /
-  `blue dominant`; low lightness with low saturation gives `black and white`. The thresholds are
-  a documented constant block, not scattered literals.
+  `blue dominant`, emitted only above a saturation floor since the hue of a near-grey is noise;
+  a near-grey that is also very dark **or** very light gives `black and white`. The thresholds
+  are a documented constant block, not scattered literals.
 
-Imports `TAXONOMY_BY_FACET` from `@/lib/ai/taxonomy` so a term that leaves the vocabulary breaks
-the build rather than silently producing an unmatchable tag. Every mapper output is asserted to
+The AIC response and the manifest are both validated with Zod at the boundary per AGENTS.md —
+the manifest loosely, so unknown keys survive. Imports `TAXONOMY_BY_FACET` from
+`@/lib/ai/taxonomy` so a term that leaves the vocabulary breaks the build rather than silently
+producing an unmatchable tag. Every mapper output is asserted to
 be a member of its facet before it reaches the manifest. Titles longer than 120 characters are
 truncated on a word boundary with an ellipsis. Images are written as
 `<artist-uuid>/<piece_uuid>.jpg` to satisfy `image_path_pattern`, requested at IIIF width 843
-with both user-agent headers, and rejected unless the response `content-type` starts with
-`image/`. Re-running skips pieces already in the manifest with a downloaded file present.
+**capped at the source width** — AIC 403s any request that would upscale — with both user-agent
+headers, and rejected unless the response `content-type` starts with `image/` and the bytes begin
+with a JPEG magic number. Writes go through a temporary file and an atomic rename, and a
+zero-byte file counts as absent, so an interrupted run is repaired rather than trusted.
+Re-running skips pieces already in the manifest with a non-empty downloaded file present.
 
 ### Success Criteria:
 
@@ -732,6 +746,20 @@ rather than four uniform clusters, and Phase 4's manual verification is where a 
 show up.
 
 Storage holds ~260 MB across 1000 objects locally. Nothing is committed.
+
+## Known Intermediate State
+
+**Between Phase 1 and Phase 4 this branch does not run locally.** Phase 1 deletes the five
+placeholder PNGs; Phase 4 is what regenerates `supabase/seed.sql`. In between, `seed.sql` still
+references those files 54 times, so `npm run db:reset` seeds 54 rows whose `image_path` points at
+objects that no longer exist, and `npm run db:seed:images` uploads ~260 MB of JPEGs that no row
+references yet.
+
+Nothing is lost — the placeholders are recoverable at `03d7e7f^` — but the consequence is a
+merge constraint, recorded here rather than discovered: **do not merge this branch until Phase 4
+has regenerated `seed.sql`.** Phases 1 through 4 land together. Restoring the placeholders behind
+a `.gitignore` negation was considered and rejected: it trades a visible breakage on a
+feature branch for a hidden one that has to be remembered and undone later.
 
 ## Migration Notes
 

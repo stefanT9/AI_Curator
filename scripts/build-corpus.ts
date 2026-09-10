@@ -27,8 +27,16 @@
  */
 
 import { createHash } from "node:crypto";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  readFile,
+  readdir,
+  rename,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import path from "node:path";
+import * as z from "zod";
 import { TAXONOMY_BY_FACET, type Facet } from "@/lib/ai/taxonomy";
 
 // ---------------------------------------------------------------------------
@@ -403,20 +411,38 @@ export function assertFacetMember(term: string, facet: Facet): string {
   return term;
 }
 
-/** AIC's `color`, as returned by the search API. */
-export type AicColor = { h: number; s: number; l: number } | null | undefined;
+/**
+ * The AIC boundary, validated rather than asserted.
+ *
+ * `paletteTags` does arithmetic on `color.h/s/l`, so a cast is the wrong tool:
+ * if AIC ever returns those as strings, a cast produces silently wrong tags on
+ * every piece, while a parse fails loudly. Per AGENTS.md, external input is
+ * validated with Zod at the boundary.
+ *
+ * Unknown keys are dropped deliberately here — AIC sends fields this script has
+ * no use for (`percentage`, `population`, `_score`), and none of them reach the
+ * manifest. The manifest schema below is the opposite case.
+ */
+const AicColorSchema = z.object({
+  h: z.number(),
+  s: z.number(),
+  l: z.number(),
+});
 
-export type AicArtwork = {
-  id: number;
-  title?: string | null;
-  artist_title?: string | null;
-  image_id?: string | null;
-  classification_titles?: string[] | null;
-  subject_titles?: string[] | null;
-  medium_display?: string | null;
-  color?: AicColor;
-  thumbnail?: { width?: number | null } | null;
-};
+const AicArtworkSchema = z.object({
+  id: z.number(),
+  title: z.string().nullish(),
+  artist_title: z.string().nullish(),
+  image_id: z.string().nullish(),
+  classification_titles: z.array(z.string()).nullish(),
+  subject_titles: z.array(z.string()).nullish(),
+  medium_display: z.string().nullish(),
+  color: AicColorSchema.nullish(),
+  thumbnail: z.object({ width: z.number().nullish() }).nullish(),
+});
+
+export type AicColor = z.infer<typeof AicColorSchema> | null | undefined;
+export type AicArtwork = z.infer<typeof AicArtworkSchema>;
 
 /**
  * Longest key first, so "oil on canvas" wins over a shorter key that also
@@ -587,9 +613,34 @@ export function allocate(available: number[], total: number): number[] {
 // ---------------------------------------------------------------------------
 
 /**
+ * Write through a temporary file and rename into place.
+ *
+ * `rename` is atomic within a filesystem, so an interrupted run leaves either
+ * the old file or the new one — never a truncated one. Without it, Ctrl-C
+ * during a manifest write corrupts the durable artifact, and during an image
+ * write leaves a short `.jpg` that `downloadedUuids` counts as present forever.
+ * `package.json`'s `db:types` uses the same idiom for the generated types.
+ */
+async function writeAtomic(
+  destination: string,
+  data: string | Uint8Array,
+): Promise<void> {
+  const temporary = `${destination}.tmp`;
+  await writeFile(temporary, data);
+  await rename(temporary, destination);
+}
+
+/**
  * Written with a fixed key order and a trailing newline so a regeneration
  * shows up as a content diff rather than a reshuffle. `corpus.json` is in
  * `.prettierignore` for the same reason: this writer owns its formatting.
+ *
+ * The spread is load-bearing, not tidiness. Every stage round-trips the whole
+ * manifest through this function, so a hardcoded field list would silently
+ * delete whatever a later stage had written — `db:seed:fetch`, which reads as
+ * a harmless no-op, would erase hours of enrichment. Spreading first means
+ * unknown fields survive; the explicit keys still lead, so the order a reviewer
+ * reads is unchanged.
  */
 async function writeManifest(manifest: CorpusManifest): Promise<void> {
   const ordered: CorpusManifest = {
@@ -598,6 +649,7 @@ async function writeManifest(manifest: CorpusManifest): Promise<void> {
     pieces: [...manifest.pieces]
       .sort((a, b) => a.aic_id - b.aic_id)
       .map((piece) => ({
+        ...piece,
         aic_id: piece.aic_id,
         image_id: piece.image_id,
         piece_uuid: piece.piece_uuid,
@@ -609,16 +661,60 @@ async function writeManifest(manifest: CorpusManifest): Promise<void> {
       })),
   };
 
-  await writeFile(MANIFEST_PATH, `${JSON.stringify(ordered, null, 2)}\n`);
+  await writeAtomic(MANIFEST_PATH, `${JSON.stringify(ordered, null, 2)}\n`);
 }
 
+/**
+ * `looseObject`, not `object`, and that is the whole point.
+ *
+ * Zod strips unknown keys by default, which would delete every field a later
+ * stage had written the moment the manifest was read back — the same data loss
+ * `writeManifest` was fixed to avoid, re-introduced one layer up. Loose parsing
+ * validates the fields this stage owns and carries the rest through untouched.
+ */
+const CorpusPieceSchema = z.looseObject({
+  aic_id: z.number(),
+  image_id: z.string(),
+  piece_uuid: z.string().regex(/^[0-9a-f-]{36}$/),
+  title: z.string().min(1).max(MAX_TITLE_LENGTH),
+  artist: z.string().nullable(),
+  tags_from_metadata: z.array(z.string()),
+  image_width: z.number().positive(),
+  slot: z.number().int().nonnegative(),
+});
+
+const CorpusManifestSchema = z.looseObject({
+  version: z.number(),
+  source: z.looseObject({
+    api: z.string(),
+    iiif_url: z.string(),
+    licence: z.string(),
+    query: z.string(),
+    sampled_at: z.string(),
+  }),
+  pieces: z.array(CorpusPieceSchema),
+});
+
 async function readManifest(): Promise<CorpusManifest | null> {
+  let raw: string;
   try {
-    return JSON.parse(await readFile(MANIFEST_PATH, "utf8")) as CorpusManifest;
+    raw = await readFile(MANIFEST_PATH, "utf8");
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
     throw error;
   }
+
+  const parsed = CorpusManifestSchema.safeParse(JSON.parse(raw));
+  if (!parsed.success) {
+    // Refusing here protects the manifest: an unreadable one would otherwise
+    // look like "no manifest", and the run would sample a fresh corpus over
+    // the top of it.
+    throw new Error(
+      `${path.relative(REPO_ROOT, MANIFEST_PATH)} is malformed: ${z.prettifyError(parsed.error)}`,
+    );
+  }
+
+  return parsed.data as CorpusManifest;
 }
 
 // ---------------------------------------------------------------------------
@@ -659,8 +755,33 @@ async function searchAic(
     );
   }
 
-  const payload = (await response.json()) as { data?: AicArtwork[] };
-  return payload.data ?? [];
+  const payload: unknown = await response.json();
+  const envelope = z.object({ data: z.array(z.unknown()).optional() });
+  const outer = envelope.safeParse(payload);
+  if (!outer.success) {
+    throw new Error(
+      `AIC search returned an unrecognised envelope for ${family} ${bucket[0]}-${bucket[1]}`,
+    );
+  }
+
+  // Per record, not per page: one malformed artwork among a hundred should cost
+  // that artwork, not the whole page. A page that is entirely unparseable still
+  // surfaces, as an empty result the caller reports as zero candidates.
+  const artworks: AicArtwork[] = [];
+  let rejected = 0;
+  for (const record of outer.data.data ?? []) {
+    const parsedRecord = AicArtworkSchema.safeParse(record);
+    if (parsedRecord.success) artworks.push(parsedRecord.data);
+    else rejected += 1;
+  }
+
+  if (rejected > 0) {
+    console.warn(
+      `  ${family} ${bucket[0]}-${bucket[1]}: skipped ${rejected} record(s) that did not match the expected AIC shape`,
+    );
+  }
+
+  return artworks;
 }
 
 const iiifUrl = (imageId: string, width: number) =>
@@ -709,7 +830,7 @@ async function downloadImage(piece: CorpusPiece): Promise<void> {
     throw new Error(`aic ${piece.aic_id} downloaded bytes are not a JPEG`);
   }
 
-  await writeFile(path.join(ASSET_DIR, `${piece.piece_uuid}.jpg`), bytes);
+  await writeAtomic(path.join(ASSET_DIR, `${piece.piece_uuid}.jpg`), bytes);
 }
 
 /** Bounded parallelism, so a free unauthenticated API is not hammered. */
@@ -795,8 +916,18 @@ async function gatherCandidates(
   return byBucket;
 }
 
-async function selectPieces(): Promise<FamilySample[]> {
-  const seen = new Set<number>();
+/**
+ * @param target how many pieces to pick in total.
+ * @param exclude AIC object ids already pinned in the manifest. Seeding the
+ * `seen` set with them is what makes a top-up additive rather than a re-sample:
+ * a pinned piece can never be offered again, so the shortfall is filled with
+ * pieces the corpus does not already have.
+ */
+async function selectPieces(
+  target: number,
+  exclude: ReadonlySet<number>,
+): Promise<FamilySample[]> {
+  const seen = new Set<number>(exclude);
   const gathered: CorpusPiece[][][] = [];
 
   for (const family of FAMILIES) {
@@ -809,9 +940,14 @@ async function selectPieces(): Promise<FamilySample[]> {
     );
   }
 
+  // On a top-up the shortfall is spread by remaining availability rather than
+  // by each family's original share: the manifest does not record which family
+  // a piece came from, so there is nothing to restore a balance against. The
+  // first, full sample is the balanced one; a repair run trades a little skew
+  // for not discarding what is already on disk.
   const familyTargets = allocate(
     gathered.map((byBucket) => byBucket.reduce((n, b) => n + b.length, 0)),
-    TARGET_TOTAL,
+    target,
   );
 
   return FAMILIES.map((family, familyIndex) => {
@@ -884,63 +1020,94 @@ async function downloadFamily(sample: FamilySample): Promise<CorpusPiece[]> {
 }
 
 async function downloadedUuids(): Promise<Set<string>> {
+  let files: string[];
   try {
-    const files = await readdir(ASSET_DIR);
-    return new Set(
-      files
-        .filter((f) => f.endsWith(".jpg"))
-        .map((f) => f.replace(/\.jpg$/, "")),
-    );
+    files = await readdir(ASSET_DIR);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return new Set();
     throw error;
   }
+
+  const present = new Set<string>();
+  for (const file of files) {
+    if (!file.endsWith(".jpg")) continue;
+
+    // Presence by name alone would count a zero-byte file as done, and it would
+    // then never be re-fetched — it would just be uploaded broken. A leftover
+    // `.tmp` is skipped by the extension filter and replaced on the next write.
+    const { size } = await stat(path.join(ASSET_DIR, file));
+    if (size > 0) present.add(file.replace(/\.jpg$/, ""));
+  }
+
+  return present;
 }
 
 async function runFetch(): Promise<void> {
   await mkdir(ASSET_DIR, { recursive: true });
 
+  // Everything already in the manifest is pinned. It is never re-sampled, its
+  // slots are never reassigned, and its images are never re-downloaded — the
+  // manifest is the durable artifact, and a run that discards it to start over
+  // would throw away hours of network work and, once Phase 2 lands, hours of
+  // model work. A short manifest is topped up, not replaced.
   const existing = await readManifest();
-  const complete = existing !== null && existing.pieces.length >= TARGET_TOTAL;
+  const pinned = existing?.pieces ?? [];
+  const shortfall = TARGET_TOTAL - pinned.length;
 
-  let pieces: CorpusPiece[];
-
-  if (complete) {
-    // The manifest is the source of truth once it is populated. Re-running is
-    // a no-op that only replaces missing image files, so it never reshuffles a
-    // corpus other stages have already enriched, overridden or generated from.
+  // Per-piece resume: only images actually absent from disk are fetched. A
+  // piece whose image will not download stays pinned and is retried next run,
+  // rather than aborting the whole batch.
+  const already = await downloadedUuids();
+  const missing = pinned.filter((p) => !already.has(p.piece_uuid));
+  if (pinned.length > 0) {
     console.log(
-      `Manifest already holds ${existing.pieces.length} pieces — skipping AIC sampling.`,
+      `Manifest holds ${pinned.length} pinned pieces; images: ${
+        pinned.length - missing.length
+      } present, ${missing.length} to download.`,
     );
-    pieces = existing.pieces;
+  }
 
-    const already = await downloadedUuids();
-    const missing = pieces.filter((p) => !already.has(p.piece_uuid));
-    console.log(
-      `Images: ${pieces.length - missing.length} present, ${missing.length} to download.`,
-    );
-    let done = 0;
-    await inBatches(missing, DOWNLOAD_CONCURRENCY, async (piece) => {
+  let repaired = 0;
+  let unreachable = 0;
+  await inBatches(missing, DOWNLOAD_CONCURRENCY, async (piece) => {
+    try {
       await downloadImage(piece);
-      done += 1;
-      if (done % PROGRESS_EVERY === 0) {
-        console.log(`  ${done}/${missing.length}`);
+      repaired += 1;
+      if (repaired % PROGRESS_EVERY === 0) {
+        console.log(`  ${repaired}/${missing.length}`);
       }
-    });
-  } else {
-    console.log(`Sampling ${FAMILIES.length} families from AIC…`);
-    const samples = await selectPieces();
+    } catch (error) {
+      unreachable += 1;
+      console.warn(
+        `  image still missing for aic ${piece.aic_id}: ${
+          error instanceof Error ? error.message : error
+        }`,
+      );
+    }
+  });
 
-    console.log(`Downloading ${TARGET_TOTAL} images…`);
-    pieces = [];
+  const pieces = [...pinned];
+
+  if (shortfall > 0) {
+    console.log(
+      `Sampling ${FAMILIES.length} families from AIC for ${shortfall} more piece(s)…`,
+    );
+    const samples = await selectPieces(
+      shortfall,
+      new Set(pinned.map((p) => p.aic_id)),
+    );
+
+    console.log(`Downloading ${shortfall} image(s)…`);
     for (const sample of samples) {
       const kept = await downloadFamily(sample);
       console.log(
-        `  ${sample.family.padEnd(11)} ${String(kept.length).padStart(4)} downloaded (${pieces.length + kept.length} total)`,
+        `  ${sample.family.padEnd(11)} ${String(kept.length).padStart(4)} downloaded`,
       );
       pieces.push(...kept);
     }
 
+    // Only when the piece set actually changed. Leaving slots alone on a no-op
+    // run is what keeps the manifest byte-identical across re-runs.
     assignSlots(pieces);
   }
 
@@ -951,6 +1118,12 @@ async function runFetch(): Promise<void> {
       iiif_url: IIIF_BASE,
       licence: LICENCE,
       query: SAMPLING_QUERY,
+      // The date the corpus was FIRST sampled, carried forward for the life of
+      // the manifest. Since resume is additive, pieces pinned on day one really
+      // were sampled on this date; pieces added by a later top-up were not, and
+      // the manifest does not record their date separately. That imprecision is
+      // deliberate — the field exists to say which AIC index generation the
+      // corpus came from, not to timestamp each row.
       sampled_at:
         existing?.source.sampled_at ?? new Date().toISOString().slice(0, 10),
     },
@@ -966,6 +1139,21 @@ async function runFetch(): Promise<void> {
   console.log(
     `Metadata tags: ${tagTotal} total, ${(tagTotal / pieces.length).toFixed(1)} per piece, ${untagged.length} pieces with none.`,
   );
+
+  // Say so out loud. A short run used to be invisible — it exited 0 and the
+  // next invocation silently started over. Now the manifest keeps what it has
+  // and the shortfall is named, so re-running is a top-up that converges.
+  if (pieces.length < TARGET_TOTAL) {
+    console.warn(
+      `\nShort of the ${TARGET_TOTAL}-piece target by ${TARGET_TOTAL - pieces.length}. ` +
+        `Re-run to top up — pinned pieces are kept.`,
+    );
+  }
+  if (unreachable > 0) {
+    console.warn(
+      `${unreachable} pinned piece(s) still have no image on disk; re-run to retry them.`,
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------

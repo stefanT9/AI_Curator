@@ -1,8 +1,23 @@
 # Ranking evaluation corpus — seed workflow
 
-This directory holds the placeholder card images for the ranking evaluation
-corpus (roadmap **F-01**). The corpus itself is authored in
-[`../seed.sql`](../seed.sql).
+This directory holds the card images for the ranking evaluation corpus. The
+corpus itself is authored in [`../seed.sql`](../seed.sql).
+
+> **In progress — this document describes the corpus as it is being replaced.**
+> The images are no longer committed placeholders: they are ~1000 real
+> public-domain artworks fetched from the Art Institute of Chicago by
+> `npm run db:seed:fetch`, pinned in [`corpus.json`](corpus.json), and
+> **gitignored**. A fresh clone therefore has an empty image directory until
+> that command is run once.
+>
+> ```bash
+> npm run db:seed:fetch   # one-time after a clone; re-run tops up, never restarts
+> npm run db:reset        # per-reset, as before
+> ```
+>
+> `seed.sql` is not yet regenerated from the manifest — that is Phase 4 of the
+> `real-artwork-corpus` change — so until then `db:reset` seeds rows that point
+> at the deleted placeholders. The full rewrite of this file lands with Phase 4.
 
 ## Local development only
 
