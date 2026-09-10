@@ -637,38 +637,38 @@ auto-deploys it via `.github/workflows/migrations.yml`; never edit it after it a
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `npm run typecheck`
-- [x] 2.2 Linting passes: `npm run lint`
-- [x] 2.3 Formatting is clean: `npm run format:check`
-- [x] 2.4 Unit tests pass: `npm run test`
-- [x] 2.5 New unit test covers `getStarterDeck` returning an empty array without throwing
-- [x] 2.6 Build succeeds: `npm run build`
+- [x] 2.1 Type checking passes: `npm run typecheck` — 78ce584
+- [x] 2.2 Linting passes: `npm run lint` — 78ce584
+- [x] 2.3 Formatting is clean: `npm run format:check` — 78ce584
+- [x] 2.4 Unit tests pass: `npm run test` — 78ce584
+- [x] 2.5 New unit test covers `getStarterDeck` returning an empty array without throwing — 78ce584
+- [x] 2.6 Build succeeds: `npm run build` — 78ce584
 
 #### Manual
 
-- [x] 2.7 Navigating directly to `/onboarding` renders 20 style chips with no app nav
-- [x] 2.8 Submit is disabled at 0, 1 and 5 selections; enabled at 2, 3 and 4
-- [x] 2.9 An account that has already onboarded is redirected away from `/onboarding`
+- [x] 2.7 Navigating directly to `/onboarding` renders 20 style chips with no app nav — 78ce584
+- [x] 2.8 Submit is disabled at 0, 1 and 5 selections; enabled at 2, 3 and 4 — 78ce584
+- [x] 2.9 An account that has already onboarded is redirected away from `/onboarding` — 78ce584
 
 ### Phase 3: Rating loop and completion
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `npm run typecheck`
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Formatting is clean: `npm run format:check`
-- [ ] 3.4 Unit tests pass: `npm run test`
-- [ ] 3.5 New unit test: `completeOnboarding` redirects without re-stamping when `onboardedAt` is already set
-- [ ] 3.6 New unit test: exhaustion with zero likes still reaches completion
-- [ ] 3.7 Build succeeds: `npm run build`
+- [x] 3.1 Type checking passes: `npm run typecheck`
+- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.3 Formatting is clean: `npm run format:check`
+- [x] 3.4 Unit tests pass: `npm run test`
+- [x] 3.5 New unit test: `completeOnboarding` redirects without re-stamping when `onboardedAt` is already set
+- [x] 3.6 New unit test: exhaustion with zero likes still reaches completion
+- [x] 3.7 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 3.8 Liking `ONBOARDING_LIKE_TARGET` starter pieces ends the flow and lands on `/discover`
-- [ ] 3.9 Skipping every starter piece also ends the flow and lands on `/discover`
-- [ ] 3.10 Choosing terms that match no artworks completes rather than hanging
-- [ ] 3.11 The resulting `/discover` deck is visibly ordered by the tags of the pieces just liked
-- [ ] 3.12 Starter pieces rated during onboarding do not reappear in the `/discover` deck
+- [x] 3.8 Liking `ONBOARDING_LIKE_TARGET` starter pieces ends the flow and lands on `/discover`
+- [x] 3.9 Skipping every starter piece also ends the flow and lands on `/discover`
+- [x] 3.10 Choosing terms that match no artworks completes rather than hanging
+- [x] 3.11 The resulting `/discover` deck is visibly ordered by the tags of the pieces just liked
+- [x] 3.12 Starter pieces rated during onboarding do not reappear in the `/discover` deck
 
 ### Phase 4: Gate wiring
 
