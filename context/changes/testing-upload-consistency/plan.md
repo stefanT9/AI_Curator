@@ -357,14 +357,14 @@ The `check` constraint is the only schema change and it lands `not valid` delibe
 
 #### Automated
 
-- [x] 3.1 Happy-path retrievability test passes
-- [x] 3.2 Cleanup test documents the risk path (blind delete without checking for row)
-- [x] 3.3 Empty-`image_path` test shows the DB accepts unrenderable rows
-- [x] 3.4 The mocked suite still passes unchanged
+- [x] 3.1 Happy-path retrievability test passes — 7f314c4
+- [x] 3.2 Cleanup test documents the risk path (blind delete without checking for row) — 7f314c4
+- [x] 3.3 Empty-`image_path` test shows the DB accepts unrenderable rows — 7f314c4
+- [x] 3.4 The mocked suite still passes unchanged — 7f314c4
 
 #### Manual
 
-- [ ] 3.5 Fault injection confirmed to reflect a real production failure mode
+- [x] 3.5 Fault injection confirmed to reflect a real production failure mode — 7f314c4
 
 ### Phase 4: Close the Gap (green)
 
