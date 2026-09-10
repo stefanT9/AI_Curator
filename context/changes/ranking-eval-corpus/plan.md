@@ -437,33 +437,33 @@ database rows, so the image upload is part of the reset workflow rather than one
 
 #### Automated
 
-- [x] 1.1 Formatting check passes: `npm run format:check`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Type checking passes: `npm run typecheck`
-- [x] 1.4 Unit tests pass: `npm run test`
-- [x] 1.5 Production build succeeds: `npm run build`
+- [x] 1.1 Formatting check passes: `npm run format:check` — b912fee
+- [x] 1.2 Linting passes: `npm run lint` — b912fee
+- [x] 1.3 Type checking passes: `npm run typecheck` — b912fee
+- [x] 1.4 Unit tests pass: `npm run test` — b912fee
+- [x] 1.5 Production build succeeds: `npm run build` — b912fee
 
 #### Manual
 
-- [x] 1.6 Reset applies the seed without error
-- [x] 1.7 All three profiles exist with the expected roles
-- [x] 1.8 Signing in succeeds as each of the three seeded emails
-- [x] 1.9 Re-running the seed produces no duplicate-key error
+- [x] 1.6 Reset applies the seed without error — b912fee
+- [x] 1.7 All three profiles exist with the expected roles — b912fee
+- [x] 1.8 Signing in succeeds as each of the three seeded emails — b912fee
+- [x] 1.9 Re-running the seed produces no duplicate-key error — b912fee
 
 ### Phase 2: Cluster Placeholder Images
 
 #### Automated
 
-- [ ] 2.1 All five files exist with the exact expected names
-- [ ] 2.2 Formatting check passes: `npm run format:check`
-- [ ] 2.3 Linting passes: `npm run lint`
+- [x] 2.1 All five files exist with the exact expected names
+- [x] 2.2 Formatting check passes: `npm run format:check`
+- [x] 2.3 Linting passes: `npm run lint`
 
 #### Manual
 
-- [ ] 2.4 The upload command completes without error
-- [ ] 2.5 `storage ls` lists all five objects
-- [ ] 2.6 A public object URL renders the image rather than a 404
-- [ ] 2.7 The five placeholders are visually distinguishable
+- [x] 2.4 The upload command completes without error
+- [x] 2.5 `storage ls` lists all five objects
+- [x] 2.6 A public object URL renders the image rather than a 404
+- [x] 2.7 The five placeholders are visually distinguishable
 
 ### Phase 3: Artwork Corpus and Like History
 
