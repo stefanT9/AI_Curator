@@ -1,165 +1,151 @@
 ---
 project: ArtSwipe
 context_type: brownfield
-created: 2026-09-09
-updated: 2026-09-09
+created: 2026-09-10
+updated: 2026-09-10
 checkpoint:
   current_phase: 8
   phases_completed: [1, 2, 3, 4, 5, 6, 7]
   gray_areas_resolved:
-    - topic: "AI scope for this change"
-      decision: "auto-tag art from image; draft artist title/description; persist tags for a future recommender"
-    - topic: "change framing"
-      decision: "new standalone AI enrichment module invoked by the existing upload flow"
-    - topic: "primary persona"
-      decision: "artist (upload-time friction); collector is secondary beneficiary"
-    - topic: "insight"
-      decision: "artists won't do manual tagging; derive the signal from the image instead"
-  frs_drafted: 6
+    - topic: "ranking signal"
+      decision: "personalized tag-match to collector's own liked artworks, not global popularity"
+    - topic: "deck refresh"
+      decision: "revised in Socrates round — continuous automatic refill, not an explicit request"
+    - topic: "MVP scope"
+      decision: "keep v1 simple — no explanations, no scoring"
+    - topic: "cold start"
+      decision: "collectors without enough likes get the existing unranked ordering"
+    - topic: "preference signal stored"
+      decision: "revised in Socrates round — likes only for v1; passes not stored"
+    - topic: "scope of preservation"
+      decision: "revised in Socrates round — liking and swipe interaction preserved; ordering explicitly changes"
+  frs_drafted: 7
   quality_check_status: accepted
 ---
 
-# Shape Notes — ArtSwipe (brownfield)
+# Shape Notes — ArtSwipe Recommendation Engine (brownfield)
 
-Discovery complete (phases 1–7). Ready for `/10x-prd`. Body sections below are ordered to match the 11-section brownfield PRD template.
+Shaping a new recommendation service that learns from a collector's likes and orders artworks by tag-match to those likes. Body sections below are ordered to match the 11-section brownfield PRD template.
 
 ## PRD frontmatter scaffold (product-level priors)
 
 - `project`: ArtSwipe
 - `context_type`: brownfield
 - `product_type`: web-app _(existing; unchanged by this work)_
-- `target_scale`: `{ users: small, qps: low, data_volume: small }` _(no real user base yet; confirm in Phase 6)_
-- `timeline_budget`: `{ delivery_weeks: 3, hard_deadline: null, after_hours_only: false }` _(owner confirmed 3 weeks feasible in Phase 3; Phase 6: worked as part of day-job, not after-hours)_
+- `target_scale`: `{ users: small, qps: low, data_volume: small }` _(no real user base yet; unchanged by this work)_
+- `timeline_budget`: `{ delivery_weeks: 3, hard_deadline: null, after_hours_only: false }`
 
 ## Current System
 
 - **Purpose:** ArtSwipe connects independent artists showing work with collectors discovering art to buy or bid on.
 - **Architecture:** Next.js 16 (App Router) web app deployed on Vercel; Supabase as the backend (Postgres, Auth, Storage). Server Actions used for mutations.
-- **Tech stack:** Next.js 16, React 19, TypeScript, Tailwind CSS v4, Supabase (`@supabase/ssr`, `@supabase/supabase-js`), Zod, Vercel Analytics. Artwork images are stored in a Supabase Storage bucket (`ARTWORKS_BUCKET`), served via public object URLs.
-- **Users:** One user today — the owner/developer. Built as coursework; a public launch is possible later. No real collector or artist base yet.
+- **Tech stack:** Next.js 16, React 19, TypeScript, Tailwind CSS v4, Supabase (`@supabase/ssr`, `@supabase/supabase-js`), Zod, Vercel Analytics. Artwork images are stored in a Supabase Storage bucket, served via public object URLs.
+- **Current user base:** One user today — the owner/developer. Built as coursework; a public launch is possible later. No real collector or artist base yet.
 - **Core functionality today:**
-  - **Artist mode:** upload artwork image(s) with a title and description; manage own pieces (studio / artist routes).
-  - **Collector mode:** swipe through artworks, express interest (like), view liked artworks (`discover` / `liked` routes).
-  - **Recommendations:** there is **no recommendation algorithm yet** — swipe currently surfaces artworks without personalized ranking. A tag-aware recommender is planned as a separate future change.
-  - **Transactions:** collectors reach out to buy, or reach out to auction on external platforms. All payment/auction activity happens off-platform.
-  - **Auth:** Supabase email/password (signup / login / email confirm), split into collector and artist flows.
+  - **Artist mode:** upload artwork with AI-assisted tagging; manage own pieces.
+  - **Collector mode:** swipe through artworks (unranked), express interest (like), view liked artworks.
+  - **AI enrichment:** (recently added) artworks have persisted AI-derived tags from image analysis; baseline tags auto-applied at publish if artist's tags are sparse.
+  - **Auth:** Supabase email/password, split into collector and artist flows.
+  - **Transactions:** collectors reach out to buy/auction off-platform.
 
 ## Vision & Problem Statement
 
-Artists posting to ArtSwipe won't do manual metadata work. Every extra field on the upload screen is a reason to abandon a post, so pieces arrive with thin, inconsistent, free-text descriptions and no structured attributes. ArtSwipe's value proposition — matching the right collector to the right piece — depends on a dense, normalized signal per artwork, and today that signal doesn't exist. The problem is sharpest for brand-new uploads: with no swipe history and no structured tags, a new piece has nothing for a future recommender to work with.
+Every collector is served artworks in the same order today, with no relationship to what that collector has liked. With the AI enrichment work now live, every artwork carries normalized, machine-readable tags — so the signal needed to order pieces per collector exists, and nothing consumes it. The missing piece is a recommendation service that learns from a collector's own likes and orders what they are served by how well each piece's tags match the tags on the pieces they liked.
 
-The insight driving this change: the structured signal can be derived from the uploaded image itself, automatically, instead of asked of the artist. This change adds a **new AI enrichment module**. The existing upload flow calls it to (a) suggest descriptive tags for the tags field and (b) draft editable text for the description field, both derived from the image; and at publish it fills in baseline tags when the artist's own tags are too few. The tags are persisted on the artwork so a future recommendation engine can consume them. The title field, the collector swipe flow, and the external buy/auction hand-off are unchanged by this work.
+Without personalization, collectors face discovery friction: they swipe past many unrelated pieces to reach art they would actually like. With tag-based ordering, collectors reach matching work sooner, and artists whose work matches a collector's demonstrated taste get more visibility to that collector.
 
 ## User & Persona
 
-**Primary persona — the artist.** An independent visual artist posting a finished piece to ArtSwipe to get it in front of collectors. The moment that matters is the upload screen: they want to post the image and move on, not fill out a tagging form. This change removes that form by doing the work for them.
+**Primary persona — the collector.** Someone swiping to discover art to buy or bid on. They've been liking pieces over time; the recommender learns from those likes and surfaces new pieces tagged similarly, cutting discovery friction.
 
-**Secondary persona — the collector.** Someone swiping to discover art to buy or bid on. Benefits indirectly and later: once a recommender exists, the AI-derived tags make matches sharper, especially for fresh uploads. (The owner rated both personas equally important; the artist is named primary because both the friction and the insight live at upload.)
+**Secondary persona — the artist.** An independent visual artist whose work now ranks higher when it matches collectors' demonstrated taste, gaining visibility to interested buyers.
 
 ## Access Control
 
-**Current model (unchanged by this work).** Supabase email/password auth. One account type — every authenticated user is a collector by default (can swipe, like, view artworks, reach out). Becoming an artist is a capability unlock, not a separate account: the user completes one extra onboarding step, after which they can upload and manage their own artworks. A single account can be both collector and artist.
-
-**Changes in this work:** none. No new roles, no changed role boundaries. Every artist can use the AI enrichment features; the feature operates entirely within the existing "authenticated artist acting on their own artwork" boundary. `No access control changes — current model preserved.`
+No changes planned — current model preserved. Authentication remains Supabase email/password; all authenticated users are collectors by default and can become artists via one-step onboarding. No new roles and no shifted role boundaries. The recommender operates entirely within the existing "authenticated collector acting on their own history" boundary: a collector's preferences are derived from their own likes and applied only to what they are served.
 
 ## Success Criteria
 
 ### Primary
 
-- The sparkle-assisted upload flow works end to end: an artist uploading a piece can fill the description field and the tags field from the image with a single click each, edit the results freely, and publish. Any piece whose artist-entered tags are below the minimum count still ends up adequately tagged via server-side baseline tagging at publish.
+A collector who keeps swiping is served artworks ordered by how well each piece's tags match the tags on the pieces they have liked, and that ordering sharpens as they like more. Personalization is per-collector, never a global popularity ranking. (Revised during the Socrates round: decks refill continuously as the collector swipes rather than on an explicit request — see FR-001.)
 
 ### Secondary
 
-- _(The Phase-3 nice-to-have "bulk sparkle" was cut during the Socrates round and recorded as a Non-Goal. No replacement secondary outcome was set — see Open Question 9.)_
+Keep v1 simple — no explanations, no recommendation scoring, no secondary outcomes.
 
 ### Guardrails
 
-- Upload stays fully usable when the AI is unavailable, failing, or slow — AI is never a hard dependency of publishing a piece.
-- Publishing is not visibly slower after this change; no step in the upload flow blocks waiting on an AI response.
-- The AI never overwrites content the artist has entered or edited; every suggestion is opt-in per field and remains editable.
-- Per-upload AI cost stays bounded and predictable — no path to runaway cost per artwork.
+- Liking, the liked-artworks view, and the swipe interaction itself remain intact and functional. (Ordering and composition of what a collector is served are explicitly in scope to change — see FR-007.)
+- A collector's likes and derived taste stay private to that collector.
+- The project is in dev — acceptable to iterate and refactor for good reason; not production-critical.
 
 ## Functional Requirements
 
-### AI enrichment (new module)
+### Recommendation (new)
 
-- FR-001: An artist can request an AI suggestion for the description field and the tags field via each field's sparkle control. Priority: must-have. Change: new
-  > Socrates: Counter-argument considered: "only tags carry recommendation signal — title/description assist is scope for little gain." Resolution: narrowed. Sparkle assist covers **description + tags** only this change; the title stays the artist's own voice; broader text assist is deferred (see Non-Goals).
-- FR-002: An artist can edit or discard any AI suggestion before publishing; accepting a suggestion is per-field and optional. Priority: must-have. Change: new
-  > Socrates: Counter-argument considered: "pure opt-in keeps the tag signal thin — artists will ignore suggestions." Resolution: kept as opt-in. FR-003's server-side baseline tagging is the coverage backstop, so opt-in on the artist-facing controls is safe.
-- FR-003: The system generates a baseline set of tags for an artwork at publish time when the artist-entered tags are below a minimum count, so no piece is published with too few tags. Priority: must-have. Change: new
-  > Socrates: Counter-argument considered: "an AI call on every publish is the cost/latency exposure the guardrails flag." Resolution: revised. The baseline call runs only when the artwork has fewer than N tags after artist input — artists who tag well incur no call. N is an Open Question.
-- FR-004: The system persists the resulting tags on the artwork record as a simple list, so a future recommendation engine can consume them. Priority: must-have. Change: new
-  > Socrates: Counter-argument considered: "designing storage for a recommender that isn't specced risks the wrong shape." Resolution: kept, minimal. Persist a loose list of string tags on the artwork — no recommender-specific modeling; the future change owns any richer structure.
+- FR-001: A collector is served further artworks automatically as they swipe, without asking for a new deck. Priority: must-have. Change: new
+  > Socrates: Counter-argument considered: "an explicit deck request is friction — it adds a decision and a control the collector has to find." Resolution: revised. The original shape had the collector requesting a new deck every 10–20 cards; that request is dropped. Artworks refill continuously as they swipe, so ranking is felt rather than operated.
+- FR-002: The system orders artworks by how closely each piece's tags match the tags on the artworks that collector has liked. Priority: must-have. Change: new
+  > Socrates: Counter-argument considered: "raw tag overlap ranks crudely — it treats every tag as equally important, so 'blue' weighs the same as 'oil-on-canvas'." Resolution: kept for v1; simple tag-match is what ships in three weeks. How tags are weighted is unresolved and routed to Open Questions.
+- FR-003: For this change, a collector's preferences come only from their own likes — never from a global or cross-collector popularity signal. Priority: must-have. Change: new
+  > Socrates: Counter-argument considered: "ruling out global signal forever over-commits — a blend might be right once there are real users." Resolution: narrowed. The exclusion binds this change only; a future blend is left open rather than ruled out. Avoiding everyone-sees-the-same-feed remains the product stance for v1.
+- FR-004: The system persists each collector's likes so preferences accumulate across sessions. Priority: must-have. Change: new
+  > Socrates: Counter-argument considered: "passes carry little signal for the cost of storing them — a pass can mean 'not now', 'wrong mood', or a mis-swipe." Resolution: revised. v1 persists likes only; passes are not stored as preference signal.
+- FR-005: A collector who has not liked enough artworks yet is served the existing unranked ordering until ranking has something to work with. Priority: must-have. Change: new
+  > Socrates: Counter-argument considered: "'enough likes' is undefined, so the fallback never clearly ends and the behavior is untestable." Resolution: kept as a rule; the like-count threshold that switches ranking on is routed to Open Questions.
+- FR-006: Artworks the collector has already liked are not served again. Whether artworks they passed on reappear is unresolved. Priority: must-have. Change: new
+  > Socrates: Counter-argument considered: "re-showing a passed artwork reads as the app ignoring you, not as a deliberate second chance." Resolution: unresolved. Both positions recorded — permanent exclusion risks a small catalogue running dry; reappearance risks reading as a bug. Routed to Open Questions.
 
 ### Preserved
 
-- FR-005: An artist can complete an upload and publish a piece with the AI unavailable or failing, filling every field manually. Priority: must-have. Change: preserved
-  > Socrates: No counter-argument; stands as written.
-- FR-006: The existing artwork upload, studio management, and collector swipe/like flows continue to function with no behavioral change from this work. Priority: must-have. Change: preserved
-  > Socrates: Counter-argument considered: "the swipe flow SHOULD change to use the new tags." Resolution: kept frozen for this change. Consuming tags in swipe ranking is the deferred recommender's job (see Non-Goals).
-
-Dropped during Socrates: former FR "bulk sparkle — fill all empty fields at once" (was nice-to-have). Cut to protect the 3-week budget; recorded as a Non-Goal / future addition.
-
-Note: the artist-facing tags field is a free-text multi-input (chips); AI tag suggestions populate that same free-text field. This change adds no new fields to the upload form; it does add a persisted tag list on the artwork record.
+- FR-007: Liking, the liked-artworks view, and the swipe interaction itself continue to work unchanged. The composition and ordering of what a collector is served is explicitly in scope to change. Priority: must-have. Change: preserved
+  > Socrates: Counter-argument considered: "the swipe flow must change — changing what a collector is served is the whole feature, so claiming no behavioral change is a contradiction." Resolution: narrowed. Preservation now covers liking, liked-artworks history, and the swipe interaction; ordering and composition are named as in-scope changes.
 
 ## User Stories
 
-### US-01: Artist fills upload fields with AI assistance
+### US-01: Collector is served artworks matching their taste
 
-- **Given** an authenticated artist on the artwork upload form with an image selected
-- **When** they click the sparkle control on the description field or the tags field
-- **Then** that field populates with an image-derived suggestion they can edit or clear, while the rest of the form stays interactive and the publish action stays enabled
+- **Given** an authenticated collector who has swiped through artworks and liked several of them
+- **When** they keep swiping
+- **Then** the artworks they are served are ordered by how well each piece's tags match the tags on the pieces they have liked, and pieces they have already liked are not served again
 
-#### Acceptance Criteria
-
-- The sparkle control is available on the description field and the tags field. The title field has no sparkle control.
-- Clicking a sparkle shows an inline loading state on that field only; all other fields remain editable and publish is never disabled by an in-flight AI call.
-- An AI suggestion never replaces text the artist has already entered or edited in a field without an explicit click on that field's control.
-- If an AI request fails, the field shows a non-blocking error and the artist can type the value manually.
-- A piece published with fewer than the minimum tag count receives server-side baseline tags at publish, so no artwork is published under-tagged.
+_Before this change: every collector was served artworks in the same order, with no relationship to what that collector had liked._
 
 ## Business Logic
 
-ArtSwipe derives a normalized set of descriptive tags for every artwork from its image, so each piece carries a consistent descriptive signal regardless of how much text its artist supplied.
+ArtSwipe orders what a collector is served based on previous likes and the metadata associated to those previous likes.
 
-This is a **new domain rule** — before this change ArtSwipe made no algorithmic decision about content (no recommender, no classification).
+This **adds a new domain rule** alongside the existing one. ArtSwipe already derives a normalized set of descriptive tags for every artwork from its image; that rule is unchanged. The new rule consumes the output of the old one.
 
-The rule consumes the artwork image the artist uploads, together with whatever description and tags the artist chooses to type or accept. Its output is a list of descriptive tags persisted with the artwork, plus optional draft text offered for the description field. The artist encounters it as per-field suggestions they accept or edit while completing the upload form; at publish, when the artist's own tags are below the minimum count, the rule fills the gap so no piece is published under-tagged. Collectors do not encounter the rule directly today — they will feel it later, as sharper matches, once a recommendation engine consumes the tags.
+The rule consumes the artworks a collector has liked, together with the tags carried by those artworks. Its output is an ordering over the artworks that collector has not yet liked. The collector encounters it as the sequence in which pieces arrive while they swipe — there is no control to operate and nothing to configure. A collector who has not liked enough yet falls back to the existing ordering until the rule has something to work with.
 
 ## Constraints & Preserved Behavior
 
-- **Artwork schema change:** persisting the tag list requires a schema change / migration on the artworks table. Existing artwork rows must remain valid with no tags (absent/empty tags is a normal state, not an error).
-- **No new hard deploy-time dependency for the core flow:** if an AI provider credential is missing or the provider is unreachable, enrichment degrades to unavailable but upload and publish continue to work (ties to FR-005).
-- **Image storage/serving preserved:** enrichment reads artwork images from the existing Supabase Storage bucket and public-URL scheme; this change does not alter how images are stored or served.
-- **Pre-change artworks preserved:** artworks uploaded before this change remain fully viewable and manageable with no tags unless a backfill is run later (backfill is a Non-Goal for this change; see Open Questions).
+- **Preference collection starts fresh:** likes recorded before this change are not treated as preference signal. Every collector begins with no learned taste and reaches ranking through new likes only. No migration or backfill of historical likes.
+- **Depends on the enrichment work being live:** ranking is only meaningful for artworks that carry tags. Pieces without tags need a defined position in the ordering (see Open Questions).
+- **Liking and liked-artworks preserved:** the like action and the liked-artworks view continue to work exactly as they do today. Ordering and composition of what a collector is served are explicitly in scope to change.
+- **Dev-stage tolerance:** the project has no real user base, so refactors and behavior changes are acceptable where they are justified. This is not a production system with users to protect.
 
 ## Non-Functional Requirements
 
-- A single-field sparkle suggestion resolves quickly enough that the artist keeps working in the same session; the field shows continuous visible progress from the click until the suggestion resolves or fails. (Exact latency target — Open Question.)
-- The number of AI model calls triggered by one artwork upload is bounded and known regardless of artist behavior — there is no path to unbounded per-artwork AI spend.
-- An AI request that fails or times out surfaces as a non-blocking, recoverable state on the affected field and never prevents the artist from publishing.
+- A collector's likes, and any taste derived from them, are visible only to that collector — no other user, artist included, can see them.
+- Swiping is never blocked waiting for ordering work; where the collector must wait between batches, the wait is brief and visibly signposted rather than silent.
 
 ## Non-Goals
 
-- **Not building the recommendation engine.** This change produces and persists the tag signal only. Consuming tags in swipe ranking is a separate future change. Rationale: no recommender is specced; keeping this change narrow protects the timeline.
-- **No "bulk sparkle" action.** Filling all empty fields with one click is out of scope (dropped during the Socrates round). Rationale: budget protection; per-field assist delivers the core value.
-- **No AI assistance on the title field.** Sparkle assist covers description + tags only. Rationale: the title is the artist's voice; title carries little recommendation signal.
-- **No backfill of existing artworks.** Enrichment is forward-only for new uploads; pieces uploaded before this change are not retro-tagged. Rationale: backfill is a separable batch job with its own cost profile.
-- **No change to the collector swipe/like experience.** Rationale: swipe behavior change belongs to the deferred recommender.
-- **No new user roles or auth changes.** Rationale: the feature fits entirely within the existing authenticated-artist boundary.
+- **No collector-facing controls over ranking.** No filters, no "show me more like this", no tuning, no way to reset learned taste. Rationale: ranking is invisible and automatic in v1; controls are a whole product surface of their own.
+- **No explanation of why a piece was served.** No match score, no "because you liked X". Rationale: v1 is deliberately simple; explanation implies a defensible scoring model that does not exist yet.
+- **No changes to the artist side.** Artists get no visibility into how ranking treats their work, no analytics, and no way to influence placement. Rationale: the artist is a secondary beneficiary of this change, not a participant in it.
+- **No cross-collector or popularity signal.** Ranking never blends in what other collectors liked. Rationale: everyone's feed looking the same is the outcome this change exists to avoid.
+- **No migration of historical likes.** Likes recorded before this change do not seed preferences. Rationale: preference collection starts fresh; backfill is separable work.
 
 ## Open Questions
 
-1. ~~Does "improve collector recommendations" belong in this change?~~ **RESOLVED (Phase 3): out of scope.** This change produces and persists the tag signal only. Building the recommender that consumes it is a separate future change. Recorded as a Non-Goal.
-2. **Does the backend baseline auto-tagging (FR-003) use any normalized vocabulary?** The artist-facing tags field is free text (resolved Phase 4). Open: whether server-side baseline tags are also free text or drawn from a controlled set of dimensions (style, medium, subject, palette, mood) for future recommender quality. — Owner: user.
-3. **What happens to artworks uploaded before this change?** Backfill enrichment, or forward-only? — Owner: user.
-4. **Can a logged-out visitor swipe or view artwork pages, or is all of it behind auth?** Not confirmed this session; doesn't affect the AI change but the PRD should state it. — Owner: user.
-5. **What is the minimum tag count (N) below which server-side baseline tagging runs (FR-003)?** — Owner: user.
-6. **Which fields' AI suggestions count as "content the artist entered" for the no-overwrite rule?** e.g. does a prior AI suggestion the artist left untouched block a re-run? — Owner: user.
-7. **What is the latency target for a single-field sparkle suggestion?** "Feels prompt" accepted in Phase 5; needs a number for the PRD NFR. — Owner: user.
-8. **Should artist images sent for AI analysis have a data-retention / no-training guarantee from the provider?** Not selected as a hard NFR in Phase 5; confirm whether it belongs in the PRD. — Owner: user.
-9. **Is there a Secondary success outcome for this change?** The original nice-to-have (bulk sparkle) became a Non-Goal; no replacement was chosen. — Owner: user.
+1. **How are tags weighted when matching?** Raw overlap treats every tag as equally important, which the Socrates round flagged as producing arbitrary rankings. Whether weighting is needed for v1, and what form it takes, is unresolved. — Owner: user.
+2. **How many likes switch ranking on?** FR-005 falls back to the existing ordering until a collector has liked "enough"; the threshold is undefined, which makes the behavior untestable as written. — Owner: user.
+3. **Do artworks a collector passed on reappear, and after how long?** Permanent exclusion risks a small catalogue running dry; immediate reappearance reads as the app ignoring the collector. Both positions recorded, neither chosen. — Owner: user.
+4. **Where do untagged artworks sit in the ordering?** Ranking is only meaningful for pieces carrying tags. Artworks predating the enrichment work, or otherwise untagged, need a defined position. — Owner: user.
 
 ## Quality cross-check
 
@@ -172,4 +158,4 @@ All six brownfield elements present at finalize — no gaps. `quality_check_stat
 - Non-Goals — present
 - Preserved behavior — present
 
-Open Questions above are ordinary unknowns for `/10x-prd` to route, not cross-check failures.
+Noted at finalize, not a cross-check failure: FR-006 states its own decision as unresolved, and Open Questions 2 and 3 (like threshold, passes reappearing) leave FR-005 and FR-006 untestable as written. The user chose to carry both into the PRD rather than settle them during shaping.

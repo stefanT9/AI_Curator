@@ -31,6 +31,8 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
+# `.env*` already covers `.env.test.local`, the integration lane's locally
+# generated stack credentials — see the Tests section of AGENTS.md.
 .env*
 !.env.example
 
