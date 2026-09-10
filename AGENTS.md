@@ -48,6 +48,15 @@ Node is pinned in `.nvmrc` / `engines` (currently 24 LTS — `nvm use` picks it 
 
 - Validate all external input (form data, Server Action args, request bodies) with Zod at the boundary before use.
 
+### AI enrichment
+
+- `src/lib/ai/` is the only module that talks to a model. Everything else goes through `enrichFromImage`, which **never throws** — a failure is returned as `{ ok: false, reason }` so each caller decides whether to surface it (the upload form) or swallow it (the publish-time top-up).
+- `enrichFromImage` accepts a `data:` URL **or** an http(s) URL. Passing a bare Supabase Storage key fails silently: the SDK treats it as base64 and decodes garbage.
+- Enrichment is always optional. `OPENROUTER_API_KEY` is server-only and deliberately not `NEXT_PUBLIC_`; unset, enrichment degrades to unavailable and upload/publish keep working. Read it inside the function, never at module scope — `next build` imports every module and CI has no key.
+- Generated tags come from the controlled vocabulary in `src/lib/ai/taxonomy.ts`; artist-typed tags stay free text. The `tags` column mixes both by design.
+- Artwork images upload from the **browser** straight to Storage (`src/lib/artworks/upload.ts`); only the object key travels through the Server Action. Server Action bodies are capped at 1 MB, well under a real photograph — do not route image bytes through an action.
+- Every export of a `"use server"` module is a public endpoint. Helpers like `topUpTags` live in `src/lib/` for that reason.
+
 ### Formatting
 
 - Prettier owns formatting (`.prettierrc.json`); ESLint defers to it via `eslint-config-prettier`. Run `npm run format` before committing, or `npm run format:check` to verify. `.editorconfig` mirrors the core rules for editors.
