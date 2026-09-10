@@ -537,11 +537,11 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Automated
 
-- [x] 1.5.1 Unit tests pass: `npm run test`
-- [x] 1.5.2 Type checking passes: `npm run typecheck`
-- [x] 1.5.3 Linting passes: `npm run lint`
-- [x] 1.5.4 Formatting is clean: `npm run format:check`
-- [x] 1.5.5 Build succeeds: `npm run build`
+- [x] 1.5.1 Unit tests pass: `npm run test` — d715bda
+- [x] 1.5.2 Type checking passes: `npm run typecheck` — d715bda
+- [x] 1.5.3 Linting passes: `npm run lint` — d715bda
+- [x] 1.5.4 Formatting is clean: `npm run format:check` — d715bda
+- [x] 1.5.5 Build succeeds: `npm run build` — d715bda
 
 #### Manual
 
@@ -555,10 +555,10 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `npm run test`
-- [x] 2.2 Type checking passes: `npm run typecheck`
-- [x] 2.3 Linting passes: `npm run lint`
-- [x] 2.4 Build succeeds: `npm run build`
+- [x] 2.1 Unit tests pass: `npm run test` — a4e9c6c
+- [x] 2.2 Type checking passes: `npm run typecheck` — a4e9c6c
+- [x] 2.3 Linting passes: `npm run lint` — a4e9c6c
+- [x] 2.4 Build succeeds: `npm run build` — a4e9c6c
 
 #### Manual
 
@@ -569,10 +569,10 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `npm run typecheck`
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Existing tests still pass: `npm run test`
-- [x] 3.4 Build succeeds: `npm run build`
+- [x] 3.1 Type checking passes: `npm run typecheck` — 99f5433
+- [x] 3.2 Linting passes: `npm run lint` — 99f5433
+- [x] 3.3 Existing tests still pass: `npm run test` — 99f5433
+- [x] 3.4 Build succeeds: `npm run build` — 99f5433
 
 #### Manual
 
@@ -587,11 +587,11 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Automated
 
-- [x] 4.1 All tests pass: `npm run test`
-- [x] 4.2 Type checking passes: `npm run typecheck`
-- [x] 4.3 Linting passes: `npm run lint`
-- [x] 4.4 Formatting is clean: `npm run format:check`
-- [x] 4.5 Build succeeds: `npm run build`
+- [x] 4.1 All tests pass: `npm run test` — e67dd3d
+- [x] 4.2 Type checking passes: `npm run typecheck` — e67dd3d
+- [x] 4.3 Linting passes: `npm run lint` — e67dd3d
+- [x] 4.4 Formatting is clean: `npm run format:check` — e67dd3d
+- [x] 4.5 Build succeeds: `npm run build` — e67dd3d
 
 #### Manual
 
