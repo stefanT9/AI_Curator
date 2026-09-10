@@ -418,15 +418,15 @@ server-side.
 
 #### Automated
 
-- [x] 3.1 Full verify gate passes
-- [x] 3.2 No ordinal reader survives in `SwipeDeck.tsx`
-- [x] 3.3 Probe not committed
+- [x] 3.1 Full verify gate passes — 8e4d639
+- [x] 3.2 No ordinal reader survives in `SwipeDeck.tsx` — 8e4d639
+- [x] 3.3 Probe not committed — 8e4d639
 
 #### Manual
 
-- [x] 3.4 `repro.md` sequence now advances to the correct next card
-- [x] 3.5 A skipped piece does not reappear despite the demotion tier
-- [x] 3.6 "N left" agrees with the rendered card across a refetch and never goes negative
-- [x] 3.7 A failed write returns that specific card with an error
-- [x] 3.8 Arrow keys, drag, buttons, and `EmptyDeck` all still work
-- [x] 3.9 Probe reverted and `git status` confirmed before committing
+- [x] 3.4 `repro.md` sequence now advances to the correct next card — 8e4d639
+- [x] 3.5 A skipped piece does not reappear despite the demotion tier — 8e4d639
+- [x] 3.6 "N left" agrees with the rendered card across a refetch and never goes negative — 8e4d639
+- [x] 3.7 A failed write returns that specific card with an error — 8e4d639
+- [x] 3.8 Arrow keys, drag, buttons, and `EmptyDeck` all still work — 8e4d639
+- [x] 3.9 Probe reverted and `git status` confirmed before committing — 8e4d639
