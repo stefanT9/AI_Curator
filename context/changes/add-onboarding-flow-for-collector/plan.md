@@ -693,30 +693,30 @@ auto-deploys it via `.github/workflows/migrations.yml`; never edit it after it a
 
 #### Automated
 
-- [x] 5.1 Type checking passes: `npm run typecheck`
-- [x] 5.2 Linting passes: `npm run lint`
-- [x] 5.3 Formatting is clean: `npm run format:check`
-- [x] 5.4 Unit tests pass: `npm run test`
-- [x] 5.5 Existing `test/lib/deck.test.ts` still passes unmodified
-- [x] 5.6 Build succeeds: `npm run build`
+- [x] 5.1 Type checking passes: `npm run typecheck` — fee995a
+- [x] 5.2 Linting passes: `npm run lint` — fee995a
+- [x] 5.3 Formatting is clean: `npm run format:check` — fee995a
+- [x] 5.4 Unit tests pass: `npm run test` — fee995a
+- [x] 5.5 Existing `test/lib/deck.test.ts` still passes unmodified — fee995a
+- [x] 5.6 Build succeeds: `npm run build` — fee995a
 
 #### Manual
 
-- [x] 5.7 The hint appears on the first card after onboarding and not on subsequent cards
-- [x] 5.8 Dismissing it persists across a page reload
-- [x] 5.9 With site data cleared the hint returns, and nothing throws in a private window
-- [x] 5.10 Drag, buttons and arrow keys all still register verdicts with the hint on screen
-- [x] 5.11 `EmptyDeck` copy is byte-identical to before this phase
+- [x] 5.7 The hint appears on the first card after onboarding and not on subsequent cards — fee995a
+- [x] 5.8 Dismissing it persists across a page reload — fee995a
+- [x] 5.9 With site data cleared the hint returns, and nothing throws in a private window — fee995a
+- [x] 5.10 Drag, buttons and arrow keys all still register verdicts with the hint on screen — fee995a
+- [x] 5.11 `EmptyDeck` copy is byte-identical to before this phase — fee995a
 
 ### Phase 6: Decision record
 
 #### Automated
 
-- [ ] 6.1 Formatting is clean: `npm run format:check`
-- [ ] 6.2 No source changes — `npm run test` and `npm run build` still pass
+- [x] 6.1 Formatting is clean: `npm run format:check`
+- [x] 6.2 No source changes — `npm run test` and `npm run build` still pass
 
 #### Manual
 
-- [ ] 6.3 `prd-v2.md` no longer contradicts shipped behavior on any of the three cited lines
-- [ ] 6.4 `roadmap.md` states what replaced Open Question 2 and why
-- [ ] 6.5 Walk B in `judgment.md` is annotated, not deleted, and still usable for an S-01 re-run
+- [x] 6.3 `prd-v2.md` no longer contradicts shipped behavior on any of the three cited lines
+- [x] 6.4 `roadmap.md` states what replaced Open Question 2 and why
+- [x] 6.5 Walk B in `judgment.md` is annotated, not deleted, and still usable for an S-01 re-run

@@ -112,6 +112,23 @@ _Before this change: every collector was served artworks in the same order, with
 - **Depends on the enrichment work being live:** ranking is only meaningful for artworks that carry tags. Pieces without tags need a defined position in the ordering (see Open Questions).
 - **Liking and liked-artworks preserved:** the like action and the liked-artworks view continue to work exactly as they do today. Ordering and composition of what a collector is served are explicitly in scope to change.
 - **Existing unranked ordering must survive as a fallback:** it is not replaced, it becomes the cold-start path for collectors without enough likes.
+
+  > **Amended 2026-09-10 by `add-onboarding-flow-for-collector`.** Two of the four
+  > constraints above are now partly false as written, and are read as follows.
+  >
+  > "**Every collector begins with no learned taste**" — no longer true by design. A
+  > mandatory first-run flow gates the whole authenticated app: the collector picks
+  > 2–4 style terms, rates a starter set built from them, and reaches `/discover`
+  > holding up to `ONBOARDING_LIKE_TARGET` real likes. The half of the constraint that
+  > survives is the one it was written for: taste still comes only from that
+  > collector's own likes, recorded as ordinary `interactions` rows, and no historical
+  > like is backfilled as signal.
+  >
+  > "**Existing unranked ordering … becomes the cold-start path**" — survives, but as
+  > an exhaustion release rather than the ordinary entry state. A collector who skips
+  > every starter piece, or whose chosen terms match nothing, is still let through with
+  > zero likes and lands on newest-first. That path is now the exception, not the
+  > default first experience.
 - **Dev-stage tolerance:** the project has no real user base, so refactors and behavior changes are acceptable where they are justified. This is not a production system with users to protect.
 
 ## Business Logic Changes
@@ -128,7 +145,23 @@ No access control changes — current model preserved. Authentication remains em
 
 ## Non-Goals
 
-- **No collector-facing controls over ranking.** No filters, no "show me more like this", no tuning, no way to reset learned taste. Rationale: ranking is invisible and automatic in v1; controls are a whole product surface of their own.
+- **No collector-facing controls over ranking**, with one carve-out for first-run term selection. No filters, no "show me more like this", no tuning, no way to reset learned taste. Rationale: ranking is invisible and automatic in v1; controls are a whole product surface of their own.
+
+  > **Amended 2026-09-10 by `add-onboarding-flow-for-collector`.** The first-run flow
+  > asks the collector to pick 2–4 style terms before they see any art. That is a
+  > collector-facing input to what they are served, so it is recorded here as a
+  > deliberate exception rather than left as a flat contradiction with shipped
+  > behavior.
+  >
+  > The exception is narrow. The chosen terms are **transient**: they are never
+  > persisted — no preference table, no column, nothing reads them once the starter
+  > pool is built — and they select which artworks the collector is _offered to rate_,
+  > not how anything is ranked. Ranking itself still reads only the collector's likes.
+  > The control is exercised exactly once, at first run, and there is no route back to
+  > it.
+  >
+  > Everything else in this Non-Goal stands: no filters, no "more like this", no
+  > ongoing tuning, no reset.
 - **No explanation of why a piece was served.** No match score, no "because you liked X". Rationale: v1 is deliberately simple; explanation implies a defensible scoring model that does not exist yet.
 - **No changes to the artist side.** Artists get no visibility into how ranking treats their work, no analytics, and no way to influence placement. Rationale: the artist is a secondary beneficiary of this change, not a participant in it.
 - **No cross-collector or popularity signal.** Ranking never blends in what other collectors liked. Rationale: everyone's feed looking the same is the outcome this change exists to avoid.
@@ -138,7 +171,7 @@ No access control changes — current model preserved. Authentication remains em
 ## Open Questions
 
 1. **How are tags weighted when matching?** Raw overlap treats every tag as equally important, which the Socrates round flagged as producing arbitrary rankings. Whether weighting is needed for v1, and what form it takes, is unresolved. — Owner: user.
-2. **How many likes switch ranking on?** The cold-start rule falls back to the existing ordering until a collector has liked "enough"; the threshold is undefined, which makes the behavior untestable as written. — Owner: user.
+2. ~~**How many likes switch ranking on?**~~ — **DISSOLVED 2026-09-10 by `add-onboarding-flow-for-collector`, not answered.** The question presumed a population of collectors sitting below a threshold; the mandatory first-run flow removes that population. Every collector now arrives at `/discover` holding up to `ONBOARDING_LIKE_TARGET` (currently 5) likes, so the number that matters is a target the flow drives toward, not a threshold ranking waits on. `swipe_deck` is unchanged and still needs no threshold — it ranks on whatever likes exist. The unranked ordering remains only as the exhaustion release for a collector who skipped everything. — Owner: closed.
 3. **Do artworks a collector passed on reappear, and after how long?** Permanent exclusion risks a small catalogue running dry; immediate reappearance reads as the app ignoring the collector. Both positions recorded, neither chosen. — Owner: user.
 4. **Where do untagged artworks sit in the ordering?** Ranking is only meaningful for pieces carrying tags. Artworks predating the enrichment work, or otherwise untagged, need a defined position. — Owner: user.
 5. **Two Scope-of-Change items are untestable as written.** Carried forward from the shaping cross-check: the cold-start item depends on Open Question 2, and the already-liked/passed item depends on Open Question 3. Until both resolve, neither item has acceptance criteria a test can assert. — Owner: user. Block: partial (planning can start; these two items cannot be verified).
