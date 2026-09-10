@@ -560,38 +560,38 @@ migration.
 
 #### Automated
 
-- [x] 1.1 Formatting passes: `npm run format:check`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Type checking passes: `npm run typecheck`
-- [x] 1.4 Default suite passes, including the new cases: `npm run test`
-- [x] 1.5 Build passes: `npm run build`
-- [x] 1.6 `npm run db:seed:generate` still rewrites `supabase/seed.sql` byte-identically
+- [x] 1.1 Formatting passes: `npm run format:check` — 9ce9866
+- [x] 1.2 Linting passes: `npm run lint` — 9ce9866
+- [x] 1.3 Type checking passes: `npm run typecheck` — 9ce9866
+- [x] 1.4 Default suite passes, including the new cases: `npm run test` — 9ce9866
+- [x] 1.5 Build passes: `npm run build` — 9ce9866
+- [x] 1.6 `npm run db:seed:generate` still rewrites `supabase/seed.sql` byte-identically — 9ce9866
 
 #### Manual
 
-- [x] 1.7 Dry-run against the seeded local stack reports nothing to do
-- [x] 1.8 Dry-run against a fresh, unseeded local database reports 1000 rows to create and 1000 objects to upload
-- [x] 1.9 A missing `PUSH_*` variable produces setup instructions; a swapped `.env.local` changes nothing
-- [x] 1.10 A collector account is refused by the artist assertion before reconciliation runs
+- [x] 1.7 Dry-run against the seeded local stack reports nothing to do — 9ce9866
+- [x] 1.8 Dry-run against a fresh, unseeded local database reports 1000 rows to create and 1000 objects to upload — 9ce9866
+- [x] 1.9 A missing `PUSH_*` variable produces setup instructions; a swapped `.env.local` changes nothing — 9ce9866
+- [x] 1.10 A collector account is refused by the artist assertion before reconciliation runs — 9ce9866
 
 ### Phase 2: The apply pass
 
 #### Automated
 
-- [ ] 2.1 Formatting passes: `npm run format:check`
-- [ ] 2.2 Linting passes: `npm run lint`
-- [ ] 2.3 Type checking passes: `npm run typecheck`
-- [ ] 2.4 Default suite passes, including the row-parity test: `npm run test`
-- [ ] 2.5 Build passes: `npm run build`
+- [x] 2.1 Formatting passes: `npm run format:check`
+- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.3 Type checking passes: `npm run typecheck`
+- [x] 2.4 Default suite passes, including the row-parity test: `npm run test`
+- [x] 2.5 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.6 `--apply` against a fresh local stack lands 1000 rows and 1000 objects; dry-run then reports nothing to do
-- [ ] 2.7 A second `--apply` sends no row or object requests; count stays 1000
-- [ ] 2.8 A hand-edited description yields exactly one row to replace, applied in place
-- [ ] 2.9 An interrupted run resumes and reaches nothing-to-do
-- [ ] 2.10 A deleted local JPEG yields exactly one collected failure, a non-zero exit, and no row for that piece
-- [ ] 2.11 The local app renders the deck from pushed data with images intact
+- [x] 2.6 `--apply` against a fresh local stack lands 1000 rows and 1000 objects; dry-run then reports nothing to do
+- [x] 2.7 A second `--apply` sends no row or object requests; count stays 1000
+- [x] 2.8 A hand-edited description yields exactly one row to replace, applied in place
+- [x] 2.9 An interrupted run resumes and reaches nothing-to-do
+- [x] 2.10 A deleted local JPEG yields exactly one collected failure, a non-zero exit, and no row for that piece
+- [x] 2.11 The local app renders the deck from pushed data with images intact
 
 ### Phase 3: Documentation and env scaffolding
 

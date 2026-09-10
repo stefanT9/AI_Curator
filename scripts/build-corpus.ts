@@ -90,7 +90,7 @@ const REQUEST_HEADERS = {
  * requires `<artist_id>/<uuid>.<ext>` — so the asset directory is named after
  * this UUID and `db:seed:images` uploads it to exactly the referenced key.
  */
-const ARTIST_UUID = "00000000-0000-4000-8000-000000000001";
+export const ARTIST_UUID = "00000000-0000-4000-8000-000000000001";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "..");
 const SEED_ASSETS = path.join(REPO_ROOT, "supabase", "seed-assets");
@@ -988,7 +988,7 @@ async function downloadImage(piece: CorpusPiece): Promise<void> {
 
 /** Bounded parallelism, so a free unauthenticated API is not hammered. */
 async function inBatches<T>(
-  items: T[],
+  items: readonly T[],
   size: number,
   worker: (item: T) => Promise<void>,
 ): Promise<void> {
@@ -2028,7 +2028,7 @@ export function verifyGeneratable(
 }
 
 /** One `values` row for `public.artworks`, in column order. */
-function artworkRow(piece: CorpusPiece): string {
+export function artworkRow(piece: CorpusPiece): string {
   const description = descriptionFor(piece);
   return (
     `  (${sqlString(piece.piece_uuid)}, ${sqlString(ARTIST_UUID)}, ` +
@@ -2423,7 +2423,117 @@ async function fetchExistingObjectUuids(
   return uuids;
 }
 
+/** One piece's upsert row, including the column `desiredRow` leaves out for the diff. */
+export function artworkInsertRow(
+  piece: CorpusPiece,
+  artistUuid: string,
+): DesiredRow & { artist_id: string } {
+  return { artist_id: artistUuid, ...desiredRow(piece, artistUuid) };
+}
+
+export type PushFailure = {
+  aic_id: number;
+  piece_uuid: string;
+  stage: "object" | "row";
+  reason: string;
+};
+
+/**
+ * Parallel object uploads. Kept small on the `ENRICH_CONCURRENCY` precedent —
+ * this is a courtesy to the project's storage endpoint, not a throughput goal.
+ */
+const PUSH_UPLOAD_CONCURRENCY = 4;
+
+/** Row writes chunked so one rejected batch fails at most this many pieces. */
+const PUSH_ROW_CHUNK = 200;
+
+/**
+ * Upload every missing object under the artist's session, exactly the call
+ * the browser makes. A missing local file is collected as a failure naming
+ * the repair command, never a crash; everything else collected verbatim.
+ */
+async function uploadObjects(
+  client: SupabaseClient<Database>,
+  pieces: readonly CorpusPiece[],
+  artistUuid: string,
+  failures: PushFailure[],
+): Promise<Set<string>> {
+  const failed = new Set<string>();
+  let done = 0;
+
+  await inBatches(pieces, PUSH_UPLOAD_CONCURRENCY, async (piece) => {
+    try {
+      const bytes = await readFile(
+        path.join(ASSET_DIR, `${piece.piece_uuid}.jpg`),
+      );
+      const { error } = await client.storage
+        .from(ARTWORKS_BUCKET)
+        .upload(imagePathOf(piece, artistUuid), bytes, {
+          contentType: "image/jpeg",
+          upsert: false,
+        });
+      if (error) throw new Error(error.message);
+    } catch (error) {
+      failed.add(piece.piece_uuid);
+      const missingImage =
+        error instanceof Error &&
+        (error as NodeJS.ErrnoException).code === "ENOENT";
+      failures.push({
+        aic_id: piece.aic_id,
+        piece_uuid: piece.piece_uuid,
+        stage: "object",
+        reason: missingImage
+          ? "image missing on disk — run `npm run db:seed:fetch` to repair it"
+          : error instanceof Error
+            ? error.message
+            : String(error),
+      });
+    }
+
+    done += 1;
+    if (done % PROGRESS_EVERY === 0) {
+      console.log(`  uploaded ${done}/${pieces.length}`);
+    }
+  });
+
+  return failed;
+}
+
+/**
+ * Upsert the given pieces' rows, chunked. The manifest is the source of
+ * truth, so every comparable column is replaced on conflict — a re-push after
+ * more enrichment is how corrected tags and descriptions reach production.
+ */
+async function writeRows(
+  client: SupabaseClient<Database>,
+  pieces: readonly CorpusPiece[],
+  artistUuid: string,
+  failures: PushFailure[],
+): Promise<void> {
+  for (let i = 0; i < pieces.length; i += PUSH_ROW_CHUNK) {
+    const chunk = pieces.slice(i, i + PUSH_ROW_CHUNK);
+    const rows = chunk.map((piece) => artworkInsertRow(piece, artistUuid));
+
+    const { error } = await client
+      .from("artworks")
+      .upsert(rows, { onConflict: "id" });
+
+    if (error) {
+      for (const piece of chunk) {
+        failures.push({
+          aic_id: piece.aic_id,
+          piece_uuid: piece.piece_uuid,
+          stage: "row",
+          reason: error.message,
+        });
+      }
+    }
+  }
+}
+
 async function runPush(): Promise<void> {
+  const apply = process.argv.slice(3).includes("--apply");
+
   const target = requirePushTarget();
 
   const manifest = await readManifest();
@@ -2456,17 +2566,65 @@ async function runPush(): Promise<void> {
   console.log(`Rows to replace: ${plan.toReplace.length}`);
   console.log(`Objects to upload: ${plan.toUpload.length}`);
 
-  if (
+  const nothingToDo =
     plan.toCreate.length === 0 &&
     plan.toReplace.length === 0 &&
-    plan.toUpload.length === 0
-  ) {
+    plan.toUpload.length === 0;
+  if (nothingToDo) {
     console.log("\nNothing to do.");
   }
 
-  console.log(
-    "\nDry run — nothing written. Re-run as `npm run db:push -- --apply` to write.",
+  if (!apply) {
+    console.log(
+      "\nDry run — nothing written. Re-run as `npm run db:push -- --apply` to write.",
+    );
+    return;
+  }
+
+  if (nothingToDo) {
+    console.log("\nNothing to apply.");
+    return;
+  }
+
+  // Before the first write: a bad title or a malformed key should cost
+  // nothing, not a partial push.
+  verifyGeneratable(manifest, artistUuid);
+
+  const failures: PushFailure[] = [];
+
+  console.log(`\nUploading ${plan.toUpload.length} object(s)…`);
+  const uploadFailed = await uploadObjects(
+    client,
+    plan.toUpload,
+    artistUuid,
+    failures,
   );
+
+  // Object-then-row, per piece: a piece whose upload failed gets no row, so a
+  // partial run never leaves a row pointing at nothing.
+  const toWrite = [
+    ...plan.toCreate,
+    ...plan.toReplace.map(({ piece }) => piece),
+  ].filter((piece) => !uploadFailed.has(piece.piece_uuid));
+
+  console.log(`Writing ${toWrite.length} row(s)…`);
+  await writeRows(client, toWrite, artistUuid, failures);
+
+  if (failures.length > 0) {
+    console.log(`\n${failures.length} failure(s):`);
+    for (const failure of failures) {
+      console.log(
+        `  ${failure.stage} — aic ${failure.aic_id} (${failure.piece_uuid}): ${failure.reason}`,
+      );
+    }
+    console.log(
+      "\nRe-run to retry only the failures — everything that landed is skipped by reconciliation.",
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  console.log("\nDone. Re-run the dry run to verify nothing is left to do.");
 }
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  ARTIST_UUID,
+  artworkInsertRow,
+  artworkRow,
   buildPushPlan,
   combineTags,
   coverageReport,
@@ -988,5 +991,45 @@ describe("buildPushPlan", () => {
     );
 
     expect(plan.toReplace[0].staleFields).toEqual(["created_at"]);
+  });
+});
+
+describe("artworkInsertRow", () => {
+  it("agrees with artworkRow's SQL on id, title, description, tags and image_path", () => {
+    const [piece] = corpusPieces(1);
+    const insertRow = artworkInsertRow(piece, ARTIST_UUID);
+    const sql = artworkRow(piece);
+
+    expect(sql).toContain(sqlString(insertRow.id));
+    expect(sql).toContain(sqlString(ARTIST_UUID));
+    expect(sql).toContain(sqlString(insertRow.title));
+    expect(insertRow.description).not.toBeNull();
+    expect(sql).toContain(sqlString(insertRow.description as string));
+    expect(sql).toContain(sqlTagArray(insertRow.tags));
+    expect(sql).toContain(sqlString(insertRow.image_path));
+
+    // The row and the SQL generator must agree on the instant too, not just
+    // its two different spellings — see `createdAtOf`'s own coverage of that.
+    const hour = Number(sql.match(/interval '(\d+) hour'/)?.[1]);
+    expect(hour).toBe(piece.slot + 1);
+  });
+
+  it("agrees for an untagged-tail piece — empty tags and a null description in both", () => {
+    const [piece] = corpusPieces(1);
+    const untagged: CorpusPiece = { ...piece, untagged: true };
+    const insertRow = artworkInsertRow(untagged, ARTIST_UUID);
+    const sql = artworkRow(untagged);
+
+    expect(insertRow.tags).toEqual([]);
+    expect(insertRow.description).toBeNull();
+    expect(sql).toContain(", null, '{}', ");
+  });
+
+  it("derives image_path against the given artist uid, not the local default", () => {
+    const [piece] = corpusPieces(1);
+    const target = "11111111-2222-4333-8444-555555555555";
+    const insertRow = artworkInsertRow(piece, target);
+    expect(insertRow.image_path).toBe(`${target}/${piece.piece_uuid}.jpg`);
+    expect(insertRow.artist_id).toBe(target);
   });
 });
