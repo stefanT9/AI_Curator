@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildPushPlan,
   combineTags,
   coverageReport,
+  createdAtOf,
   descriptionFor,
   effectiveTags,
   enrichedTags,
@@ -22,6 +24,7 @@ import {
   type AicArtwork,
   type CorpusManifest,
   type CorpusPiece,
+  type ExistingRow,
 } from "../scripts/build-corpus";
 import { ARTWORK_TAGS, TAXONOMY_BY_FACET } from "@/lib/ai/taxonomy";
 import { MAX_TAGS } from "@/lib/artworks/tags";
@@ -648,6 +651,13 @@ describe("imagePathOf", () => {
       `00000000-0000-4000-8000-000000000001/${piece.piece_uuid}.jpg`,
     );
   });
+
+  it("files under a non-default artist uid and still satisfies the pattern", () => {
+    const target = "11111111-2222-4333-8444-555555555555";
+    const path = imagePathOf(piece, target);
+    expect(path).toBe(`${target}/${piece.piece_uuid}.jpg`);
+    expect(path).toMatch(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(png|jpg|webp)$/);
+  });
 });
 
 describe("descriptionFor", () => {
@@ -840,5 +850,143 @@ describe("renderGeneratedRegion", () => {
     );
     expect(sql).toContain(", null, '{}', ");
     expect(sql).not.toContain("dropped");
+  });
+});
+
+describe("createdAtOf", () => {
+  it("matches the SQL generator's stagger — slot N lands N+1 hours after the epoch", () => {
+    const [piece] = corpusPieces(1);
+    expect(createdAtOf({ ...piece, slot: 0 })).toBe("2026-01-01T01:00:00.000Z");
+    expect(createdAtOf({ ...piece, slot: 4 })).toBe("2026-01-01T05:00:00.000Z");
+  });
+});
+
+describe("buildPushPlan", () => {
+  const artistUuid = "11111111-2222-4333-8444-555555555555";
+
+  /** The exact row `runPush` would write for this piece against `artistUuid`. */
+  const rowFor = (piece: CorpusPiece): ExistingRow => ({
+    id: piece.piece_uuid,
+    title: piece.title,
+    description: descriptionFor(piece),
+    tags: effectiveTags(piece),
+    image_path: imagePathOf(piece, artistUuid),
+    created_at: createdAtOf(piece),
+  });
+
+  it("covers the four presence states a piece can be in", () => {
+    const [both, rowOnly, objectOnly, neither] = corpusPieces(4);
+
+    const existingRows = new Map<string, ExistingRow>([
+      [both.piece_uuid, rowFor(both)],
+      [rowOnly.piece_uuid, rowFor(rowOnly)],
+    ]);
+    const existingObjectUuids = new Set([
+      both.piece_uuid,
+      objectOnly.piece_uuid,
+    ]);
+
+    const plan = buildPushPlan(
+      [both, rowOnly, objectOnly, neither],
+      artistUuid,
+      existingRows,
+      existingObjectUuids,
+    );
+
+    expect(plan.toCreate.map((p) => p.piece_uuid)).toEqual([
+      objectOnly.piece_uuid,
+      neither.piece_uuid,
+    ]);
+    expect(plan.toReplace).toEqual([]);
+    expect(plan.toUpload.map((p) => p.piece_uuid)).toEqual([
+      rowOnly.piece_uuid,
+      neither.piece_uuid,
+    ]);
+  });
+
+  it("reports nothing to do once every row and every object already match", () => {
+    const pieces = corpusPieces(3);
+    const existingRows = new Map(
+      pieces.map((piece) => [piece.piece_uuid, rowFor(piece)]),
+    );
+    const existingObjectUuids = new Set(
+      pieces.map((piece) => piece.piece_uuid),
+    );
+
+    const plan = buildPushPlan(
+      pieces,
+      artistUuid,
+      existingRows,
+      existingObjectUuids,
+    );
+
+    expect(plan.toCreate).toEqual([]);
+    expect(plan.toReplace).toEqual([]);
+    expect(plan.toUpload).toEqual([]);
+  });
+
+  it("flags a row whose description has drifted from the manifest, naming the field", () => {
+    const [piece] = corpusPieces(1);
+    const stale = { ...rowFor(piece), description: "an old description" };
+    const existingRows = new Map([[piece.piece_uuid, stale]]);
+    const existingObjectUuids = new Set([piece.piece_uuid]);
+
+    const plan = buildPushPlan(
+      [piece],
+      artistUuid,
+      existingRows,
+      existingObjectUuids,
+    );
+
+    expect(plan.toCreate).toEqual([]);
+    expect(plan.toUpload).toEqual([]);
+    expect(plan.toReplace).toHaveLength(1);
+    expect(plan.toReplace[0].piece.piece_uuid).toBe(piece.piece_uuid);
+    expect(plan.toReplace[0].staleFields).toEqual(["description"]);
+  });
+
+  it("flags drifted tags separately from a drifted description", () => {
+    const [piece] = corpusPieces(1);
+    const stale = { ...rowFor(piece), tags: ["monochrome"] };
+    const plan = buildPushPlan(
+      [piece],
+      artistUuid,
+      new Map([[piece.piece_uuid, stale]]),
+      new Set([piece.piece_uuid]),
+    );
+
+    expect(plan.toReplace[0].staleFields).toEqual(["tags"]);
+  });
+
+  it("treats PostgREST's +00:00 rendering as the same instant as toISOString's Z", () => {
+    // PostgREST renders a timestamptz as "…T01:00:00+00:00"; `createdAtOf`
+    // produces "…T01:00:00.000Z" for the same instant. Comparing the raw
+    // strings would flag every untouched row as stale.
+    const [piece] = corpusPieces(1);
+    const row = rowFor(piece);
+    const rendered = { ...row, created_at: "2026-01-01T01:00:00+00:00" };
+    expect(row.created_at).toBe("2026-01-01T01:00:00.000Z");
+
+    const plan = buildPushPlan(
+      [piece],
+      artistUuid,
+      new Map([[piece.piece_uuid, rendered]]),
+      new Set([piece.piece_uuid]),
+    );
+
+    expect(plan.toReplace).toEqual([]);
+  });
+
+  it("still flags a created_at that is a genuinely different instant", () => {
+    const [piece] = corpusPieces(1);
+    const stale = { ...rowFor(piece), created_at: "2026-01-02T01:00:00+00:00" };
+    const plan = buildPushPlan(
+      [piece],
+      artistUuid,
+      new Map([[piece.piece_uuid, stale]]),
+      new Set([piece.piece_uuid]),
+    );
+
+    expect(plan.toReplace[0].staleFields).toEqual(["created_at"]);
   });
 });

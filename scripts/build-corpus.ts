@@ -47,10 +47,13 @@ import {
 } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import * as z from "zod";
 import { enrichFromImage, type EnrichmentFailure } from "@/lib/ai";
 import { FACETS, TAXONOMY_BY_FACET, type Facet } from "@/lib/ai/taxonomy";
+import { ARTWORKS_BUCKET } from "@/lib/artworks/images";
 import { MAX_TAGS } from "@/lib/artworks/tags";
+import type { Database } from "@/types/database";
 
 // ---------------------------------------------------------------------------
 // Source and layout
@@ -1865,9 +1868,19 @@ export function sqlTagArray(tags: readonly string[]): string {
   return sqlString(`{${elements.join(",")}}`);
 }
 
-/** The storage key the fetch stage downloaded to, derived not stored. */
-export function imagePathOf(piece: CorpusPiece): string {
-  return `${ARTIST_UUID}/${piece.piece_uuid}.jpg`;
+/**
+ * The storage key the fetch stage downloaded to, derived not stored.
+ *
+ * Defaults to the local seeded artist so `runGenerate` and `artworkRow` are
+ * untouched; the push stage passes the target artist's own uid instead, since
+ * a key built from the local `ARTIST_UUID` would fail `image_path_pattern`'s
+ * `<artist_id>/…` requirement against any other account.
+ */
+export function imagePathOf(
+  piece: CorpusPiece,
+  artistUuid: string = ARTIST_UUID,
+): string {
+  return `${artistUuid}/${piece.piece_uuid}.jpg`;
 }
 
 /**
@@ -1955,8 +1968,16 @@ export function selectLikeHistory(
  * thousand-row insert with no piece named, and the whole seed is rolled back —
  * so a single bad title costs a reset and a bisect. These are the four
  * constraints on `public.artworks` that corpus data can actually violate.
+ *
+ * Defaults to the local seeded artist so `runGenerate` is untouched; the push
+ * stage calls this against the target artist's own uid before its first
+ * write, for the same reason — a bad title or a malformed key should cost
+ * nothing, not a partial push.
  */
-function verifyGeneratable(manifest: CorpusManifest): void {
+export function verifyGeneratable(
+  manifest: CorpusManifest,
+  artistUuid: string = ARTIST_UUID,
+): void {
   const problems: string[] = [];
   const slots = new Set<number>();
 
@@ -1983,7 +2004,7 @@ function verifyGeneratable(manifest: CorpusManifest): void {
       );
     }
 
-    const imagePath = imagePathOf(piece);
+    const imagePath = imagePathOf(piece, artistUuid);
     if (!IMAGE_PATH_PATTERN.test(imagePath)) {
       problems.push(
         `${where}: image_path "${imagePath}" fails image_path_pattern`,
@@ -2144,6 +2165,311 @@ async function runGenerate(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Stage: push
+//
+// A second sink on the same manifest — dry-run by default, `--apply` writes.
+// Reads its target from variables nothing else in this repo defines, so a
+// `.env.local` swapped between the local and remote pairs cannot redirect it.
+// ---------------------------------------------------------------------------
+
+type PushTarget = {
+  url: string;
+  publishableKey: string;
+  artistEmail: string;
+  artistPassword: string;
+};
+
+const PUSH_ENV_SETUP = `
+  Create .env.push.local (never .env.local — see supabase/seed-assets/README.md) with:
+    PUSH_SUPABASE_URL=...
+    PUSH_SUPABASE_PUBLISHABLE_KEY=...
+    PUSH_ARTIST_EMAIL=...
+    PUSH_ARTIST_PASSWORD=...
+`;
+
+/**
+ * Read the push target from its own, deliberately non-`NEXT_PUBLIC_` variable
+ * names. No fallback to `NEXT_PUBLIC_SUPABASE_URL` or any service-role /
+ * secret key under any name — if one is set in the process environment, it is
+ * ignored, not consulted.
+ */
+function requirePushTarget(): PushTarget {
+  const url = process.env.PUSH_SUPABASE_URL;
+  const publishableKey = process.env.PUSH_SUPABASE_PUBLISHABLE_KEY;
+  const artistEmail = process.env.PUSH_ARTIST_EMAIL;
+  const artistPassword = process.env.PUSH_ARTIST_PASSWORD;
+
+  if (!url || !publishableKey || !artistEmail || !artistPassword) {
+    throw new Error(
+      "The push stage needs PUSH_SUPABASE_URL, PUSH_SUPABASE_PUBLISHABLE_KEY, " +
+        `PUSH_ARTIST_EMAIL and PUSH_ARTIST_PASSWORD.\n${PUSH_ENV_SETUP}`,
+    );
+  }
+
+  return { url, publishableKey, artistEmail, artistPassword };
+}
+
+/**
+ * Sign in as the demo artist over the publishable key and assert the account
+ * can actually write.
+ *
+ * Failing here names the email and host explicitly: a failed
+ * `private.is_artist()` would otherwise surface as 1000 opaque RLS rejections
+ * on the first insert.
+ */
+async function signInPushArtist(
+  target: PushTarget,
+): Promise<{ client: SupabaseClient<Database>; artistUuid: string }> {
+  // Not the `@supabase/ssr` browser factory — there is no cookie jar or
+  // document here. `autoRefreshToken` stays on (the default): a 1000-object
+  // upload runs for many minutes and the session must outlive its own token.
+  const client = createClient<Database>(target.url, target.publishableKey, {
+    auth: { persistSession: false, autoRefreshToken: true },
+  });
+
+  const { data: signIn, error: signInError } =
+    await client.auth.signInWithPassword({
+      email: target.artistEmail,
+      password: target.artistPassword,
+    });
+
+  if (signInError || !signIn.user) {
+    throw new Error(
+      `Could not sign in as ${target.artistEmail} at ${target.url}: ` +
+        `${signInError?.message ?? "no user returned"}`,
+    );
+  }
+
+  const { data: profile, error: profileError } = await client
+    .from("profiles")
+    .select("role")
+    .eq("id", signIn.user.id)
+    .single();
+
+  if (profileError || !profile || profile.role !== "artist") {
+    throw new Error(
+      `${target.artistEmail} at ${target.url} is not an artist ` +
+        `(role: ${profile?.role ?? "unknown"}). Promote it through the account ` +
+        'page\'s "Become an artist" form before pushing.',
+    );
+  }
+
+  return { client, artistUuid: signIn.user.id };
+}
+
+/** What the push would write for one piece, under the target artist's uid. */
+type DesiredRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  tags: string[];
+  image_path: string;
+  created_at: string;
+};
+
+/** The comparable columns of a row already on the target. */
+export type ExistingRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  tags: string[];
+  image_path: string;
+  created_at: string;
+};
+
+/**
+ * The ISO instant `artworkRow`'s SQL writes as
+ * `timestamptz '2026-01-01 00:00:00+00' + interval 'N hour'` — computed here
+ * instead of parsed from `CORPUS_EPOCH`, so the push and the SQL generator
+ * agree on the value without one reading the other's string format.
+ */
+const CORPUS_EPOCH_MS = Date.UTC(2026, 0, 1, 0, 0, 0);
+
+export function createdAtOf(piece: CorpusPiece): string {
+  return new Date(
+    CORPUS_EPOCH_MS + (piece.slot + 1) * 60 * 60 * 1000,
+  ).toISOString();
+}
+
+function desiredRow(piece: CorpusPiece, artistUuid: string): DesiredRow {
+  return {
+    id: piece.piece_uuid,
+    title: piece.title,
+    description: descriptionFor(piece),
+    tags: effectiveTags(piece),
+    image_path: imagePathOf(piece, artistUuid),
+    created_at: createdAtOf(piece),
+  };
+}
+
+/** Which comparable columns differ, empty when the row is already correct. */
+function staleFields(desired: DesiredRow, existing: ExistingRow): string[] {
+  const fields: string[] = [];
+  if (desired.title !== existing.title) fields.push("title");
+  if (desired.description !== existing.description) fields.push("description");
+  if (JSON.stringify(desired.tags) !== JSON.stringify(existing.tags)) {
+    fields.push("tags");
+  }
+  if (desired.image_path !== existing.image_path) fields.push("image_path");
+  // By instant, not by string: PostgREST renders a timestamptz as
+  // "2026-01-01T01:00:00+00:00", while `createdAtOf`'s `toISOString()`
+  // produces "2026-01-01T01:00:00.000Z" — the same instant, two spellings.
+  // Comparing the raw strings flagged every row as stale.
+  if (
+    new Date(desired.created_at).getTime() !==
+    new Date(existing.created_at).getTime()
+  ) {
+    fields.push("created_at");
+  }
+  return fields;
+}
+
+export type PushPlan = {
+  artistUuid: string;
+  toCreate: CorpusPiece[];
+  toReplace: { piece: CorpusPiece; staleFields: string[] }[];
+  toUpload: CorpusPiece[];
+};
+
+/**
+ * The diff between the manifest and the target, across the four states a
+ * piece can be in: row and object both present (nothing to do unless the row
+ * has drifted), row only, object only, or neither.
+ *
+ * Pure and network-free so it is the part the unit tests actually exercise —
+ * `runPush` is the thin network shell around it.
+ */
+export function buildPushPlan(
+  pieces: readonly CorpusPiece[],
+  artistUuid: string,
+  existingRows: ReadonlyMap<string, ExistingRow>,
+  existingObjectUuids: ReadonlySet<string>,
+): PushPlan {
+  const toCreate: CorpusPiece[] = [];
+  const toReplace: { piece: CorpusPiece; staleFields: string[] }[] = [];
+  const toUpload: CorpusPiece[] = [];
+
+  for (const piece of pieces) {
+    const existing = existingRows.get(piece.piece_uuid);
+
+    if (!existing) {
+      toCreate.push(piece);
+    } else {
+      const stale = staleFields(desiredRow(piece, artistUuid), existing);
+      if (stale.length > 0) toReplace.push({ piece, staleFields: stale });
+    }
+
+    if (!existingObjectUuids.has(piece.piece_uuid)) {
+      toUpload.push(piece);
+    }
+  }
+
+  return { artistUuid, toCreate, toReplace, toUpload };
+}
+
+/** A 1000-element `in` filter is a URL-length hazard, so this chunks. */
+const RECONCILE_ROW_CHUNK = 200;
+
+async function fetchExistingRows(
+  client: SupabaseClient<Database>,
+  pieceUuids: readonly string[],
+): Promise<Map<string, ExistingRow>> {
+  const rows = new Map<string, ExistingRow>();
+
+  for (let i = 0; i < pieceUuids.length; i += RECONCILE_ROW_CHUNK) {
+    const chunk = pieceUuids.slice(i, i + RECONCILE_ROW_CHUNK);
+    const { data, error } = await client
+      .from("artworks")
+      .select("id, title, description, tags, image_path, created_at")
+      .in("id", chunk);
+
+    if (error) {
+      throw new Error(`Could not read existing artworks: ${error.message}`);
+    }
+    for (const row of data ?? []) {
+      rows.set(row.id, row);
+    }
+  }
+
+  return rows;
+}
+
+/** The storage API caps a page; the corpus is exactly 1000, so this paginates. */
+const RECONCILE_OBJECT_PAGE = 1000;
+
+async function fetchExistingObjectUuids(
+  client: SupabaseClient<Database>,
+  artistUuid: string,
+): Promise<Set<string>> {
+  const uuids = new Set<string>();
+  let offset = 0;
+
+  for (;;) {
+    const { data, error } = await client.storage
+      .from(ARTWORKS_BUCKET)
+      .list(artistUuid, { limit: RECONCILE_OBJECT_PAGE, offset });
+
+    if (error) {
+      throw new Error(`Could not list existing objects: ${error.message}`);
+    }
+    if (!data || data.length === 0) break;
+
+    for (const object of data) uuids.add(object.name.replace(/\.jpg$/, ""));
+
+    if (data.length < RECONCILE_OBJECT_PAGE) break;
+    offset += RECONCILE_OBJECT_PAGE;
+  }
+
+  return uuids;
+}
+
+async function runPush(): Promise<void> {
+  const target = requirePushTarget();
+
+  const manifest = await readManifest();
+  if (!manifest) {
+    throw new Error(
+      `No manifest at ${path.relative(REPO_ROOT, MANIFEST_PATH)} — run \`npm run db:seed:fetch\` first.`,
+    );
+  }
+
+  const { client, artistUuid } = await signInPushArtist(target);
+  const host = new URL(target.url).host;
+
+  console.log(`Target: ${host}`);
+  console.log(`Artist: ${target.artistEmail} (${artistUuid})`);
+
+  const pieceUuids = manifest.pieces.map((piece) => piece.piece_uuid);
+  const [existingRows, existingObjectUuids] = await Promise.all([
+    fetchExistingRows(client, pieceUuids),
+    fetchExistingObjectUuids(client, artistUuid),
+  ]);
+
+  const plan = buildPushPlan(
+    manifest.pieces,
+    artistUuid,
+    existingRows,
+    existingObjectUuids,
+  );
+
+  console.log(`Rows to create: ${plan.toCreate.length}`);
+  console.log(`Rows to replace: ${plan.toReplace.length}`);
+  console.log(`Objects to upload: ${plan.toUpload.length}`);
+
+  if (
+    plan.toCreate.length === 0 &&
+    plan.toReplace.length === 0 &&
+    plan.toUpload.length === 0
+  ) {
+    console.log("\nNothing to do.");
+  }
+
+  console.log(
+    "\nDry run — nothing written. Re-run as `npm run db:push -- --apply` to write.",
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Dispatcher
 // ---------------------------------------------------------------------------
 
@@ -2152,6 +2478,7 @@ const STAGES: Record<string, () => Promise<void>> = {
   enrich: runEnrich,
   coverage: runCoverage,
   generate: runGenerate,
+  push: runPush,
 };
 
 async function main(): Promise<void> {

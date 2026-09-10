@@ -25,6 +25,7 @@
     "db:seed:enrich:retry": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/build-corpus.ts enrich --retry-failed",
     "db:seed:coverage": "tsx --conditions=react-server scripts/build-corpus.ts coverage",
     "db:seed:generate": "tsx --conditions=react-server scripts/build-corpus.ts generate",
+    "db:push": "tsx --conditions=react-server --env-file-if-exists=.env.push.local scripts/build-corpus.ts push",
     "db:types": "supabase gen types typescript --linked > src/types/database.ts.tmp && mv src/types/database.ts.tmp src/types/database.ts",
     "db:types:local": "supabase gen types typescript --local > src/types/database.ts.tmp && mv src/types/database.ts.tmp src/types/database.ts"
   },
