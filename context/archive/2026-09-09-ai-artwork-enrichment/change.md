@@ -1,10 +1,10 @@
 ---
 change_id: ai-artwork-enrichment
 title: AI enrichment for artwork uploads — image-derived description and tags
-status: impl_reviewed
+status: archived
 created: 2026-09-09
 updated: 2026-09-10
-archived_at: null
+archived_at: 2026-09-10T07:42:13Z
 ---
 
 ## Notes
