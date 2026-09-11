@@ -597,27 +597,27 @@ migration.
 
 #### Automated
 
-- [x] 3.1 Formatting passes: `npm run format:check`
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Full gate stays green: `npm run typecheck` · `npm run test` · `npm run build`
-- [x] 3.4 `git status --porcelain` shows no `.env.push.local`
+- [x] 3.1 Formatting passes: `npm run format:check` — 78e4f20
+- [x] 3.2 Linting passes: `npm run lint` — 78e4f20
+- [x] 3.3 Full gate stays green: `npm run typecheck` · `npm run test` · `npm run build` — 78e4f20
+- [x] 3.4 `git status --porcelain` shows no `.env.push.local` — 78e4f20
 
 #### Manual
 
-- [x] 3.5 A reader can construct `.env.push.local` and dry-run from the README alone
-- [x] 3.6 The AGENTS.md sentence is defensible against the existing "no second mechanism" rule
+- [x] 3.5 A reader can construct `.env.push.local` and dry-run from the README alone — 78e4f20
+- [x] 3.6 The AGENTS.md sentence is defensible against the existing "no second mechanism" rule — 78e4f20
 
 ### Phase 4: The production run
 
 #### Automated
 
-- [ ] 4.1 Pre-push dry-run reports the linked project's host, the demo artist's uid, 1000 rows to create and 1000 objects to upload
-- [ ] 4.2 `--apply` exits 0 with no collected failures
-- [ ] 4.3 Post-push dry-run reports nothing to do
+- [x] 4.1 Pre-push dry-run reports the linked project's host, the demo artist's uid, 1000 rows to create and 1000 objects to upload — 32bcb0a
+- [x] 4.2 `--apply` exits 0 with no collected failures — 32bcb0a
+- [x] 4.3 Post-push dry-run reports nothing to do — 32bcb0a
 
 #### Manual
 
-- [ ] 4.4 A fresh collector sees a full deck with images rendering in the deployed app
-- [ ] 4.5 The demo artist's studio lists the corpus, attributed to the demo account
-- [ ] 4.6 An untagged-tail piece renders without tags or description rather than erroring
-- [ ] 4.7 No account other than the demo artist owns any pushed artwork
+- [x] 4.4 A fresh collector sees a full deck with images rendering in the deployed app — 32bcb0a
+- [x] 4.5 The demo artist's studio lists the corpus, attributed to the demo account — 32bcb0a
+- [x] 4.6 An untagged-tail piece renders without tags or description rather than erroring — 32bcb0a
+- [x] 4.7 No account other than the demo artist owns any pushed artwork — 32bcb0a
