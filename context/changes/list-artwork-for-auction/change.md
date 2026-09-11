@@ -1,7 +1,7 @@
 ---
 change_id: list-artwork-for-auction
 title: An artist lists a piece for auction, and it shows up somewhere
-status: implementing
+status: implemented
 created: 2026-09-11
 updated: 2026-09-11
 archived_at: null

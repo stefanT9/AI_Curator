@@ -738,19 +738,19 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `npm run typecheck`
-- [x] 4.2 Linting passes: `npm run lint`
-- [x] 4.3 Formatting passes: `npm run format:check`
-- [x] 4.4 The full default lane passes, including every pre-existing spec unchanged: `npm run test`
-- [x] 4.5 The integration lane still passes: `npm run test:integration` (all 11 `auctions.int.ts` cases pass; one pre-existing failure in `storage-boundary.int.ts`, last touched 2026-09-10 before this branch, is unrelated to this change and out of scope for this phase)
-- [x] 4.6 Build passes: `npm run build`
+- [x] 4.1 Type checking passes: `npm run typecheck` — f1f098a
+- [x] 4.2 Linting passes: `npm run lint` — f1f098a
+- [x] 4.3 Formatting passes: `npm run format:check` — f1f098a
+- [x] 4.4 The full default lane passes, including every pre-existing spec unchanged: `npm run test` — f1f098a
+- [x] 4.5 The integration lane still passes: `npm run test:integration` (all 11 `auctions.int.ts` cases pass; one pre-existing failure in `storage-boundary.int.ts`, last touched 2026-09-10 before this branch, is unrelated to this change and out of scope for this phase) — f1f098a
+- [x] 4.6 Build passes: `npm run build` — f1f098a
 
 #### Manual
 
-- [x] 4.7 An artist lists a piece with each of the three durations and it appears at `/auctions` with the right end time
-- [x] 4.8 A listed piece shows the "On auction" badge and offers no second listing link
-- [x] 4.9 A second user sees the auction with no bid control, bid count, or bidder information anywhere in the page source
-- [x] 4.10 The countdown ticks live and reads "Ended" at zero; a reload drops the auction from the list
-- [x] 4.11 The seller cancels their own auction and it disappears; a second user has no cancel control
-- [x] 4.12 FR-014 regression: upload, AI tagging, and publishing walked through end to end and unchanged
-- [x] 4.13 FR-013 regression: deck ordering, liking, and the liked view unchanged
+- [x] 4.7 An artist lists a piece with each of the three durations and it appears at `/auctions` with the right end time — f1f098a
+- [x] 4.8 A listed piece shows the "On auction" badge and offers no second listing link — f1f098a
+- [x] 4.9 A second user sees the auction with no bid control, bid count, or bidder information anywhere in the page source — f1f098a
+- [x] 4.10 The countdown ticks live and reads "Ended" at zero; a reload drops the auction from the list — f1f098a
+- [x] 4.11 The seller cancels their own auction and it disappears; a second user has no cancel control — f1f098a
+- [x] 4.12 FR-014 regression: upload, AI tagging, and publishing walked through end to end and unchanged — f1f098a
+- [x] 4.13 FR-013 regression: deck ordering, liking, and the liked view unchanged — f1f098a
