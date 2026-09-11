@@ -3,7 +3,7 @@ project: ArtSwipe
 version: 1
 status: draft
 created: 2026-09-10
-updated: 2026-09-10
+updated: 2026-09-11
 prd_version: 2
 main_goal: low-complexity
 top_blocker: none
@@ -241,3 +241,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **F-01: (foundation) a seeded set of tagged artworks and a collector like-history exists in the development environment, so a tag-match ordering can be exercised and judged rather than guessed at.** — Archived 2026-09-10 → `context/archive/2026-09-10-ranking-eval-corpus/`. Lesson: —.
 - **S-01: A collector who has liked several pieces is served their next cards ordered by how well each piece's tags match the tags on the pieces they liked, instead of newest-first — and pieces they previously passed on return below all fresh matches, rather than being gone for good.** — Archived 2026-09-10 → `context/archive/2026-09-10-personalized-deck-ranking/`. Lesson: —.
 - **S-04: A new collector is walked through a first-run flow — pick 2–4 style terms, rate a starter set built from them — so they reach `/discover` already holding likes and their first deck is genuinely ranked.** — Archived 2026-09-10 → `context/archive/2026-09-10-add-onboarding-flow-for-collector/`. Dissolved Open Question 2 and superseded `S-03`. Lesson: —.
+- **F-02: (foundation) the ranking-evaluation corpus is 1000 real public-domain artworks sampled from the Art Institute of Chicago, tagged from museum metadata plus the live enrichment pipeline, so ranking is judged against a realistic tag distribution instead of four designed clusters.** — Archived 2026-09-11 → `context/archive/2026-09-10-real-artwork-corpus/`. Lesson: —.
