@@ -206,6 +206,41 @@ export const getArtistArtworks = async (
   return data ?? [];
 };
 
+export const STUDIO_PAGE_SIZE = 24;
+
+/**
+ * A bounded page of one artist's catalog, for the Studio grid.
+ *
+ * `getArtistArtworks` above loads everything in one query, which is unsafe to
+ * feed straight into `getLiveAuctionsByArtwork`: the local seed corpus gives
+ * its demo artist 1000 artworks, and passing every id into a PostgREST `in`
+ * filter built a GET request whose query string was too long for the client
+ * to send at all ("URI too long"), before RLS or the database ever saw it.
+ * Paginating the Studio grid bounds that list to `STUDIO_PAGE_SIZE` ids
+ * regardless of catalog size, which is what keeps that lookup safe.
+ */
+export const getArtistArtworksPage = async (
+  artistId: string,
+  {
+    limit = STUDIO_PAGE_SIZE,
+    offset = 0,
+  }: { limit?: number; offset?: number } = {},
+): Promise<{ artworks: Artwork[]; total: number }> => {
+  const supabase = await createClient();
+  const { data, error, count } = await supabase
+    .from("artworks")
+    .select("*", { count: "exact" })
+    .eq("artist_id", artistId)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    throw new Error(`Failed to load artworks: ${error.message}`);
+  }
+
+  return { artworks: data ?? [], total: count ?? 0 };
+};
+
 /**
  * A public artist profile. Returns null for a collector as well as for an id
  * that does not exist — the RLS policy only exposes rows whose role is

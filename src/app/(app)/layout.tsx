@@ -23,6 +23,9 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
             <Link href="/liked" className="opacity-70 hover:opacity-100">
               Liked
             </Link>
+            <Link href="/auctions" className="opacity-70 hover:opacity-100">
+              Auctions
+            </Link>
             {/* The artist flow only exists in the nav once you've opted in. */}
             {profile.role === "artist" ? (
               <Link href="/studio" className="opacity-70 hover:opacity-100">
