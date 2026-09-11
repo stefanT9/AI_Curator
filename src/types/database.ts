@@ -93,6 +93,54 @@ export type Database = {
           },
         ]
       }
+      auctions: {
+        Row: {
+          artwork_id: string
+          cancelled_at: string | null
+          created_at: string
+          ends_at: string
+          id: string
+          seller_id: string
+          starting_price_cents: number
+          updated_at: string
+        }
+        Insert: {
+          artwork_id: string
+          cancelled_at?: string | null
+          created_at?: string
+          ends_at: string
+          id?: string
+          seller_id: string
+          starting_price_cents: number
+          updated_at?: string
+        }
+        Update: {
+          artwork_id?: string
+          cancelled_at?: string | null
+          created_at?: string
+          ends_at?: string
+          id?: string
+          seller_id?: string
+          starting_price_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auctions_artwork_id_fkey"
+            columns: ["artwork_id"]
+            isOneToOne: false
+            referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auctions_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interactions: {
         Row: {
           action: string
@@ -167,9 +215,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_auction: { Args: { p_auction_id: string }; Returns: boolean }
       claim_enrichment_slot: {
         Args: { p_daily_limit?: number; p_hourly_limit?: number }
         Returns: boolean
+      }
+      create_auction: {
+        Args: {
+          p_artwork_id: string
+          p_duration_hours: number
+          p_starting_price_cents: number
+        }
+        Returns: string
       }
       swipe_deck: {
         Args: { p_limit?: number }
