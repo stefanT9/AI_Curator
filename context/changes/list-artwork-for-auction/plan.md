@@ -691,34 +691,34 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly from scratch: `npx supabase db reset`
-- [x] 1.2 Type checking passes: `npm run typecheck`
-- [x] 1.3 Linting passes: `npm run lint`
-- [x] 1.4 Formatting passes: `npm run format:check`
-- [x] 1.5 Unit tests for `isOpen` / `msRemaining` / `formatRemaining` at an injected clock pass: `npm run test`
-- [x] 1.6 Unit tests for `parsePriceToCents` / `formatCents` round-trip and reject out-of-bounds input: `npm run test`
-- [x] 1.7 Build passes: `npm run build`
+- [x] 1.1 Migration applies cleanly from scratch: `npx supabase db reset` — a16dc6e
+- [x] 1.2 Type checking passes: `npm run typecheck` — a16dc6e
+- [x] 1.3 Linting passes: `npm run lint` — a16dc6e
+- [x] 1.4 Formatting passes: `npm run format:check` — a16dc6e
+- [x] 1.5 Unit tests for `isOpen` / `msRemaining` / `formatRemaining` at an injected clock pass: `npm run test` — a16dc6e
+- [x] 1.6 Unit tests for `parsePriceToCents` / `formatCents` round-trip and reject out-of-bounds input: `npm run test` — a16dc6e
+- [x] 1.7 Build passes: `npm run build` — a16dc6e
 
 #### Manual
 
-- [x] 1.8 `npm run db:types:local` has been run and `src/types/database.ts` contains `auctions`, `create_auction`, and `cancel_auction`
-- [x] 1.9 `pg_policies` returns exactly one row for `auctions`, the select policy
-- [x] 1.10 Existing migrations are untouched
+- [x] 1.8 `npm run db:types:local` has been run and `src/types/database.ts` contains `auctions`, `create_auction`, and `cancel_auction` — a16dc6e
+- [x] 1.9 `pg_policies` returns exactly one row for `auctions`, the select policy — a16dc6e
+- [x] 1.10 Existing migrations are untouched — a16dc6e
 
 ### Phase 2: Server Actions and data access
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `npm run typecheck`
-- [ ] 2.2 Linting passes: `npm run lint`
-- [ ] 2.3 Formatting passes: `npm run format:check`
-- [ ] 2.4 New and existing default-lane tests pass: `npm run test`
-- [ ] 2.5 Build passes: `npm run build`
+- [x] 2.1 Type checking passes: `npm run typecheck`
+- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.3 Formatting passes: `npm run format:check`
+- [x] 2.4 New and existing default-lane tests pass: `npm run test`
+- [x] 2.5 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.6 `src/app/actions/auctions.ts` exports exactly two functions, both re-checking authorisation
-- [ ] 2.7 No existing artworks, interactions, or `src/lib/artworks/` file appears in `git diff`
+- [x] 2.6 `src/app/actions/auctions.ts` exports exactly two functions, both re-checking authorisation
+- [x] 2.7 No existing artworks, interactions, or `src/lib/artworks/` file appears in `git diff`
 
 ### Phase 3: Real-boundary proof of the RLS and RPC design
 
