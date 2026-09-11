@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { formatRemaining, isOpen, msRemaining } from "@/lib/auctions/status";
+import {
+  canBid,
+  formatRemaining,
+  isOpen,
+  msRemaining,
+} from "@/lib/auctions/status";
 import type { Auction } from "@/types/domain";
 
 const endsAt = "2026-09-18T12:00:00.000Z";
@@ -31,6 +36,49 @@ describe("isOpen", () => {
     expect(
       isOpen(auction({ cancelled_at: "2026-09-12T00:00:00.000Z" }), now),
     ).toBe(false);
+  });
+});
+
+describe("canBid", () => {
+  const sellerId = "11111111-1111-4111-8111-111111111111";
+  const collectorId = "22222222-2222-4222-8222-222222222222";
+
+  function biddable(
+    overrides: Partial<
+      Pick<Auction, "cancelled_at" | "ends_at" | "seller_id">
+    > = {},
+  ): Pick<Auction, "cancelled_at" | "ends_at" | "seller_id"> {
+    return {
+      cancelled_at: null,
+      ends_at: endsAt,
+      seller_id: sellerId,
+      ...overrides,
+    };
+  }
+
+  const whileOpen = new Date(new Date(endsAt).getTime() - 1);
+
+  it("lets a collector bid on an open auction that is not theirs", () => {
+    expect(canBid(biddable(), collectorId, whileOpen)).toBe(true);
+  });
+
+  it("refuses the seller on their own open auction", () => {
+    expect(canBid(biddable(), sellerId, whileOpen)).toBe(false);
+  });
+
+  it("refuses a cancelled auction", () => {
+    expect(
+      canBid(
+        biddable({ cancelled_at: "2026-09-12T00:00:00.000Z" }),
+        collectorId,
+        whileOpen,
+      ),
+    ).toBe(false);
+  });
+
+  it("refuses an auction that has ended", () => {
+    const afterEnd = new Date(new Date(endsAt).getTime() + 1);
+    expect(canBid(biddable(), collectorId, afterEnd)).toBe(false);
   });
 });
 

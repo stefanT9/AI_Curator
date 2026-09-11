@@ -141,6 +141,48 @@ export type Database = {
           },
         ]
       }
+      bids: {
+        Row: {
+          amount_cents: number
+          auction_id: string
+          bidder_id: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          auction_id: string
+          bidder_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          auction_id?: string
+          bidder_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bids_bidder_id_fkey"
+            columns: ["bidder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interactions: {
         Row: {
           action: string
@@ -227,6 +269,10 @@ export type Database = {
           p_starting_price_cents: number
         }
         Returns: string
+      }
+      place_bid: {
+        Args: { p_amount_cents: number; p_auction_id: string }
+        Returns: undefined
       }
       swipe_deck: {
         Args: { p_limit?: number }

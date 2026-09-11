@@ -11,6 +11,7 @@ export type UserRole = Database["public"]["Enums"]["user_role"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
 export type Auction = Database["public"]["Tables"]["auctions"]["Row"];
+export type Bid = Database["public"]["Tables"]["bids"]["Row"];
 
 export type InteractionAction = "like" | "skip";
 

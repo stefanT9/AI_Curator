@@ -23,6 +23,24 @@ export function isOpen(
   );
 }
 
+/**
+ * Whether this viewer may place a bid on this auction right now.
+ *
+ * Stated once here rather than re-derived in the detail page and the bid form,
+ * so the two cannot drift apart. It is a display predicate only: `place_bid`
+ * re-checks both halves under a row lock, and that check -- not this one -- is
+ * what actually refuses a bid.
+ *
+ * Same explicit-clock reasoning as `isOpen` above.
+ */
+export function canBid(
+  auction: Pick<Auction, "cancelled_at" | "ends_at" | "seller_id">,
+  viewerId: string,
+  now: Date,
+): boolean {
+  return isOpen(auction, now) && auction.seller_id !== viewerId;
+}
+
 export function msRemaining(
   auction: Pick<Auction, "ends_at">,
   now: Date,
