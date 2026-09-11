@@ -742,7 +742,7 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 - [x] 4.2 Linting passes: `npm run lint` — f1f098a
 - [x] 4.3 Formatting passes: `npm run format:check` — f1f098a
 - [x] 4.4 The full default lane passes, including every pre-existing spec unchanged: `npm run test` — f1f098a
-- [x] 4.5 The integration lane still passes: `npm run test:integration` (all 11 `auctions.int.ts` cases pass; one pre-existing failure in `storage-boundary.int.ts`, last touched 2026-09-10 before this branch, is unrelated to this change and out of scope for this phase) — f1f098a
+- [x] 4.5 The integration lane still passes: `npm run test:integration` (all 39 tests across all 5 files pass; a `storage-boundary.int.ts` test that briefly failed mid-phase was a stale characterization test — it pinned a bug fixed by an unrelated, already-closed change's migration `20260911000000_add_artwork_storage_select.sql`, and was updated to assert the now-correct behavior) — f1f098a
 - [x] 4.6 Build passes: `npm run build` — f1f098a
 
 #### Manual

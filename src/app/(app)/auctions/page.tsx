@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/dal";
-import { getOpenAuctions } from "@/lib/auctions/queries";
+import {
+  AUCTIONS_PAGE_SIZE,
+  getOpenAuctionsPage,
+} from "@/lib/auctions/queries";
+import { parsePage } from "@/lib/pagination";
 import { AuctionCard } from "@/components/auctions/AuctionCard";
+import { Pagination } from "@/components/ui/Pagination";
 
 export const metadata: Metadata = {
   title: "Auctions",
@@ -9,17 +14,26 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function AuctionsPage() {
+export default async function AuctionsPage({
+  searchParams,
+}: PageProps<"/auctions">) {
   const user = await requireUser();
-  const auctions = await getOpenAuctions();
+  const { page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
+
+  const { auctions, total } = await getOpenAuctionsPage({
+    offset: (page - 1) * AUCTIONS_PAGE_SIZE,
+  });
+
+  const totalPages = Math.max(1, Math.ceil(total / AUCTIONS_PAGE_SIZE));
 
   return (
     <div className="mx-auto w-full max-w-5xl">
       <h1 className="mb-1 text-2xl font-semibold tracking-tight">Auctions</h1>
       <p className="mb-6 text-sm opacity-70">
-        {auctions.length === 0
+        {total === 0
           ? "No open auctions right now."
-          : `${auctions.length} open ${auctions.length === 1 ? "auction" : "auctions"}.`}
+          : `${total} open ${total === 1 ? "auction" : "auctions"}.`}
       </p>
 
       {auctions.length === 0 ? (
@@ -40,6 +54,8 @@ export default async function AuctionsPage() {
           ))}
         </ul>
       )}
+
+      <Pagination page={page} totalPages={totalPages} basePath="/auctions" />
     </div>
   );
 }

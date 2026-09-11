@@ -101,6 +101,42 @@ export const getOpenAuctions = async (): Promise<AuctionWithArtwork[]> => {
   return attachArtworks(data ?? []);
 };
 
+export const AUCTIONS_PAGE_SIZE = 24;
+
+/**
+ * A bounded page of open auctions, for the `/auctions` browse grid.
+ *
+ * `getOpenAuctions` above loads every open auction in one query and feeds
+ * every one of their artwork ids into `attachArtworks`'s `in()` filter — the
+ * same shape that built a "URI too long" failure for the Studio grid once its
+ * artist had 1000 artworks (see `getArtistArtworksPage` in
+ * `src/lib/artworks/queries.ts`). Auction volume is low today, but nothing
+ * bounds it as it grows, so the browse page paginates from the start rather
+ * than waiting to hit the same wall.
+ */
+export const getOpenAuctionsPage = async ({
+  limit = AUCTIONS_PAGE_SIZE,
+  offset = 0,
+}: { limit?: number; offset?: number } = {}): Promise<{
+  auctions: AuctionWithArtwork[];
+  total: number;
+}> => {
+  const supabase = await createClient();
+  const { data, error, count } = await supabase
+    .from("auctions")
+    .select("*", { count: "exact" })
+    .is("cancelled_at", null)
+    .gt("ends_at", new Date().toISOString())
+    .order("ends_at", { ascending: true })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    throw new Error(`Failed to load auctions: ${error.message}`);
+  }
+
+  return { auctions: await attachArtworks(data ?? []), total: count ?? 0 };
+};
+
 /**
  * One query for a whole studio page's worth of artworks, never per row. Only
  * live auctions matter to the studio badge, so the same openness predicate

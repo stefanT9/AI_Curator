@@ -223,20 +223,15 @@ describe("Storage RLS policies", () => {
     expect(stillExists).toBe(true);
   });
 
-  it("does NOT let an artist delete an object in their own folder (recorded)", async () => {
-    // Recorded, not desired. `.remove()` returns no error, but the object
-    // survives — even for its owner. `storage-api` lists matching objects
-    // before deleting them, and that list is gated by a SELECT policy on
-    // `storage.objects` that no migration defines (only insert/update/delete
-    // exist). With nothing to list, nothing is deleted.
-    //
-    // Consequence: the compensating `remove()` in `createArtwork` and the
-    // `remove()` in `deleteArtwork` are BOTH silent no-ops today. Deleted
-    // artworks leave their image in the bucket forever, and the pre-Phase-4
-    // "cleanup orphans a live row's image" path (Risk #1 / P1) is not actually
-    // reachable through either deleter while this holds. Add a SELECT policy to
-    // make cleanup work and P1 becomes reachable — at which point the Phase 4
-    // guard in `createArtwork` is what stops it. Tracked as a follow-up.
+  it("lets an artist delete an object in their own folder", async () => {
+    // Previously recorded as a bug: `storage-api` lists matching objects
+    // before deleting them, and that list was gated by a SELECT policy on
+    // `storage.objects` that no migration defined, so `.remove()` returned no
+    // error but silently deleted nothing — even for the object's own owner.
+    // `20260911000000_add_artwork_storage_select.sql` added that policy, so
+    // deletion of one's own object now actually works; this test was updated
+    // to match. The compensating `remove()` in `createArtwork` and the
+    // `remove()` in `deleteArtwork` are no longer silent no-ops.
     const imagePath = await artist1.upload(TINY_PNG);
 
     const { error: deleteError } = await artist1.client.storage
@@ -248,11 +243,10 @@ describe("Storage RLS policies", () => {
     const { data: existsAfter } = await artist1.client.storage
       .from(ARTWORKS_BUCKET)
       .exists(imagePath);
-    expect(existsAfter).toBe(true);
+    expect(existsAfter).toBe(false);
 
     const response = await fetch(publicImageUrl(imagePath));
-    expect(response.status).toBe(200);
-    await response.arrayBuffer();
+    expect(response.status).toBe(400);
   });
 
   it("rejects an upload larger than 10 MiB", async () => {

@@ -6,21 +6,17 @@ import {
   getArtistArtworksPage,
 } from "@/lib/artworks/queries";
 import { getLiveAuctionsByArtwork } from "@/lib/auctions/queries";
+import { parsePage } from "@/lib/pagination";
 import { ArtCard } from "@/components/artworks/ArtCard";
 import { DeleteArtworkButton } from "@/components/artworks/DeleteArtworkButton";
-import { submitButtonClass, secondaryButtonClass } from "@/components/ui/Field";
+import { submitButtonClass } from "@/components/ui/Field";
+import { Pagination } from "@/components/ui/Pagination";
 
 export const metadata: Metadata = {
   title: "Studio",
 };
 
 export const dynamic = "force-dynamic";
-
-const parsePage = (value: string | string[] | undefined): number => {
-  const raw = Array.isArray(value) ? value[0] : value;
-  const parsed = Number(raw);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : 1;
-};
 
 export default async function StudioPage({
   searchParams,
@@ -101,27 +97,7 @@ export default async function StudioPage({
         </ul>
       )}
 
-      {totalPages > 1 ? (
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <Link
-            href={page <= 2 ? "/studio" : `/studio?page=${page - 1}`}
-            aria-disabled={page <= 1}
-            className={`${secondaryButtonClass} ${page <= 1 ? "pointer-events-none opacity-40" : ""}`}
-          >
-            Previous
-          </Link>
-          <span className="text-sm opacity-70">
-            Page {page} of {totalPages}
-          </span>
-          <Link
-            href={`/studio?page=${page + 1}`}
-            aria-disabled={page >= totalPages}
-            className={`${secondaryButtonClass} ${page >= totalPages ? "pointer-events-none opacity-40" : ""}`}
-          >
-            Next
-          </Link>
-        </div>
-      ) : null}
+      <Pagination page={page} totalPages={totalPages} basePath="/studio" />
     </div>
   );
 }
