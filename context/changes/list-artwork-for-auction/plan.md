@@ -709,30 +709,30 @@ Pushing the migration file to `main` auto-applies it via `.github/workflows/migr
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `npm run typecheck`
-- [x] 2.2 Linting passes: `npm run lint`
-- [x] 2.3 Formatting passes: `npm run format:check`
-- [x] 2.4 New and existing default-lane tests pass: `npm run test`
-- [x] 2.5 Build passes: `npm run build`
+- [x] 2.1 Type checking passes: `npm run typecheck` — aefd96c
+- [x] 2.2 Linting passes: `npm run lint` — aefd96c
+- [x] 2.3 Formatting passes: `npm run format:check` — aefd96c
+- [x] 2.4 New and existing default-lane tests pass: `npm run test` — aefd96c
+- [x] 2.5 Build passes: `npm run build` — aefd96c
 
 #### Manual
 
-- [x] 2.6 `src/app/actions/auctions.ts` exports exactly two functions, both re-checking authorisation
-- [x] 2.7 No existing artworks, interactions, or `src/lib/artworks/` file appears in `git diff`
+- [x] 2.6 `src/app/actions/auctions.ts` exports exactly two functions, both re-checking authorisation — aefd96c
+- [x] 2.7 No existing artworks, interactions, or `src/lib/artworks/` file appears in `git diff` — aefd96c
 
 ### Phase 3: Real-boundary proof of the RLS and RPC design
 
 #### Automated
 
-- [ ] 3.1 The integration lane passes against a local stack: `npm run test:integration`
-- [ ] 3.2 The default lane is still green and CI-safe: `npm run test`
-- [ ] 3.3 Linting and formatting pass over the new spec: `npm run lint` · `npm run format:check`
+- [x] 3.1 The integration lane passes against a local stack: `npm run test:integration`
+- [x] 3.2 The default lane is still green and CI-safe: `npm run test`
+- [x] 3.3 Linting and formatting pass over the new spec: `npm run lint` · `npm run format:check`
 
 #### Manual
 
-- [ ] 3.4 Each of the eleven boundary cases exists as its own named test, none narrowed to fit
-- [ ] 3.5 The lane was observed failing with a policy temporarily loosened, confirming the refusal tests are not vacuous
-- [ ] 3.6 `test/integration/auctions.int.ts` mints no more users than it uses
+- [x] 3.4 Each of the eleven boundary cases exists as its own named test, none narrowed to fit
+- [x] 3.5 The lane was observed failing with a policy temporarily loosened, confirming the refusal tests are not vacuous
+- [x] 3.6 `test/integration/auctions.int.ts` mints no more users than it uses
 
 ### Phase 4: The listing flow and the auction section
 
