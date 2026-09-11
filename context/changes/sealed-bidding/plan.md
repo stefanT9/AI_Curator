@@ -561,32 +561,32 @@ migration edits an applied file; `.github/workflows/migrations.yml` applies this
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npx supabase db reset`
-- [x] 1.2 Types regenerate with `bids` present: `npm run db:types:local`
-- [x] 1.3 Type checking passes: `npm run typecheck`
-- [x] 1.4 Linting passes: `npm run lint`
-- [x] 1.5 Formatting passes: `npm run format:check`
-- [x] 1.6 `canBid` unit tests pass: `npm run test`
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset` — 86b6382
+- [x] 1.2 Types regenerate with `bids` present: `npm run db:types:local` — 86b6382
+- [x] 1.3 Type checking passes: `npm run typecheck` — 86b6382
+- [x] 1.4 Linting passes: `npm run lint` — 86b6382
+- [x] 1.5 Formatting passes: `npm run format:check` — 86b6382
+- [x] 1.6 `canBid` unit tests pass: `npm run test` — 86b6382
 
 #### Manual
 
-- [x] 1.7 No insert/update/delete policy on `bids`; exactly one select policy scoped to `bidder_id`
-- [x] 1.8 Regenerated `src/types/database.ts` shows `place_bid` and the `bids` row type
+- [x] 1.7 No insert/update/delete policy on `bids`; exactly one select policy scoped to `bidder_id` — 86b6382
+- [x] 1.8 Regenerated `src/types/database.ts` shows `place_bid` and the `bids` row type — 86b6382
 
 ### Phase 2: Server Action and data access
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `npm run test`
-- [ ] 2.2 Type checking passes: `npm run typecheck`
-- [ ] 2.3 Linting passes: `npm run lint`
-- [ ] 2.4 Formatting passes: `npm run format:check`
-- [ ] 2.5 Production build passes: `npm run build`
+- [x] 2.1 Unit tests pass: `npm run test`
+- [x] 2.2 Type checking passes: `npm run typecheck`
+- [x] 2.3 Linting passes: `npm run lint`
+- [x] 2.4 Formatting passes: `npm run format:check`
+- [x] 2.5 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.6 `placeBid` is the only new export of the `"use server"` module
-- [ ] 2.7 No query selects a bid amount belonging to anyone but the caller
+- [x] 2.6 `placeBid` is the only new export of the `"use server"` module
+- [x] 2.7 No query selects a bid amount belonging to anyone but the caller
 
 ### Phase 3: Real-boundary proof
 

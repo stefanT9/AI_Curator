@@ -14,7 +14,7 @@ vi.mock("@/utils/supabase/server", () => ({
 vi.mock("next/navigation", () => ({ redirect }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
-import { cancelAuction, createAuction } from "@/app/actions/auctions";
+import { cancelAuction, createAuction, placeBid } from "@/app/actions/auctions";
 
 const VALID_ARTWORK_ID = "11111111-1111-4111-8111-111111111111";
 const VALID_AUCTION_ID = "22222222-2222-4222-8222-222222222222";
@@ -127,6 +127,106 @@ describe("createAuction", () => {
 
     expect(result?.message).toBeDefined();
     expect(redirect).not.toHaveBeenCalled();
+  });
+});
+
+describe("placeBid", () => {
+  it("rejects a malformed auction id before calling the database", async () => {
+    const result = await placeBid(
+      undefined,
+      form({ auctionId: "not-a-uuid", amount: "10" }),
+    );
+
+    expect(result).toEqual({ message: "Unknown auction." });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("rejects an unparseable amount before calling the database", async () => {
+    const result = await placeBid(
+      undefined,
+      form({ auctionId: VALID_AUCTION_ID, amount: "ten dollars" }),
+    );
+
+    expect(result?.errors?.amount).toBeDefined();
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("rejects a zero amount before calling the database", async () => {
+    const result = await placeBid(
+      undefined,
+      form({ auctionId: VALID_AUCTION_ID, amount: "0" }),
+    );
+
+    expect(result?.errors?.amount).toBeDefined();
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("rejects an amount above the maximum before calling the database", async () => {
+    const result = await placeBid(
+      undefined,
+      form({ auctionId: VALID_AUCTION_ID, amount: "1000000001" }),
+    );
+
+    expect(result?.errors?.amount).toBeDefined();
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("calls place_bid with minor units, not dollars", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+
+    const result = await placeBid(
+      undefined,
+      form({ auctionId: VALID_AUCTION_ID, amount: "12.50" }),
+    );
+
+    expect(rpc).toHaveBeenCalledWith("place_bid", {
+      p_auction_id: VALID_AUCTION_ID,
+      p_amount_cents: 1250,
+    });
+    expect(result).toBeUndefined();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["BID00", { message: "Sign in and try again." }],
+    ["BID01", { message: "This auction is no longer open for bids." }],
+    ["BID02", { message: "You cannot bid on your own listing." }],
+    [
+      "BID03",
+      { errors: { amount: ["Your bid must be at least the starting price."] } },
+    ],
+    [
+      "BID04",
+      {
+        errors: {
+          amount: ["Your bid must be higher than your current bid."],
+        },
+      },
+    ],
+  ])("maps %s to its own state", async (code, expected) => {
+    rpc.mockResolvedValue({ data: null, error: { message: "nope", code } });
+
+    const result = await placeBid(
+      undefined,
+      form({ auctionId: VALID_AUCTION_ID, amount: "10" }),
+    );
+
+    expect(result).toEqual(expected);
+  });
+
+  it("falls back to a generic message for an unmapped database refusal", async () => {
+    rpc.mockResolvedValue({
+      data: null,
+      error: { message: "boom", code: "UNKNOWN" },
+    });
+
+    const result = await placeBid(
+      undefined,
+      form({ auctionId: VALID_AUCTION_ID, amount: "10" }),
+    );
+
+    expect(result?.message).toBeDefined();
+    expect(result?.errors).toBeUndefined();
   });
 });
 

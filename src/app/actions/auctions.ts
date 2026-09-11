@@ -46,6 +46,23 @@ const CancelAuctionSchema = z.object({
 });
 
 /**
+ * A bid is bounded exactly like a starting price -- same minor units, same
+ * floor and ceiling, same `bids_amount_positive` check mirroring them in the
+ * database -- so it reuses `parsePriceToCents` rather than restating bounds
+ * that could drift from `StartingPriceSchema`'s.
+ */
+const BidAmountSchema = z
+  .string()
+  .transform((value) => parsePriceToCents(value))
+  .refine((value): value is number => value !== null, {
+    error: "Enter a valid bid amount.",
+  });
+
+const PlaceBidSchema = z.object({
+  amount: BidAmountSchema,
+});
+
+/**
  * `create_auction` raises a distinguishable Postgres errcode for each refusal
  * (see `supabase/migrations/20260911120000_add_auctions.sql`), surfaced here
  * as `error.code`. "Already live" in particular is a user-facing message, not
@@ -104,6 +121,82 @@ export async function createAuction(
   revalidatePath("/studio");
   revalidatePath("/auctions");
   redirect("/auctions");
+}
+
+export type BidFormState =
+  | {
+      errors?: {
+        amount?: string[];
+      };
+      message?: string;
+    }
+  | undefined;
+
+/**
+ * `place_bid` raises a distinguishable Postgres errcode for each refusal (see
+ * `supabase/migrations/20260911190000_add_bids.sql`). The split matters: BID03
+ * and BID04 are things the collector can fix by typing a different number, so
+ * they land on the field; BID00-BID02 are about the auction or the session, so
+ * they are form-level.
+ *
+ * BID01 stays vague on purpose -- the function folds missing, cancelled, and
+ * ended auctions into one code so a non-participant learns nothing about
+ * someone else's auction, and this message must not undo that.
+ */
+const BID_ERROR_STATES: Record<string, NonNullable<BidFormState>> = {
+  BID00: { message: "Sign in and try again." },
+  BID01: { message: "This auction is no longer open for bids." },
+  BID02: { message: "You cannot bid on your own listing." },
+  BID03: {
+    errors: { amount: ["Your bid must be at least the starting price."] },
+  },
+  BID04: {
+    errors: { amount: ["Your bid must be higher than your current bid."] },
+  },
+};
+
+/**
+ * The only write path to `bids` from the app. No redirect: the collector stays
+ * on the detail page and the revalidation is what shows them their new
+ * standing bid.
+ */
+export async function placeBid(
+  _state: BidFormState,
+  formData: FormData,
+): Promise<BidFormState> {
+  await requireUser();
+
+  const auctionId = asString(formData.get("auctionId"));
+
+  if (!z.uuid().safeParse(auctionId).success) {
+    return { message: "Unknown auction." };
+  }
+
+  const validatedFields = PlaceBidSchema.safeParse({
+    amount: asString(formData.get("amount")),
+  });
+
+  if (!validatedFields.success) {
+    return { errors: z.flattenError(validatedFields.error).fieldErrors };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("place_bid", {
+    p_auction_id: auctionId,
+    p_amount_cents: validatedFields.data.amount,
+  });
+
+  if (error) {
+    return (
+      BID_ERROR_STATES[error.code ?? ""] ?? {
+        message: "Could not place your bid. Try again.",
+      }
+    );
+  }
+
+  revalidatePath(`/auctions/${auctionId}`);
+  revalidatePath("/auctions");
+  return undefined;
 }
 
 export async function cancelAuction(formData: FormData): Promise<void> {

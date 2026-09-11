@@ -27,6 +27,13 @@ const { tableResults, calls, fromCalls, createClient } = vi.hoisted(() => {
       };
     }
 
+    // Terminal, unlike the filters above: it resolves rather than chaining, so
+    // a `maybeSingle` read registers its result directly (a row, not an array).
+    builder.maybeSingle = (...args: unknown[]) => {
+      calls.push({ table, method: "maybeSingle", args });
+      return Promise.resolve(result());
+    };
+
     return builder;
   };
 
@@ -46,8 +53,11 @@ const { tableResults, calls, fromCalls, createClient } = vi.hoisted(() => {
 vi.mock("@/utils/supabase/server", () => ({ createClient }));
 
 import {
+  getAuction,
   getLiveAuctionsByArtwork,
   getOpenAuctions,
+  getOwnBid,
+  getOwnBidAuctionIds,
 } from "@/lib/auctions/queries";
 
 const AUCTION_ROW = {
@@ -164,5 +174,132 @@ describe("getLiveAuctionsByArtwork", () => {
 
     expect(result.size).toBe(0);
     expect(createClient).not.toHaveBeenCalled();
+  });
+});
+
+// `getAuction` and `getOwnBid` are wrapped in React's `cache`, so each case
+// uses a distinct id rather than relying on the memo being cold.
+describe("getAuction", () => {
+  it("reads by id without the openness predicate, so an ended auction still resolves", async () => {
+    tableResults.auctions = {
+      data: { ...AUCTION_ROW, id: "auction-by-id" },
+      error: null,
+    };
+    tableResults.artworks = {
+      data: [{ id: "art-1", artist_id: "artist-1", title: "Piece" }],
+      error: null,
+    };
+    tableResults.profiles = {
+      data: [{ id: "artist-1", display_name: "Ada" }],
+      error: null,
+    };
+
+    const auction = await getAuction("auction-by-id");
+
+    expect(auction?.id).toBe("auction-by-id");
+    expect(auction?.artwork.artist).toEqual({
+      id: "artist-1",
+      displayName: "Ada",
+    });
+    expect(calls).toContainEqual({
+      table: "auctions",
+      method: "eq",
+      args: ["id", "auction-by-id"],
+    });
+    expect(
+      calls.some(
+        (call) =>
+          call.table === "auctions" &&
+          (call.method === "is" || call.method === "gt"),
+      ),
+    ).toBe(false);
+  });
+
+  it("returns null for an unknown id without resolving artworks", async () => {
+    tableResults.auctions = { data: null, error: null };
+
+    const auction = await getAuction("auction-missing");
+
+    expect(auction).toBeNull();
+    expect(fromCalls).not.toContain("artworks");
+  });
+});
+
+describe("getOwnBid", () => {
+  const BID_ROW = {
+    id: "bid-1",
+    auction_id: "auction-own-bid",
+    bidder_id: "collector-1",
+    amount_cents: 15000,
+    created_at: "2026-01-01T00:00:00.000Z",
+    updated_at: "2026-01-01T00:00:00.000Z",
+  };
+
+  it("filters by auction only — the select policy is what scopes it to the caller", async () => {
+    tableResults.bids = { data: BID_ROW, error: null };
+
+    const bid = await getOwnBid("auction-own-bid");
+
+    expect(bid).toEqual(BID_ROW);
+    expect(calls).toContainEqual({
+      table: "bids",
+      method: "eq",
+      args: ["auction_id", "auction-own-bid"],
+    });
+    expect(
+      calls.some(
+        (call) => call.table === "bids" && call.args[0] === "bidder_id",
+      ),
+    ).toBe(false);
+  });
+
+  it("returns null when the caller has not bid", async () => {
+    tableResults.bids = { data: null, error: null };
+
+    expect(await getOwnBid("auction-no-bid")).toBeNull();
+  });
+});
+
+describe("getOwnBidAuctionIds", () => {
+  it("issues one query for a whole page of auction ids", async () => {
+    tableResults.bids = {
+      data: [{ auction_id: "auction-1" }, { auction_id: "auction-3" }],
+      error: null,
+    };
+
+    const ids = await getOwnBidAuctionIds(["auction-1", "auction-2"]);
+
+    expect(fromCalls.filter((table) => table === "bids")).toHaveLength(1);
+    expect(calls).toContainEqual({
+      table: "bids",
+      method: "in",
+      args: ["auction_id", ["auction-1", "auction-2"]],
+    });
+    expect(ids).toEqual(new Set(["auction-1", "auction-3"]));
+  });
+
+  it("selects no amount — the badge says that you bid, never how much", async () => {
+    tableResults.bids = { data: [], error: null };
+
+    await getOwnBidAuctionIds(["auction-1"]);
+
+    expect(calls).toContainEqual({
+      table: "bids",
+      method: "select",
+      args: ["auction_id"],
+    });
+  });
+
+  it("returns an empty set without querying for an empty id list", async () => {
+    const ids = await getOwnBidAuctionIds([]);
+
+    expect(ids.size).toBe(0);
+    expect(createClient).not.toHaveBeenCalled();
+  });
+
+  it("throws when the bids query errors", async () => {
+    tableResults.bids = { data: null, error: { message: "boom" } };
+
+    await expect(getOwnBidAuctionIds(["auction-1"])).rejects.toThrow("boom");
   });
 });

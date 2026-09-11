@@ -1,11 +1,14 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { createClient } from "@/utils/supabase/server";
 import type {
   ArtistSummary,
   Artwork,
   Auction,
   AuctionWithArtwork,
+  Bid,
 } from "@/types/domain";
 
 /**
@@ -135,6 +138,84 @@ export const getOpenAuctionsPage = async ({
   }
 
   return { auctions: await attachArtworks(data ?? []), total: count ?? 0 };
+};
+
+/**
+ * One auction by id, for the detail page. Cached: the page reads it in both
+ * `generateMetadata` and the body, as `getArtwork` in
+ * `src/lib/artworks/queries.ts` does.
+ *
+ * Deliberately *without* the openness predicate its neighbours above apply. An
+ * ended or cancelled auction still renders -- it just is not biddable, which is
+ * `canBid`'s question, not this one's.
+ */
+export const getAuction = cache(
+  async (id: string): Promise<AuctionWithArtwork | null> => {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("auctions")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (!data) {
+      return null;
+    }
+
+    const [withArtwork] = await attachArtworks([data]);
+    return withArtwork ?? null;
+  },
+);
+
+/**
+ * The caller's own bid on one auction, or null. Cached for the same reason
+ * `getAuction` is.
+ *
+ * There is no `bidder_id` filter here and that is not an oversight: the select
+ * policy on `bids` (`bidder_id = auth.uid()`) is the only thing that scopes
+ * this read, and per AGENTS.md an ownership filter in a query would be for
+ * correctness, never access control. `maybeSingle` is safe because
+ * `bids_one_per_bidder` makes at most one row visible to any caller.
+ */
+export const getOwnBid = cache(
+  async (auctionId: string): Promise<Bid | null> => {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("bids")
+      .select("*")
+      .eq("auction_id", auctionId)
+      .maybeSingle();
+
+    return data ?? null;
+  },
+);
+
+/**
+ * Which of a page's auctions the caller has bid on, for the browse grid's
+ * badge -- one query for the whole page, never one per card, the same shape
+ * `getLiveAuctionsByArtwork` uses for the studio.
+ *
+ * Returns ids only. No amount is selected, because no surface may show one:
+ * the badge says *that* you bid, never how much.
+ */
+export const getOwnBidAuctionIds = async (
+  auctionIds: string[],
+): Promise<Set<string>> => {
+  if (auctionIds.length === 0) {
+    return new Set();
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("bids")
+    .select("auction_id")
+    .in("auction_id", auctionIds);
+
+  if (error) {
+    throw new Error(`Failed to load your bids: ${error.message}`);
+  }
+
+  return new Set((data ?? []).map((bid) => bid.auction_id));
 };
 
 /**
