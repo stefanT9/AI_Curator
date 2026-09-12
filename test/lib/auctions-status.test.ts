@@ -11,9 +11,11 @@ import type { Auction } from "@/types/domain";
 const endsAt = "2026-09-18T12:00:00.000Z";
 
 function auction(
-  overrides: Partial<Pick<Auction, "cancelled_at" | "ends_at">> = {},
-): Pick<Auction, "cancelled_at" | "ends_at"> {
-  return { cancelled_at: null, ends_at: endsAt, ...overrides };
+  overrides: Partial<
+    Pick<Auction, "cancelled_at" | "closed_at" | "ends_at">
+  > = {},
+): Pick<Auction, "cancelled_at" | "closed_at" | "ends_at"> {
+  return { cancelled_at: null, closed_at: null, ends_at: endsAt, ...overrides };
 }
 
 describe("isOpen", () => {
@@ -45,11 +47,12 @@ describe("canBid", () => {
 
   function biddable(
     overrides: Partial<
-      Pick<Auction, "cancelled_at" | "ends_at" | "seller_id">
+      Pick<Auction, "cancelled_at" | "closed_at" | "ends_at" | "seller_id">
     > = {},
-  ): Pick<Auction, "cancelled_at" | "ends_at" | "seller_id"> {
+  ): Pick<Auction, "cancelled_at" | "closed_at" | "ends_at" | "seller_id"> {
     return {
       cancelled_at: null,
+      closed_at: null,
       ends_at: endsAt,
       seller_id: sellerId,
       ...overrides,

@@ -67,6 +67,9 @@ const AUCTION_ROW = {
   starting_price_cents: 1000,
   ends_at: "2026-01-01T00:00:00.000Z",
   cancelled_at: null,
+  closed_at: null,
+  winning_bid_id: null,
+  winning_amount_cents: null,
   created_at: "2025-12-25T00:00:00.000Z",
   updated_at: "2025-12-25T00:00:00.000Z",
 };
@@ -79,7 +82,7 @@ beforeEach(() => {
 });
 
 describe("getOpenAuctions", () => {
-  it("applies both halves of the openness predicate", async () => {
+  it("applies every term of the openness predicate", async () => {
     tableResults.auctions = { data: [], error: null };
 
     await getOpenAuctions();
@@ -88,6 +91,11 @@ describe("getOpenAuctions", () => {
       table: "auctions",
       method: "is",
       args: ["cancelled_at", null],
+    });
+    expect(calls).toContainEqual({
+      table: "auctions",
+      method: "is",
+      args: ["closed_at", null],
     });
     expect(
       calls.some(

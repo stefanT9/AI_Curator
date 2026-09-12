@@ -97,32 +97,41 @@ export type Database = {
         Row: {
           artwork_id: string
           cancelled_at: string | null
+          closed_at: string | null
           created_at: string
           ends_at: string
           id: string
           seller_id: string
           starting_price_cents: number
           updated_at: string
+          winning_amount_cents: number | null
+          winning_bid_id: string | null
         }
         Insert: {
           artwork_id: string
           cancelled_at?: string | null
+          closed_at?: string | null
           created_at?: string
           ends_at: string
           id?: string
           seller_id: string
           starting_price_cents: number
           updated_at?: string
+          winning_amount_cents?: number | null
+          winning_bid_id?: string | null
         }
         Update: {
           artwork_id?: string
           cancelled_at?: string | null
+          closed_at?: string | null
           created_at?: string
           ends_at?: string
           id?: string
           seller_id?: string
           starting_price_cents?: number
           updated_at?: string
+          winning_amount_cents?: number | null
+          winning_bid_id?: string | null
         }
         Relationships: [
           {
@@ -137,6 +146,13 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auctions_winning_bid_id_fkey"
+            columns: ["winning_bid_id"]
+            isOneToOne: false
+            referencedRelation: "bids"
             referencedColumns: ["id"]
           },
         ]
@@ -262,6 +278,7 @@ export type Database = {
         Args: { p_daily_limit?: number; p_hourly_limit?: number }
         Returns: boolean
       }
+      close_due_auctions: { Args: { p_now?: string }; Returns: number }
       create_auction: {
         Args: {
           p_artwork_id: string

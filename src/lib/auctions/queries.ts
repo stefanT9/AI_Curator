@@ -84,9 +84,11 @@ const attachArtworks = async (
 /**
  * FR-006's browse surface: every open auction, closing-soonest first.
  *
- * The `is` / `gt` pair here is the SQL mirror of `isOpen` in
- * `src/lib/auctions/status.ts` (`cancelled_at is null and ends_at > now()`) —
- * change them together.
+ * The three filters here are the SQL mirror of `isOpen` in
+ * `src/lib/auctions/status.ts` (`cancelled_at is null and closed_at is null
+ * and ends_at > now()`) — change them together. `closed_at` is not implied by
+ * `ends_at`: `close_due_auctions(p_now)` can close an auction whose `ends_at`
+ * is still in the future.
  */
 export const getOpenAuctions = async (): Promise<AuctionWithArtwork[]> => {
   const supabase = await createClient();
@@ -94,6 +96,7 @@ export const getOpenAuctions = async (): Promise<AuctionWithArtwork[]> => {
     .from("auctions")
     .select("*")
     .is("cancelled_at", null)
+    .is("closed_at", null)
     .gt("ends_at", new Date().toISOString())
     .order("ends_at", { ascending: true });
 
@@ -129,6 +132,7 @@ export const getOpenAuctionsPage = async ({
     .from("auctions")
     .select("*", { count: "exact" })
     .is("cancelled_at", null)
+    .is("closed_at", null)
     .gt("ends_at", new Date().toISOString())
     .order("ends_at", { ascending: true })
     .range(offset, offset + limit - 1);
@@ -236,6 +240,7 @@ export const getLiveAuctionsByArtwork = async (
     .select("*")
     .in("artwork_id", artworkIds)
     .is("cancelled_at", null)
+    .is("closed_at", null)
     .gt("ends_at", new Date().toISOString());
 
   if (error) {

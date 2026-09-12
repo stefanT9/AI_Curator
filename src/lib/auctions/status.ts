@@ -10,15 +10,23 @@ import type { Auction } from "@/types/domain";
  * whose `ends_at` has already passed.
  *
  * `isOpen` is the TypeScript mirror of the predicate `getOpenAuctions`
- * applies in SQL (`cancelled_at is null and ends_at > now()`) -- a comment
- * at that call site names this pairing so the two are changed together.
+ * applies in SQL (`cancelled_at is null and closed_at is null and ends_at >
+ * now()`) -- a comment at that call site names this pairing so the two are
+ * changed together, and `place_bid` / `cancel_auction` state the same three
+ * terms in SQL.
+ *
+ * `closed_at` is not redundant with `ends_at`. `close_due_auctions(p_now)`
+ * can stamp an auction closed while its `ends_at` is still in the future --
+ * which is exactly what the integration lane does -- so the two timestamps
+ * cannot be assumed to agree.
  */
 export function isOpen(
-  auction: Pick<Auction, "cancelled_at" | "ends_at">,
+  auction: Pick<Auction, "cancelled_at" | "closed_at" | "ends_at">,
   now: Date,
 ): boolean {
   return (
     auction.cancelled_at === null &&
+    auction.closed_at === null &&
     new Date(auction.ends_at).getTime() > now.getTime()
   );
 }
@@ -34,7 +42,10 @@ export function isOpen(
  * Same explicit-clock reasoning as `isOpen` above.
  */
 export function canBid(
-  auction: Pick<Auction, "cancelled_at" | "ends_at" | "seller_id">,
+  auction: Pick<
+    Auction,
+    "cancelled_at" | "closed_at" | "ends_at" | "seller_id"
+  >,
   viewerId: string,
   now: Date,
 ): boolean {
