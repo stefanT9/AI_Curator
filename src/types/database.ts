@@ -199,6 +199,53 @@ export type Database = {
           },
         ]
       }
+      email_outbox: {
+        Row: {
+          attempts: number
+          auction_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          last_error: string | null
+          payload: Json
+          recipient_email: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          attempts?: number
+          auction_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          last_error?: string | null
+          payload: Json
+          recipient_email: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          attempts?: number
+          auction_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          last_error?: string | null
+          payload?: Json
+          recipient_email?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_outbox_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_sends: {
         Row: {
           actor_id: string | null
@@ -311,6 +358,15 @@ export type Database = {
         Args: { p_daily_limit?: number; p_hourly_limit?: number }
         Returns: boolean
       }
+      claim_pending_emails: {
+        Args: { p_limit?: number; p_secret: string }
+        Returns: {
+          id: string
+          kind: string
+          payload: Json
+          recipient_email: string
+        }[]
+      }
       close_due_auctions: { Args: { p_now?: string }; Returns: number }
       create_auction: {
         Args: {
@@ -319,6 +375,16 @@ export type Database = {
           p_starting_price_cents: number
         }
         Returns: string
+      }
+      mark_email_sent: {
+        Args: {
+          p_id: string
+          p_provider_id?: string
+          p_reason?: string
+          p_secret: string
+          p_status: string
+        }
+        Returns: undefined
       }
       place_bid: {
         Args: { p_amount_cents: number; p_auction_id: string }
@@ -353,6 +419,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      verify_drain_secret: { Args: { p_secret: string }; Returns: boolean }
     }
     Enums: {
       user_role: "collector" | "artist"
