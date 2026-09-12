@@ -566,17 +566,17 @@ the operator query in the manual criteria exists to catch.
 
 #### Automated
 
-- [x] 2.1 `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm run test` · `npm run build` all pass
-- [x] 2.2 `npm run test:integration` still passes
-- [x] 2.3 `npm run test:smoke` sends a real close-outcome email and it arrives
-- [x] 2.4 With `EMAIL_DRAIN_SECRET` unset, `npm run build` passes
-- [x] 2.5 `supabase db reset` applies both migrations and registers exactly two cron jobs
+- [x] 2.1 `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm run test` · `npm run build` all pass — 55965d9
+- [x] 2.2 `npm run test:integration` still passes — 55965d9
+- [x] 2.3 `npm run test:smoke` sends a real close-outcome email and it arrives — 55965d9
+- [x] 2.4 With `EMAIL_DRAIN_SECRET` unset, `npm run build` passes — 55965d9
+- [x] 2.5 `supabase db reset` applies both migrations and registers exactly two cron jobs — 55965d9
 
 #### Manual
 
-- [x] 2.6 A local auction closes and four emails are attempted within ~2 minutes with no manual step
-- [x] 2.7 `net._http_response` shows the drain POST returning 200
-- [x] 2.8 Wrong bearer token returns 401; right token on an empty outbox returns zeroes
-- [x] 2.9 The pending-rows operator query returns nothing after a healthy run
-- [x] 2.10 The retry ceiling is raised above one attempt only after a single-attempt drain is proven
-- [x] 2.11 A real `auction_won` email names the seller's address; a real `auction_lost` email names no address and no amount
+- [x] 2.6 A local auction closes and four emails are attempted within ~2 minutes with no manual step — 55965d9
+- [x] 2.7 `net._http_response` shows the drain POST returning 200 — 55965d9
+- [x] 2.8 Wrong bearer token returns 401; right token on an empty outbox returns zeroes — 55965d9
+- [x] 2.9 The pending-rows operator query returns nothing after a healthy run — 55965d9
+- [x] 2.10 The retry ceiling is raised above one attempt only after a single-attempt drain is proven — 55965d9
+- [x] 2.11 A real `auction_won` email names the seller's address; a real `auction_lost` email names no address and no amount — 55965d9

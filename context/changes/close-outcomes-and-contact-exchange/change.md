@@ -1,7 +1,7 @@
 ---
 change_id: close-outcomes-and-contact-exchange
 title: The winner and the seller get each other's details at close
-status: implementing
+status: implemented
 created: 2026-09-12
 updated: 2026-09-12
 archived_at: null
