@@ -3,7 +3,7 @@ project: ArtSwipe
 version: 1
 status: draft
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-09-12
 prd_version: 3
 main_goal: low-complexity
 top_blocker: time
@@ -57,7 +57,7 @@ nothing to bid on, and nothing to close until an auction exists.
 | F-01 | `shared-taste-definition`            | (foundation) taste means one thing, readable in both directions                            | —             | §Constraints, §Open Questions, FR-004, FR-013 | ready    |
 | F-02 | `outbound-email-foundation`          | (foundation) the product can send one transactional message, through a single gated path   | —             | §Constraints, §Guardrails, FR-005     | ready    |
 | S-01 | `list-artwork-for-auction`           | list their own artwork for auction, cancel it while untouched, and see it in one place      | —             | US-01, FR-001, FR-002, FR-006, FR-014 | done     |
-| S-02 | `sealed-bidding`                     | place a bid nobody else can see, on anything but their own auction                         | S-01          | US-01, FR-007, FR-002                 | proposed |
+| S-02 | `sealed-bidding`                     | place a bid nobody else can see, on anything but their own auction                         | S-01          | US-01, FR-007, FR-002                 | done     |
 | S-03 | `timed-auction-close`                | watch an auction reach its stated end time and close itself, with the highest bid winning   | S-02          | US-01, FR-008, §Guardrails, §Constraints | proposed |
 | S-04 | `close-outcomes-and-contact-exchange` | learn they won and get the seller's details — or learn they did not, and get nothing        | S-03, F-02    | US-01, FR-009, FR-010, §Access Control | proposed |
 | S-05 | `auction-notifications-for-likers`   | hear that a piece they liked is up for auction, and turn those messages off for good        | S-01, F-02    | US-01, FR-003, FR-005, §Guardrails    | proposed |
@@ -148,7 +148,7 @@ places, which is why F-01 exists.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** This is the slice the `data` investment is for. Two guardrails land here and neither can be retrofitted: "sealed means sealed … across every surface the product exposes, not only the ones that obviously show bids" and "two collectors bidding at the same instant must not both win". Both are properties of the database, not the interface — an RLS policy and a constraint hold under a caller that forgets to filter, a query-layer check does not. Per `AGENTS.md`, ownership filters are for correctness, never access control. The failure mode is quiet: a leaked standing bid reintroduces both sniping and shill-driving, which FR-007's whole mechanism change exists to remove, and nothing visibly breaks when it leaks.
-- **Status:** proposed
+- **Status:** done
 
 ### S-03: The auction closes itself, and the highest sealed bid wins
 
@@ -257,3 +257,4 @@ single-slice and lives in S-06.)
 item above is archived.)
 
 - **S-01: An artist can list one of their own artworks for auction with a starting price and a preset duration, cancel it while no one has bid, and any authenticated user can browse open auctions in a dedicated section showing the artwork, the starting price, and the time remaining.** — Archived 2026-09-11 → `context/archive/2026-09-11-list-artwork-for-auction/`. Lesson: —.
+- **S-02: An authenticated user can place a sealed bid at or above the starting price on any auction except one they are the seller of, can raise their own bid, and no surface anywhere exposes the standing high bid, the bid count, or who has bid.** — Archived 2026-09-12 → `context/archive/2026-09-11-sealed-bidding/`. Lesson: —.
