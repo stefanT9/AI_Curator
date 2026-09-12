@@ -577,29 +577,29 @@ migration edits an applied file; `.github/workflows/migrations.yml` applies this
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `npm run test`
-- [x] 2.2 Type checking passes: `npm run typecheck`
-- [x] 2.3 Linting passes: `npm run lint`
-- [x] 2.4 Formatting passes: `npm run format:check`
-- [x] 2.5 Production build passes: `npm run build`
+- [x] 2.1 Unit tests pass: `npm run test` — fd393e9
+- [x] 2.2 Type checking passes: `npm run typecheck` — fd393e9
+- [x] 2.3 Linting passes: `npm run lint` — fd393e9
+- [x] 2.4 Formatting passes: `npm run format:check` — fd393e9
+- [x] 2.5 Production build passes: `npm run build` — fd393e9
 
 #### Manual
 
-- [x] 2.6 `placeBid` is the only new export of the `"use server"` module
-- [x] 2.7 No query selects a bid amount belonging to anyone but the caller
+- [x] 2.6 `placeBid` is the only new export of the `"use server"` module — fd393e9
+- [x] 2.7 No query selects a bid amount belonging to anyone but the caller — fd393e9
 
 ### Phase 3: Real-boundary proof
 
 #### Automated
 
-- [ ] 3.1 Integration lane passes against a running local stack: `npm run test:integration`
-- [ ] 3.2 Default lane is still green: `npm run test`
-- [ ] 3.3 Linting and formatting pass: `npm run lint` · `npm run format:check`
+- [x] 3.1 Integration lane passes against a running local stack: `npm run test:integration`
+- [x] 3.2 Default lane is still green: `npm run test`
+- [x] 3.3 Linting and formatting pass: `npm run lint` · `npm run format:check`
 
 #### Manual
 
-- [ ] 3.4 Refusal tests observed failing with the select policy loosened to `using (true)`, then restored
-- [ ] 3.5 Case 13's two calls observed issued without awaiting the first
+- [x] 3.4 Refusal tests observed failing with the select policy loosened to `using (true)`, then restored
+- [x] 3.5 Case 13's two calls observed issued without awaiting the first
 
 ### Phase 4: The bidding surface
 
