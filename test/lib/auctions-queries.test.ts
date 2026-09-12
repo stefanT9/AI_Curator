@@ -20,7 +20,17 @@ const { tableResults, calls, fromCalls, createClient } = vi.hoisted(() => {
       then: (resolve: (value: Result) => unknown) => resolve(result()),
     };
 
-    for (const method of ["select", "eq", "in", "is", "gt", "order"]) {
+    for (const method of [
+      "select",
+      "eq",
+      "in",
+      "is",
+      "gt",
+      "gte",
+      "or",
+      "order",
+      "limit",
+    ]) {
       builder[method] = (...args: unknown[]) => {
         calls.push({ table, method, args });
         return builder;
@@ -53,8 +63,10 @@ const { tableResults, calls, fromCalls, createClient } = vi.hoisted(() => {
 vi.mock("@/utils/supabase/server", () => ({ createClient }));
 
 import {
+  CLOSED_AUCTIONS_LIMIT,
   getAuction,
   getLiveAuctionsByArtwork,
+  getMyClosedAuctions,
   getOpenAuctions,
   getOwnBid,
   getOwnBidAuctionIds,
@@ -265,6 +277,121 @@ describe("getOwnBid", () => {
     tableResults.bids = { data: null, error: null };
 
     expect(await getOwnBid("auction-no-bid")).toBeNull();
+  });
+});
+
+describe("getMyClosedAuctions", () => {
+  const viewerId = "collector-1";
+
+  const orArg = () =>
+    calls.find((call) => call.table === "auctions" && call.method === "or")
+      ?.args[0];
+
+  it("asks for the viewer's bids without a bidder_id filter — the policy scopes it", async () => {
+    tableResults.bids = { data: [{ auction_id: "auction-1" }], error: null };
+    tableResults.auctions = { data: [], error: null };
+
+    await getMyClosedAuctions(viewerId);
+
+    expect(fromCalls.filter((table) => table === "bids")).toHaveLength(1);
+    expect(
+      calls.some(
+        (call) => call.table === "bids" && call.args[0] === "bidder_id",
+      ),
+    ).toBe(false);
+  });
+
+  it("matches auctions the viewer sold or bid on, in one disjunction", async () => {
+    tableResults.bids = {
+      data: [{ auction_id: "auction-1" }, { auction_id: "auction-1" }],
+      error: null,
+    };
+    tableResults.auctions = { data: [], error: null };
+
+    await getMyClosedAuctions(viewerId);
+
+    // Deduplicated: two bid rows on one auction contribute one id.
+    expect(orArg()).toBe(`seller_id.eq.${viewerId},id.in.(auction-1)`);
+  });
+
+  it("asks the narrower seller-only question when the viewer has never bid", async () => {
+    tableResults.bids = { data: [], error: null };
+    tableResults.auctions = { data: [], error: null };
+
+    await getMyClosedAuctions(viewerId);
+
+    // `id.in.()` is not valid PostgREST, so there must be no disjunction here.
+    expect(orArg()).toBeUndefined();
+    expect(calls).toContainEqual({
+      table: "auctions",
+      method: "eq",
+      args: ["seller_id", viewerId],
+    });
+  });
+
+  it("bounds the result to a recent window, newest close first", async () => {
+    tableResults.bids = { data: [], error: null };
+    tableResults.auctions = { data: [], error: null };
+
+    await getMyClosedAuctions(viewerId);
+
+    // `gte` on `closed_at` is also what excludes auctions that never closed:
+    // a null never satisfies it.
+    expect(
+      calls.some(
+        (call) =>
+          call.table === "auctions" &&
+          call.method === "gte" &&
+          call.args[0] === "closed_at",
+      ),
+    ).toBe(true);
+    expect(calls).toContainEqual({
+      table: "auctions",
+      method: "order",
+      args: ["closed_at", { ascending: false }],
+    });
+    expect(calls).toContainEqual({
+      table: "auctions",
+      method: "limit",
+      args: [CLOSED_AUCTIONS_LIMIT],
+    });
+  });
+
+  it("resolves artwork attribution for each closed auction", async () => {
+    tableResults.bids = { data: [], error: null };
+    tableResults.auctions = {
+      data: [{ ...AUCTION_ROW, closed_at: "2026-01-02T00:00:00.000Z" }],
+      error: null,
+    };
+    tableResults.artworks = {
+      data: [{ id: "art-1", artist_id: "artist-1", title: "Piece" }],
+      error: null,
+    };
+    tableResults.profiles = {
+      data: [{ id: "artist-1", display_name: "Ada" }],
+      error: null,
+    };
+
+    const closed = await getMyClosedAuctions(viewerId);
+
+    expect(closed).toHaveLength(1);
+    expect(closed[0].artwork.artist).toEqual({
+      id: "artist-1",
+      displayName: "Ada",
+    });
+  });
+
+  it("throws when the bids query errors", async () => {
+    tableResults.bids = { data: null, error: { message: "boom" } };
+
+    await expect(getMyClosedAuctions(viewerId)).rejects.toThrow("boom");
+  });
+
+  it("throws when the auctions query errors", async () => {
+    tableResults.bids = { data: [], error: null };
+    tableResults.auctions = { data: null, error: { message: "boom" } };
+
+    await expect(getMyClosedAuctions(viewerId)).rejects.toThrow("boom");
   });
 });
 

@@ -144,6 +144,73 @@ export const getOpenAuctionsPage = async ({
   return { auctions: await attachArtworks(data ?? []), total: count ?? 0 };
 };
 
+export const CLOSED_AUCTIONS_WINDOW_DAYS = 30;
+export const CLOSED_AUCTIONS_LIMIT = 12;
+
+/**
+ * The closed auctions this viewer took part in — sold or bid on — most
+ * recently closed first.
+ *
+ * Until S-04 notifies a winner, a closed auction is reachable only by URL.
+ * This is the path to it: a bounded recent window, not an auction history,
+ * which is why it takes a limit and no page parameter.
+ *
+ * Two queries, never one per row — the shape `attachArtworks` and
+ * `getOwnBidAuctionIds` already use. The first reads the viewer's own bids
+ * with no `bidder_id` filter, for the reason `getOwnBid` states below: the
+ * select policy on `bids` is what scopes that read. The participation filter
+ * on the second is correctness and relevance only — `auctions` carries a
+ * blanket select policy and holds no bid data, so nothing here is access
+ * control.
+ */
+export const getMyClosedAuctions = async (
+  viewerId: string,
+): Promise<AuctionWithArtwork[]> => {
+  const supabase = await createClient();
+
+  const { data: bids, error: bidsError } = await supabase
+    .from("bids")
+    .select("auction_id");
+
+  if (bidsError) {
+    throw new Error(`Failed to load your bids: ${bidsError.message}`);
+  }
+
+  const bidAuctionIds = Array.from(
+    new Set((bids ?? []).map((bid) => bid.auction_id)),
+  );
+
+  const since = new Date(
+    Date.now() - CLOSED_AUCTIONS_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString();
+
+  // A null `closed_at` never satisfies `gte`, so the window bound is also what
+  // restricts this to auctions that actually closed.
+  const closedInWindow = supabase
+    .from("auctions")
+    .select("*")
+    .gte("closed_at", since);
+
+  // `id.in.()` with an empty list is not valid PostgREST, so a viewer who has
+  // never bid asks the narrower question rather than the disjunction.
+  const mine =
+    bidAuctionIds.length === 0
+      ? closedInWindow.eq("seller_id", viewerId)
+      : closedInWindow.or(
+          `seller_id.eq.${viewerId},id.in.(${bidAuctionIds.join(",")})`,
+        );
+
+  const { data, error } = await mine
+    .order("closed_at", { ascending: false })
+    .limit(CLOSED_AUCTIONS_LIMIT);
+
+  if (error) {
+    throw new Error(`Failed to load your closed auctions: ${error.message}`);
+  }
+
+  return attachArtworks(data ?? []);
+};
+
 /**
  * One auction by id, for the detail page. Cached: the page reads it in both
  * `generateMetadata` and the body, as `getArtwork` in

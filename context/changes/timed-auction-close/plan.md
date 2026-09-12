@@ -558,33 +558,33 @@ via `.github/workflows/migrations.yml`.
 
 #### Automated
 
-- [x] 2.1 The new close spec passes: `npm run test:integration`
-- [x] 2.2 The rest of the integration lane still passes in the same run
-- [x] 2.3 Type checking passes with the new devDependencies: `npm run typecheck`
-- [x] 2.4 Linting and formatting pass: `npm run lint` · `npm run format:check`
-- [x] 2.5 Default suite and build unaffected: `npm run test` · `npm run build`
+- [x] 2.1 The new close spec passes: `npm run test:integration` — 3b8d58c
+- [x] 2.2 The rest of the integration lane still passes in the same run — 3b8d58c
+- [x] 2.3 Type checking passes with the new devDependencies: `npm run typecheck` — 3b8d58c
+- [x] 2.4 Linting and formatting pass: `npm run lint` · `npm run format:check` — 3b8d58c
+- [x] 2.5 Default suite and build unaffected: `npm run test` · `npm run build` — 3b8d58c
 
 #### Manual
 
-- [x] 2.6 Each close assertion was observed red before it was made green
-- [x] 2.7 The lane still refuses a non-loopback `DB_URL`
+- [x] 2.6 Each close assertion was observed red before it was made green — 3b8d58c
+- [x] 2.7 The lane still refuses a non-loopback `DB_URL` — 3b8d58c
 
 ### Phase 3: The outcome surfaces
 
 #### Automated
 
-- [ ] 3.1 Default suite passes, including the new predicate cases: `npm run test`
-- [ ] 3.2 Type checking passes: `npm run typecheck`
-- [ ] 3.3 Linting and formatting pass: `npm run lint` · `npm run format:check`
-- [ ] 3.4 Build passes: `npm run build`
-- [ ] 3.5 Integration lane still green: `npm run test:integration`
+- [x] 3.1 Default suite passes, including the new predicate cases: `npm run test`
+- [x] 3.2 Type checking passes: `npm run typecheck`
+- [x] 3.3 Linting and formatting pass: `npm run lint` · `npm run format:check`
+- [x] 3.4 Build passes: `npm run build`
+- [x] 3.5 Integration lane still green: `npm run test:integration`
 
 #### Manual
 
-- [ ] 3.6 Seller sees the winning amount, or the relist message when there were no bids
-- [ ] 3.7 Winner is told they won, with their amount
-- [ ] 3.8 Loser is told they did not win, with no amount anywhere in the rendered HTML
-- [ ] 3.9 An uninvolved signed-in user sees only that the auction ended
-- [ ] 3.10 A countdown watched through zero updates itself to the outcome
-- [ ] 3.11 "Recently closed" lists only auctions the viewer bid on or sold
-- [ ] 3.12 A closed auction leaves the open grid on `/auctions`
+- [x] 3.6 Seller sees the winning amount, or the relist message when there were no bids
+- [x] 3.7 Winner is told they won, with their amount
+- [x] 3.8 Loser is told they did not win, with no amount anywhere in the rendered HTML
+- [x] 3.9 An uninvolved signed-in user sees only that the auction ended
+- [x] 3.10 A countdown watched through zero updates itself to the outcome
+- [x] 3.11 "Recently closed" lists only auctions the viewer bid on or sold
+- [x] 3.12 A closed auction leaves the open grid on `/auctions`

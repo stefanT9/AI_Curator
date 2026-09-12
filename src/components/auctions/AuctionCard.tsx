@@ -18,6 +18,11 @@ const absoluteFormatter = new Intl.DateTimeFormat("en-US", {
  * other bidder's identity — to anyone, the seller included (§Guardrails "sealed
  * means sealed"). `hasBid` is a boolean for exactly that reason; do not give it
  * a number.
+ *
+ * S-03 held the same line for closed auctions: a closed card says only
+ * "Closed". No winning amount, and no "You won" badge — whether you won is the
+ * detail page's answer, because that is the only surface that knows who is
+ * asking. Do not add an outcome here.
  */
 export function AuctionCard({
   auction,
@@ -45,10 +50,14 @@ export function AuctionCard({
         <span className="text-sm font-medium">
           {formatCents(auction.starting_price_cents)}
         </span>
-        <AuctionCountdown
-          endsAt={auction.ends_at}
-          absolute={absoluteFormatter.format(new Date(auction.ends_at))}
-        />
+        {auction.closed_at === null ? (
+          <AuctionCountdown
+            endsAt={auction.ends_at}
+            absolute={absoluteFormatter.format(new Date(auction.ends_at))}
+          />
+        ) : (
+          <span className="text-sm opacity-70">Closed</span>
+        )}
       </div>
       {hasBid ? (
         <div className="px-1">
@@ -60,7 +69,13 @@ export function AuctionCard({
       {isOwn ? (
         <div className="flex items-center justify-between gap-2 px-1">
           <span className="text-xs opacity-60">Your listing</span>
-          <CancelAuctionButton auctionId={auction.id} />
+          {/*
+            `cancel_auction` refuses a closed auction, so offering the control
+            there could only produce a failure the seller cannot act on.
+          */}
+          {auction.closed_at === null ? (
+            <CancelAuctionButton auctionId={auction.id} />
+          ) : null}
         </div>
       ) : null}
     </div>

@@ -39,6 +39,16 @@ describe("isOpen", () => {
       isOpen(auction({ cancelled_at: "2026-09-12T00:00:00.000Z" }), now),
     ).toBe(false);
   });
+
+  // The case that distinguishes `closed_at` from the two timestamps that came
+  // before it: `close_due_auctions(p_now)` can stamp an auction closed while
+  // its `ends_at` is still in the future, and nothing cancelled it.
+  it("is not open when closed, even with ends_at still in the future", () => {
+    const now = new Date(new Date(endsAt).getTime() - 1);
+    expect(
+      isOpen(auction({ closed_at: "2026-09-12T00:00:00.000Z" }), now),
+    ).toBe(false);
+  });
 });
 
 describe("canBid", () => {
@@ -82,6 +92,18 @@ describe("canBid", () => {
   it("refuses an auction that has ended", () => {
     const afterEnd = new Date(new Date(endsAt).getTime() + 1);
     expect(canBid(biddable(), collectorId, afterEnd)).toBe(false);
+  });
+
+  // Inherited from `isOpen` rather than restated here — the point of stating
+  // the predicate once.
+  it("refuses a closed auction whose ends_at has not passed", () => {
+    expect(
+      canBid(
+        biddable({ closed_at: "2026-09-12T00:00:00.000Z" }),
+        collectorId,
+        whileOpen,
+      ),
+    ).toBe(false);
   });
 });
 

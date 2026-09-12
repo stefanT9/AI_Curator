@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/dal";
 import {
   AUCTIONS_PAGE_SIZE,
+  CLOSED_AUCTIONS_WINDOW_DAYS,
+  getMyClosedAuctions,
   getOpenAuctionsPage,
   getOwnBidAuctionIds,
 } from "@/lib/auctions/queries";
@@ -26,12 +28,18 @@ export default async function AuctionsPage({
     offset: (page - 1) * AUCTIONS_PAGE_SIZE,
   });
 
-  // One query for the whole page's badges, never one per card — the shape the
-  // studio uses for its live-auction badge. Ids only: the badge says *that*
-  // you bid, never how much.
-  const bidAuctionIds = await getOwnBidAuctionIds(
-    auctions.map((auction) => auction.id),
-  );
+  // Until S-04 tells a winner anything, this is the only way to find a closed
+  // auction without its URL. A bounded recent window, not a history — which is
+  // why it is not paginated.
+  const closedAuctions = await getMyClosedAuctions(user.id);
+
+  // One query for both grids' badges, never one per card — the shape the studio
+  // uses for its live-auction badge. Ids only: the badge says *that* you bid,
+  // never how much, and that holds after the close too.
+  const bidAuctionIds = await getOwnBidAuctionIds([
+    ...auctions.map((auction) => auction.id),
+    ...closedAuctions.map((auction) => auction.id),
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(total / AUCTIONS_PAGE_SIZE));
 
@@ -65,6 +73,29 @@ export default async function AuctionsPage({
       )}
 
       <Pagination page={page} totalPages={totalPages} basePath="/auctions" />
+
+      {closedAuctions.length === 0 ? null : (
+        <section className="mt-12">
+          <h2 className="mb-1 text-lg font-semibold tracking-tight">
+            Recently closed
+          </h2>
+          <p className="mb-6 text-sm opacity-70">
+            Auctions you sold or bid on in the last{" "}
+            {CLOSED_AUCTIONS_WINDOW_DAYS} days. Open one to see how it went.
+          </p>
+          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {closedAuctions.map((auction) => (
+              <li key={auction.id}>
+                <AuctionCard
+                  auction={auction}
+                  isOwn={auction.seller_id === user.id}
+                  hasBid={bidAuctionIds.has(auction.id)}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

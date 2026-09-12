@@ -9,6 +9,7 @@ import { ArtCard } from "@/components/artworks/ArtCard";
 import { AuctionCountdown } from "@/components/auctions/AuctionCountdown";
 import { BidForm } from "@/components/auctions/BidForm";
 import { CancelAuctionButton } from "@/components/auctions/CancelAuctionButton";
+import type { Bid } from "@/types/domain";
 
 const absoluteFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
@@ -16,6 +17,48 @@ const absoluteFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 export const dynamic = "force-dynamic";
+
+/**
+ * What a closed auction tells the person looking at it — everything §Guardrails
+ * permits them, and nothing beyond it.
+ *
+ * The winning amount reaches exactly two people: the seller, who cannot read
+ * `bids` at all and for whom `winning_amount_cents` is the published result,
+ * and the winner, who is shown the amount off *their own* bid row. A losing
+ * bidder learns only that they lost; anyone else learns only that it ended. No
+ * branch here reads a bid that is not the viewer's own, and none of them can
+ * disclose a bid count.
+ */
+function closedOutcome({
+  viewerIsSeller,
+  winningBidId,
+  winningAmountCents,
+  ownBid,
+}: {
+  viewerIsSeller: boolean;
+  winningBidId: string | null;
+  winningAmountCents: number | null;
+  ownBid: Bid | null;
+}): string {
+  if (viewerIsSeller) {
+    return winningAmountCents === null
+      ? "This auction ended with no bids. You're free to list it again."
+      : `Sold for ${formatCents(winningAmountCents)}.`;
+  }
+
+  // Identity, not amount: the winner is recognised by their own bid id, and
+  // the figure comes from the bid row they already own. `winning_bid_id` is
+  // `on delete set null`, so a deleted bid can only ever under-claim here.
+  if (ownBid !== null && ownBid.id === winningBidId) {
+    return `You won this auction at ${formatCents(ownBid.amount_cents)}.`;
+  }
+
+  if (ownBid !== null) {
+    return "This auction has ended. You did not win.";
+  }
+
+  return "This auction has ended.";
+}
 
 // `getAuction` is React-cached, so this and the page below share one query.
 export async function generateMetadata({
@@ -46,10 +89,11 @@ export default async function AuctionDetailPage({
   const viewerIsSeller = auction.seller_id === user.id;
   const biddable = canBid(auction, user.id, now);
 
-  // Read only when a bid form is actually rendered. The select policy would
-  // hand the seller zero rows anyway, but not asking is clearer than relying
-  // on being refused.
-  const ownBid = biddable ? await getOwnBid(auction.id) : null;
+  // Read for everyone but the seller, open or closed: it seeds the bid form
+  // while the auction runs, and afterwards it is what tells a collector
+  // whether they won. The select policy would hand the seller zero rows
+  // anyway, but not asking is clearer than relying on being refused.
+  const ownBid = viewerIsSeller ? null : await getOwnBid(auction.id);
 
   return (
     <div className="mx-auto w-full max-w-md">
@@ -77,28 +121,43 @@ export default async function AuctionDetailPage({
 
       <div className="mt-6">
         {/*
-          Three mutually exclusive controls, in the order that makes each one
-          honest: a closed auction takes no action from anyone, a seller may
-          cancel but never bid, and everyone else bids. No branch shows a bid
-          that is not the viewer's own.
+          Three mutually exclusive controls: everyone who may bid bids, a
+          seller of a still-open auction may cancel but never bid, and anything
+          else is no longer open and reports its outcome instead of offering an
+          action. `canBid` is the only place the first question is asked. No
+          branch shows a bid that is not the viewer's own.
+
+          Within the terminal branch, cancelled is tested before closed because
+          the two states are disjoint by construction -- `close_due_auctions`
+          skips cancelled auctions and `cancel_auction` refuses closed ones --
+          so the order states which one wins if that ever stops being true.
         */}
-        {!isOpen(auction, now) ? (
-          <p className="text-sm opacity-70">
-            {auction.cancelled_at === null
-              ? "This auction has ended."
-              : "This auction was cancelled."}
-          </p>
-        ) : viewerIsSeller ? (
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm opacity-70">Your listing</span>
-            <CancelAuctionButton auctionId={auction.id} />
-          </div>
-        ) : (
+        {biddable ? (
           <BidForm
             auctionId={auction.id}
             startingPriceCents={auction.starting_price_cents}
             currentBidCents={ownBid?.amount_cents ?? null}
           />
+        ) : viewerIsSeller && isOpen(auction, now) ? (
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm opacity-70">Your listing</span>
+            <CancelAuctionButton auctionId={auction.id} />
+          </div>
+        ) : (
+          <p className="text-sm opacity-70">
+            {auction.cancelled_at !== null
+              ? "This auction was cancelled."
+              : auction.closed_at !== null
+                ? closedOutcome({
+                    viewerIsSeller,
+                    winningBidId: auction.winning_bid_id,
+                    winningAmountCents: auction.winning_amount_cents,
+                    ownBid,
+                  })
+                : // Past `ends_at` but the per-minute sweep has not reached it
+                  // yet. No outcome exists to show, so say only what is true.
+                  "This auction has ended."}
+          </p>
         )}
       </div>
     </div>
