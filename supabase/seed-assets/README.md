@@ -53,6 +53,47 @@ The directory is named after the seeded artist's UUID, so each JPEG uploads to
 exactly the `image_path` its seed row references. The whole `supabase storage`
 command group is gated behind `--experimental` and refuses to run without it.
 
+## Per reset: the email drain's vault entries
+
+`supabase db reset` clears Supabase Vault along with everything else, so the two
+secrets the email drain reads have to be planted again afterwards. Without them
+the per-minute drain job matches no rows and silently posts nothing — auctions
+still close, `email_outbox` still fills, and no mail ever leaves. The only
+symptom is pending rows.
+
+```bash
+npx supabase db reset   # or npm run db:reset
+
+# One value, three places. Generate it once:
+#   openssl rand -hex 32
+psql "$(npx supabase status -o env | grep DB_URL | cut -d= -f2- | tr -d '"')" <<'SQL'
+select vault.create_secret('<the same value as EMAIL_DRAIN_SECRET>', 'email_drain_secret');
+select vault.create_secret('http://host.docker.internal:3000/api/email/drain', 'email_drain_url');
+SQL
+```
+
+The URL is reached **from inside the Postgres container**, so `localhost` is the
+container, not your machine — use `host.docker.internal` for a `next dev` /
+`next start` server on the host. On a hosted project it is the deployed origin
+plus `/api/email/drain`.
+
+The third copy of the secret is `EMAIL_DRAIN_SECRET` in `.env.local` (and in
+Vercel for a deployed environment). Nothing checks that the three agree; when
+they drift, the drain POST comes back 401 and that shows up in
+`net._http_response`:
+
+```sql
+select status_code, created from net._http_response order by created desc limit 5;
+
+-- The operator's "did a message get stuck" query:
+select id, kind, status, attempts, last_error, created_at
+  from public.email_outbox
+ where status = 'pending' and created_at < now() - interval '15 minutes';
+```
+
+Both are read over a direct connection on purpose: `email_outbox` has RLS
+enabled with no policies at all, and that absence is its access control.
+
 ## Changing the corpus
 
 **Edit the manifest, never `seed.sql`.** Everything in `seed.sql` below

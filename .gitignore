@@ -46,6 +46,7 @@ next-env.d.ts
 # Live smoke-check output (test/smoke), regenerated on each run.
 test/smoke/.last-result.json
 test/smoke/.last-email.json
+test/smoke/.last-close-emails.json
 
 # Seed corpus images — fetched from the Art Institute of Chicago by
 # `npm run db:seed:fetch`, ~260 MB. The durable artifact is the manifest,
