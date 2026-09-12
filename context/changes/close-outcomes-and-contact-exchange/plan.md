@@ -575,9 +575,9 @@ the operator query in the manual criteria exists to catch.
 
 #### Manual
 
-- [ ] 2.6 A local auction closes and four emails are attempted within ~2 minutes with no manual step — reopened by the impl review: observed against the pre-split wiring, where the cron job presented `email_drain_secret` and the route checked `EMAIL_DRAIN_SECRET`. `20260913120300` moved the header onto `email_drain_trigger_token` / `EMAIL_DRAIN_TRIGGER_TOKEN`, so the shipped path has not delivered a message yet
-- [ ] 2.7 `net._http_response` shows the drain POST returning 200 — reopened by the impl review: observed against the pre-split wiring, where the cron job presented `email_drain_secret` and the route checked `EMAIL_DRAIN_SECRET`. `20260913120300` moved the header onto `email_drain_trigger_token` / `EMAIL_DRAIN_TRIGGER_TOKEN`, so the shipped path has not delivered a message yet
-- [ ] 2.8 Wrong bearer token returns 401; right token on an empty outbox returns zeroes — reopened by the impl review: observed against the pre-split wiring, where the cron job presented `email_drain_secret` and the route checked `EMAIL_DRAIN_SECRET`. `20260913120300` moved the header onto `email_drain_trigger_token` / `EMAIL_DRAIN_TRIGGER_TOKEN`, so the shipped path has not delivered a message yet
+- [x] 2.6 A local auction closes and four emails are attempted within ~2 minutes with no manual step — re-proven 2026-09-12 against the post-split wiring: close at 18:40:22 enqueued four rows as a trigger side effect with no app involved, the 18:41:00 cron tick drained all four, 38s end to end
+- [x] 2.7 `net._http_response` shows the drain POST returning 200 — re-proven: `18:41:00 | code=200 | {"claimed":4,"sent":0,"failed":4,"deferred":0}`. Four `email_sends` rows, `actor_id` null, `reason = not_permitted` — the shared sender delivering only to the Resend account owner, correctly classified terminal so `attempts` stays at 1. The operator's stuck-rows query returns 0
+- [x] 2.8 Wrong bearer token returns 401; right token on an empty outbox returns zeroes — re-proven against `EMAIL_DRAIN_TRIGGER_TOKEN`; an unauthenticated POST also answers 401 rather than a 307 to `/login`, which is the proxy exemption holding
 - [x] 2.9 The pending-rows operator query returns nothing after a healthy run — 55965d9
 - [x] 2.10 The retry ceiling is raised above one attempt only after a single-attempt drain is proven — 55965d9
 - [x] 2.11 A real `auction_won` email names the seller's address; a real `auction_lost` email names no address and no amount — 55965d9
