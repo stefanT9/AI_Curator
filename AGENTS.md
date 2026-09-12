@@ -62,6 +62,17 @@ Node is pinned in `.nvmrc` / `engines` (currently 24 LTS — `nvm use` picks it 
 - Artwork images upload from the **browser** straight to Storage (`src/lib/artworks/upload.ts`); only the object key travels through the Server Action. Server Action bodies are capped at 1 MB, well under a real photograph — do not route image bytes through an action.
 - Every export of a `"use server"` module is a public endpoint. Helpers like `topUpTags` live in `src/lib/` for that reason.
 
+### Outbound email
+
+- `src/lib/email/` is the only module that talks to a mail provider. Everything else goes through `sendEmail`, which **never throws** — a failure is returned as `{ ok: false, reason }` over the closed `SendFailure` union, so each caller decides whether to surface it, record it, or both. Do not add a second send path; if a new caller cannot reach this one, that is the thing to fix.
+- Never re-export `sendEmail` — or anything wrapping it — from a `"use server"` module. Every export of one is a public endpoint, and an unauthenticated caller able to name a recipient is a spam relay.
+- `RESEND_API_KEY` is server-only and deliberately not `NEXT_PUBLIC_`. Read it **inside** the function, never at module scope — `next build` imports every module and CI has no key. Unset, sending degrades to `unconfigured` and everything else keeps working.
+- `EMAIL_FROM` defaults to Resend's shared sender `onboarding@resend.dev`, which delivers **only to the Resend account owner's own address** — every other recipient comes back 403, classified as `not_permitted`. A custom sending domain is therefore an env change, not a code change. Classify on **HTTP status before error name**: 403 and 422 both carry the name `validation_error`.
+- A send must never sit on the critical path of a user-visible mutation — the first entry in `context/foundation/lessons.md` generalises verbatim from an AI call to any third-party call. Write the user's data first, then send from `after()` or a drain.
+- `email_sends` is the ledger: append-only, RLS enabled with **no policies at all**, written only through `record_email_send` (which takes `actor_id` from `auth.uid()` itself) and read only over a direct connection. The absent policies are the access control — do not add an owner-readable one, because once S-05 mails an artist's likers those rows would disclose collector addresses to that artist. A caller with a Supabase client sends, then calls `recordSend`.
+- Which lane tests what: the **default** lane owns the failure matrix (provider mocked, no network); the **integration** lane owns the ledger's grants and policy absences, because generated types reflect the catalog and not the grants; the **smoke** lane owns a real send.
+- F-02 built the send path and the ledger and nothing else. There is deliberately no outbox table, no `pg_net` bridge, no recipient resolution, no notification preference, no unsubscribe route, no retry and no templating — S-04 and S-05 own those. Do not assume they exist.
+
 ### Formatting
 
 - Prettier owns formatting (`.prettierrc.json`); ESLint defers to it via `eslint-config-prettier`. Run `npm run format` before committing, or `npm run format:check` to verify. `.editorconfig` mirrors the core rules for editors.
@@ -88,7 +99,7 @@ Three lanes, each with its own Vitest config and its own file glob so one can ne
     --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY > .env.test.local
   ```
 - No service-role key. Fixtures run under the same RLS a real user has. Mint **one test user per file** — `[auth.rate_limit] sign_in_sign_ups` is 30 per 5 minutes per IP.
-- One exception, and it stays one: `auction-close.int.ts` opens a direct postgres connection (`DB_URL`, from the same file) via `requireLocalDatabaseUrl`, because `close_due_auctions` is granted to no role a Supabase client can authenticate as — that revoke is the access control. Use it only to drive something deliberately ungranted, never to sidestep RLS in a fixture; the same loopback guard applies.
+- Two specs, and only two, open a direct postgres connection (`DB_URL`, from the same file) via `requireLocalDatabaseUrl`: `auction-close.int.ts`, because `close_due_auctions` is granted to no role a Supabase client can authenticate as, and `email-sends.int.ts`, because `email_sends` has no select policy for one to use. In both cases the missing grant or policy _is_ the access control, and the raw connection is there to drive or read exactly that. Use it only for something deliberately ungranted, never to sidestep RLS in a fixture; the same loopback guard applies.
 
 **Live smoke checks — `npm run test:smoke`** (`vitest.smoke.config.mts`, `test/smoke/**/*.live.ts`). Opt-in, never in CI.
 

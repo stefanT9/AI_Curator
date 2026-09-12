@@ -316,31 +316,31 @@ No data migration and no backfill: there is no history of sends to record.
 
 #### Automated
 
-- [x] 1.1 `npm run test` passes, including `test/lib/email.test.ts` covering all six `SendFailure` variants and the success path
-- [x] 1.2 `npm run typecheck` passes
-- [x] 1.3 `npm run lint` passes
-- [x] 1.4 `npm run format:check` passes
-- [x] 1.5 `npm run build` passes with no `RESEND_API_KEY` in the environment
+- [x] 1.1 `npm run test` passes, including `test/lib/email.test.ts` covering all six `SendFailure` variants and the success path — 5fbb180
+- [x] 1.2 `npm run typecheck` passes — 5fbb180
+- [x] 1.3 `npm run lint` passes — 5fbb180
+- [x] 1.4 `npm run format:check` passes — 5fbb180
+- [x] 1.5 `npm run build` passes with no `RESEND_API_KEY` in the environment — 5fbb180
 
 #### Manual
 
-- [x] 1.6 `npm run test:smoke -- email` passes with a key set, and a real email arrives in the account owner's inbox
-- [x] 1.7 With `RESEND_API_KEY=""`, the smoke lane asserts `{ ok: false, reason: "unconfigured" }` and makes no network call
-- [x] 1.8 A non-owner recipient yields `reason: "not_permitted"`, distinct from `invalid_recipient`
+- [x] 1.6 `npm run test:smoke -- email` passes with a key set, and a real email arrives in the account owner's inbox — 5fbb180
+- [x] 1.7 With `RESEND_API_KEY=""`, the smoke lane asserts `{ ok: false, reason: "unconfigured" }` and makes no network call — 5fbb180
+- [x] 1.8 A non-owner recipient yields `reason: "not_permitted"`, distinct from `invalid_recipient` — 5fbb180
 
 ### Phase 2: The ledger, and the rule written down
 
 #### Automated
 
-- [ ] 2.1 `npm run test:integration` passes, including `test/integration/email-sends.int.ts`
-- [ ] 2.2 `npm run typecheck` passes against the regenerated `src/types/database.ts`
-- [ ] 2.3 `npm run test` still passes
-- [ ] 2.4 `npm run lint` and `npm run format:check` pass
-- [ ] 2.5 `npm run build` passes
+- [x] 2.1 `npm run test:integration` passes, including `test/integration/email-sends.int.ts`
+- [x] 2.2 `npm run typecheck` passes against the regenerated `src/types/database.ts`
+- [x] 2.3 `npm run test` still passes
+- [x] 2.4 `npm run lint` and `npm run format:check` pass
+- [x] 2.5 `npm run build` passes
 
 #### Manual
 
-- [ ] 2.6 `npx supabase db reset` applies the migration cleanly
-- [ ] 2.7 `npm run db:types:local` regenerates `src/types/database.ts` with `email_sends` and `record_email_send`
-- [ ] 2.8 The `email_sends` query over `DB_URL` shows the recorded attempts legibly
-- [ ] 2.9 The new `AGENTS.md` section would stop a future slice from building a second send path
+- [x] 2.6 `npx supabase db reset` applies the migration cleanly
+- [x] 2.7 `npm run db:types:local` regenerates `src/types/database.ts` with `email_sends` and `record_email_send`
+- [x] 2.8 The `email_sends` query over `DB_URL` shows the recorded attempts legibly
+- [x] 2.9 The new `AGENTS.md` section would stop a future slice from building a second send path

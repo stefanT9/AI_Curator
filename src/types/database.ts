@@ -199,6 +199,39 @@ export type Database = {
           },
         ]
       }
+      email_sends: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          provider_id: string | null
+          reason: string | null
+          recipient: string
+          status: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          provider_id?: string | null
+          reason?: string | null
+          recipient: string
+          status: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          provider_id?: string | null
+          reason?: string | null
+          recipient?: string
+          status?: string
+        }
+        Relationships: []
+      }
       interactions: {
         Row: {
           action: string
@@ -290,6 +323,16 @@ export type Database = {
       place_bid: {
         Args: { p_amount_cents: number; p_auction_id: string }
         Returns: undefined
+      }
+      record_email_send: {
+        Args: {
+          p_kind: string
+          p_provider_id?: string
+          p_reason?: string
+          p_recipient: string
+          p_status: string
+        }
+        Returns: string
       }
       swipe_deck: {
         Args: { p_limit?: number }
