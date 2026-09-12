@@ -605,16 +605,16 @@ migration edits an applied file; `.github/workflows/migrations.yml` applies this
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `npm run typecheck`
-- [x] 4.2 Linting passes: `npm run lint`
-- [x] 4.3 Formatting passes: `npm run format:check`
-- [x] 4.4 Unit tests pass: `npm run test`
-- [x] 4.5 Production build passes: `npm run build`
+- [x] 4.1 Type checking passes: `npm run typecheck` — d111ad3
+- [x] 4.2 Linting passes: `npm run lint` — d111ad3
+- [x] 4.3 Formatting passes: `npm run format:check` — d111ad3
+- [x] 4.4 Unit tests pass: `npm run test` — d111ad3
+- [x] 4.5 Production build passes: `npm run build` — d111ad3
 
 #### Manual
 
-- [x] 4.6 Collector: bid, raise, lower-bid error, below-floor error all behave as specified
-- [x] 4.7 Seller: no bid amount, count, or bidder name anywhere; Cancel refused with the auction still listed
-- [x] 4.8 Second collector: another bidder's bid invisible everywhere, including the badge
-- [x] 4.9 FR-013 walkthrough: swipe, like, unlike, `/liked`, deck ordering unchanged
-- [x] 4.10 FR-014 walkthrough: upload with AI tagging and publish unchanged
+- [x] 4.6 Collector: bid, raise, lower-bid error, below-floor error all behave as specified — d111ad3
+- [x] 4.7 Seller: no bid amount, count, or bidder name anywhere; Cancel refused with the auction still listed — d111ad3
+- [x] 4.8 Second collector: another bidder's bid invisible everywhere, including the badge — d111ad3
+- [x] 4.9 FR-013 walkthrough: swipe, like, unlike, `/liked`, deck ordering unchanged — d111ad3
+- [x] 4.10 FR-014 walkthrough: upload with AI tagging and publish unchanged — d111ad3
