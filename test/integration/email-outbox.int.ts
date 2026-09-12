@@ -523,18 +523,46 @@ describe("the drain's two operations", () => {
     expect(after.every((row) => row.status === "pending")).toBe(true);
   });
 
-  it("does not hand the same row out twice", async () => {
-    const { data, error } = await claim(drainSecret, 200);
+  it("hands a row back until the ceiling, then stops", async () => {
+    // The ceiling was one attempt when 20260913120000 landed, and
+    // 20260913120200 raised it to three once a single-attempt drain had been
+    // observed working end to end. Three is therefore the number under test —
+    // this spec asserted the old ceiling's behaviour until an implementation
+    // review caught that the two had been shipped in the same change set.
+    //
+    // It matters more since 20260913120400: a transient failure now leaves the
+    // row `pending` rather than retiring it, so the ceiling is the only thing
+    // standing between a broken provider and a row retried forever.
+    const claimedOnce = async (): Promise<number> => {
+      const { data, error } = await claim(drainSecret, 200);
+      expect(error).toBeNull();
 
-    expect(error).toBeNull();
+      // A superset, not an exact match: the outbox is shared with whatever a
+      // sibling spec's close left behind, and the drain is deliberately not
+      // scoped to one auction.
+      const mine = new Set((await readOutbox("sold")).map((row) => row.id));
+      return (data ?? []).filter((row) => mine.has(row.id)).length;
+    };
 
-    const mine = new Set((await readOutbox("sold")).map((row) => row.id));
-    const claimedMine = (data ?? []).filter((row) => mine.has(row.id));
+    // The previous spec already spent attempt one.
+    expect(await claimedOnce()).toBe(4);
+    expect((await readOutbox("sold")).every((row) => row.attempts === 2)).toBe(
+      true,
+    );
 
-    // The ceiling starts at one attempt. Phase 2 raises it, but only after a
-    // single-attempt drain has been observed working end to end — a retry loop
-    // over an unproven drain mails the same person repeatedly.
-    expect(claimedMine).toHaveLength(0);
+    expect(await claimedOnce()).toBe(4);
+    expect((await readOutbox("sold")).every((row) => row.attempts === 3)).toBe(
+      true,
+    );
+
+    // Exhausted. The rows stay `pending` rather than moving to `failed`,
+    // because pending is what the operator's "stuck for fifteen minutes" query
+    // looks for — and a row nobody will retry is exactly what it is for.
+    expect(await claimedOnce()).toBe(0);
+
+    const exhausted = await readOutbox("sold");
+    expect(exhausted.every((row) => row.attempts === 3)).toBe(true);
+    expect(exhausted.every((row) => row.status === "pending")).toBe(true);
   });
 
   it("refuses a mark from a caller without the secret", async () => {
@@ -588,6 +616,38 @@ describe("the drain's two operations", () => {
     expect(ledger[0].reason).toBeNull();
   });
 
+  it("refuses a second mark on a settled row, so a replay cannot double the ledger", async () => {
+    // 20260913120400 guards the update with `and o.status = 'pending'`. The
+    // drain cannot tell "the write-back never ran" from "it ran and I never
+    // heard back", so it may retry one that landed — and without the guard that
+    // writes a second ledger row for a single send, and can flip a `sent` row
+    // to `failed`.
+    const target = (await readOutbox("sold")).find(
+      (row) => row.kind === "auction_won",
+    );
+    expect(target?.status).toBe("sent");
+
+    const { error } = await anonymous.rpc("mark_email_sent", {
+      p_secret: drainSecret,
+      p_id: target!.id,
+      p_status: "failed",
+      p_reason: "unavailable",
+    });
+
+    expect(error?.code).toBe("EML03");
+
+    const after = (await readOutbox("sold")).find(
+      (row) => row.id === target!.id,
+    );
+    expect(after?.status).toBe("sent");
+    expect(after?.last_error ?? null).toBeNull();
+
+    // Still exactly the one row the successful mark wrote.
+    const ledger = await readLedgerFor(winner.email);
+    expect(ledger).toHaveLength(1);
+    expect(ledger[0].status).toBe("sent");
+  });
+
   it("records a refused send with its reason, and does not retry it", async () => {
     const target = (await readOutbox("sold")).find(
       (row) => row.kind === "auction_sold",
@@ -618,5 +678,65 @@ describe("the drain's two operations", () => {
     const { data } = await claim(drainSecret, 200);
     const claimedMine = (data ?? []).filter((row) => row.id === target!.id);
     expect(claimedMine).toHaveLength(0);
+  });
+
+  it("records a deferred send but leaves the row pending", async () => {
+    // 20260913120400. `not_permitted` and `invalid_recipient` are verdicts
+    // about this recipient; `rate_limited`, `unavailable`, `timeout` and
+    // `unconfigured` are about this moment, and retiring a row for one of those
+    // loses a message nobody ever actually declined to deliver. The ledger still
+    // records the attempt as `failed` — it did fail — while the outbox row goes
+    // back to `pending` for the next tick.
+    const target = (await readOutbox("noBids")).find(
+      (row) => row.kind === "auction_unsold",
+    );
+    expect(target).toBeDefined();
+
+    const { error } = await anonymous.rpc("mark_email_sent", {
+      p_secret: drainSecret,
+      p_id: target!.id,
+      p_status: "deferred",
+      p_reason: "rate_limited",
+    });
+    expect(error).toBeNull();
+
+    const after = (await readOutbox("noBids")).find(
+      (row) => row.id === target!.id,
+    );
+    expect(after?.status).toBe("pending");
+    expect(after?.sent_at ?? null).toBeNull();
+    // Kept rather than cleared: it is why the row is still here, and what an
+    // operator reads when the fifteen-minute query turns it up.
+    expect(after?.last_error).toBe("rate_limited");
+
+    // By kind, not by position: the seller already has an `auction_sold` row
+    // from the refusal above, and both carry this recipient.
+    const ledger = (await readLedgerFor(seller.email)).filter(
+      (entry) => entry.kind === "auction_unsold",
+    );
+    expect(ledger).toHaveLength(1);
+    expect(ledger[0].status).toBe("failed");
+    expect(ledger[0].reason).toBe("rate_limited");
+    expect(ledger[0].provider_id).toBeNull();
+  });
+
+  it("refuses a status outside the three it knows", async () => {
+    const target = (await readOutbox("noBids")).find(
+      (row) => row.kind === "auction_unsold",
+    );
+
+    const { error } = await anonymous.rpc("mark_email_sent", {
+      p_secret: drainSecret,
+      p_id: target!.id,
+      p_status: "abandoned",
+      p_reason: "invented",
+    });
+
+    // Checked before the update, so a bad status cannot leave the outbox row in
+    // a state the ledger's own check constraint would then reject.
+    expect(error?.code).toBe("EML02");
+    expect(
+      (await readOutbox("noBids")).find((row) => row.id === target!.id)?.status,
+    ).toBe("pending");
   });
 });
