@@ -592,29 +592,29 @@ migration edits an applied file; `.github/workflows/migrations.yml` applies this
 
 #### Automated
 
-- [x] 3.1 Integration lane passes against a running local stack: `npm run test:integration`
-- [x] 3.2 Default lane is still green: `npm run test`
-- [x] 3.3 Linting and formatting pass: `npm run lint` · `npm run format:check`
+- [x] 3.1 Integration lane passes against a running local stack: `npm run test:integration` — fd4390b
+- [x] 3.2 Default lane is still green: `npm run test` — fd4390b
+- [x] 3.3 Linting and formatting pass: `npm run lint` · `npm run format:check` — fd4390b
 
 #### Manual
 
-- [x] 3.4 Refusal tests observed failing with the select policy loosened to `using (true)`, then restored
-- [x] 3.5 Case 13's two calls observed issued without awaiting the first
+- [x] 3.4 Refusal tests observed failing with the select policy loosened to `using (true)`, then restored — fd4390b
+- [x] 3.5 Case 13's two calls observed issued without awaiting the first — fd4390b
 
 ### Phase 4: The bidding surface
 
 #### Automated
 
-- [ ] 4.1 Type checking passes: `npm run typecheck`
-- [ ] 4.2 Linting passes: `npm run lint`
-- [ ] 4.3 Formatting passes: `npm run format:check`
-- [ ] 4.4 Unit tests pass: `npm run test`
-- [ ] 4.5 Production build passes: `npm run build`
+- [x] 4.1 Type checking passes: `npm run typecheck`
+- [x] 4.2 Linting passes: `npm run lint`
+- [x] 4.3 Formatting passes: `npm run format:check`
+- [x] 4.4 Unit tests pass: `npm run test`
+- [x] 4.5 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 4.6 Collector: bid, raise, lower-bid error, below-floor error all behave as specified
-- [ ] 4.7 Seller: no bid amount, count, or bidder name anywhere; Cancel refused with the auction still listed
-- [ ] 4.8 Second collector: another bidder's bid invisible everywhere, including the badge
-- [ ] 4.9 FR-013 walkthrough: swipe, like, unlike, `/liked`, deck ordering unchanged
-- [ ] 4.10 FR-014 walkthrough: upload with AI tagging and publish unchanged
+- [x] 4.6 Collector: bid, raise, lower-bid error, below-floor error all behave as specified
+- [x] 4.7 Seller: no bid amount, count, or bidder name anywhere; Cancel refused with the auction still listed
+- [x] 4.8 Second collector: another bidder's bid invisible everywhere, including the badge
+- [x] 4.9 FR-013 walkthrough: swipe, like, unlike, `/liked`, deck ordering unchanged
+- [x] 4.10 FR-014 walkthrough: upload with AI tagging and publish unchanged

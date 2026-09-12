@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth/dal";
 import {
   AUCTIONS_PAGE_SIZE,
   getOpenAuctionsPage,
+  getOwnBidAuctionIds,
 } from "@/lib/auctions/queries";
 import { parsePage } from "@/lib/pagination";
 import { AuctionCard } from "@/components/auctions/AuctionCard";
@@ -24,6 +25,13 @@ export default async function AuctionsPage({
   const { auctions, total } = await getOpenAuctionsPage({
     offset: (page - 1) * AUCTIONS_PAGE_SIZE,
   });
+
+  // One query for the whole page's badges, never one per card — the shape the
+  // studio uses for its live-auction badge. Ids only: the badge says *that*
+  // you bid, never how much.
+  const bidAuctionIds = await getOwnBidAuctionIds(
+    auctions.map((auction) => auction.id),
+  );
 
   const totalPages = Math.max(1, Math.ceil(total / AUCTIONS_PAGE_SIZE));
 
@@ -49,6 +57,7 @@ export default async function AuctionsPage({
               <AuctionCard
                 auction={auction}
                 isOwn={auction.seller_id === user.id}
+                hasBid={bidAuctionIds.has(auction.id)}
               />
             </li>
           ))}
