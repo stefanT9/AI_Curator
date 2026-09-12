@@ -1,7 +1,7 @@
 ---
 change_id: outbound-email-foundation
 title: Outbound email foundation
-status: implementing
+status: implemented
 created: 2026-09-12
 updated: 2026-09-12
 archived_at: null

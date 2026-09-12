@@ -332,15 +332,15 @@ No data migration and no backfill: there is no history of sends to record.
 
 #### Automated
 
-- [x] 2.1 `npm run test:integration` passes, including `test/integration/email-sends.int.ts`
-- [x] 2.2 `npm run typecheck` passes against the regenerated `src/types/database.ts`
-- [x] 2.3 `npm run test` still passes
-- [x] 2.4 `npm run lint` and `npm run format:check` pass
-- [x] 2.5 `npm run build` passes
+- [x] 2.1 `npm run test:integration` passes, including `test/integration/email-sends.int.ts` — 4e1ffbe
+- [x] 2.2 `npm run typecheck` passes against the regenerated `src/types/database.ts` — 4e1ffbe
+- [x] 2.3 `npm run test` still passes — 4e1ffbe
+- [x] 2.4 `npm run lint` and `npm run format:check` pass — 4e1ffbe
+- [x] 2.5 `npm run build` passes — 4e1ffbe
 
 #### Manual
 
-- [x] 2.6 `npx supabase db reset` applies the migration cleanly
-- [x] 2.7 `npm run db:types:local` regenerates `src/types/database.ts` with `email_sends` and `record_email_send`
-- [x] 2.8 The `email_sends` query over `DB_URL` shows the recorded attempts legibly
-- [x] 2.9 The new `AGENTS.md` section would stop a future slice from building a second send path
+- [x] 2.6 `npx supabase db reset` applies the migration cleanly — 4e1ffbe
+- [x] 2.7 `npm run db:types:local` regenerates `src/types/database.ts` with `email_sends` and `record_email_send` — 4e1ffbe
+- [x] 2.8 The `email_sends` query over `DB_URL` shows the recorded attempts legibly — 4e1ffbe
+- [x] 2.9 The new `AGENTS.md` section would stop a future slice from building a second send path — 4e1ffbe
