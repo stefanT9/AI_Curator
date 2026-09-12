@@ -1,10 +1,10 @@
 ---
 change_id: close-outcomes-and-contact-exchange
 title: The winner and the seller get each other's details at close
-status: impl_reviewed
+status: archived
 created: 2026-09-12
 updated: 2026-09-12
-archived_at: null
+archived_at: 2026-09-12T18:49:02Z
 ---
 
 ## Notes

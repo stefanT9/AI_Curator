@@ -59,7 +59,7 @@ nothing to bid on, and nothing to close until an auction exists.
 | S-01 | `list-artwork-for-auction`           | list their own artwork for auction, cancel it while untouched, and see it in one place      | —             | US-01, FR-001, FR-002, FR-006, FR-014 | done     |
 | S-02 | `sealed-bidding`                     | place a bid nobody else can see, on anything but their own auction                         | S-01          | US-01, FR-007, FR-002                 | done     |
 | S-03 | `timed-auction-close`                | watch an auction reach its stated end time and close itself, with the highest bid winning   | S-02          | US-01, FR-008, §Guardrails, §Constraints | done |
-| S-04 | `close-outcomes-and-contact-exchange` | learn they won and get the seller's details — or learn they did not, and get nothing        | S-03, F-02    | US-01, FR-009, FR-010, §Access Control | proposed |
+| S-04 | `close-outcomes-and-contact-exchange` | learn they won and get the seller's details — or learn they did not, and get nothing        | S-03, F-02    | US-01, FR-009, FR-010, §Access Control | done     |
 | S-05 | `auction-notifications-for-likers`   | hear that a piece they liked is up for auction, and turn those messages off for good        | S-01, F-02    | US-01, FR-003, FR-005, §Guardrails    | proposed |
 | S-06 | `taste-matched-auction-targeting`    | hear about an auction matching their taste even if they never saw that piece                | S-05, F-01    | US-01, FR-004, §Business Logic, §Success Criteria | proposed |
 | S-07 | `on-auction-flag-in-deck`            | tell, while swiping, that a piece is currently on auction                                  | S-01          | FR-012, FR-013                        | blocked  |
@@ -174,7 +174,7 @@ places, which is why F-01 exists.
 - **Unknowns:**
   - Is the disclosure delivered in the message, on the auction page, or both? FR-009 says the parties "receive" the details without fixing the surface. — Owner: user. Block: no.
 - **Risk:** The first time the product discloses one person's details to another, and the baseline says there is no existing path for it — `profiles` admits only the owner's own row, so this needs a deliberate, narrowly-scoped exception rather than a relaxed policy. §Access Control is explicit that the disclosure is scoped to two parties and one auction: "it is not a directory". The obvious over-broad implementation — letting a bidder read the seller's profile — would satisfy FR-009 and quietly violate that. FR-010's message needs framing care too: §Scope of Change resolved it as a closing notice with the artwork free to relist, deliberately not a failure report.
-- **Status:** proposed
+- **Status:** done
 
 ### S-05: Collectors who liked the piece hear about it, and can make it stop
 
@@ -260,3 +260,4 @@ item above is archived.)
 - **S-02: An authenticated user can place a sealed bid at or above the starting price on any auction except one they are the seller of, can raise their own bid, and no surface anywhere exposes the standing high bid, the bid count, or who has bid.** — Archived 2026-09-12 → `context/archive/2026-09-11-sealed-bidding/`. Lesson: —.
 - **S-03: An auction stops accepting bids at its stated end time without anyone intervening, the highest sealed bid standing at that moment is the winner, an earlier bid beats a later one at the same amount, and the auction shows as closed.** — Archived 2026-09-12 → `context/archive/2026-09-12-timed-auction-close/`. Lesson: —.
 - **F-02: (foundation) a single send path exists that delivers one transactional message to one address, with every caller routed through the same choke point and a failure to send visible rather than silent.** — Archived 2026-09-12 → `context/archive/2026-09-12-outbound-email-foundation/`. Lesson: —.
+- **S-04: At close with at least one bid, the winning bidder and the seller each receive the other's contact details; losing bidders are told they did not win and receive nothing about the seller or the winner. At close with no bids, the seller is told the auction ended and the artwork is free to relist.** — Archived 2026-09-12 → `context/archive/2026-09-12-close-outcomes-and-contact-exchange/`. Lesson: —.
