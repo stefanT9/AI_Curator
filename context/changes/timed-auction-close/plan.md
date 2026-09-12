@@ -573,18 +573,18 @@ via `.github/workflows/migrations.yml`.
 
 #### Automated
 
-- [x] 3.1 Default suite passes, including the new predicate cases: `npm run test`
-- [x] 3.2 Type checking passes: `npm run typecheck`
-- [x] 3.3 Linting and formatting pass: `npm run lint` · `npm run format:check`
-- [x] 3.4 Build passes: `npm run build`
-- [x] 3.5 Integration lane still green: `npm run test:integration`
+- [x] 3.1 Default suite passes, including the new predicate cases: `npm run test` — 2102504
+- [x] 3.2 Type checking passes: `npm run typecheck` — 2102504
+- [x] 3.3 Linting and formatting pass: `npm run lint` · `npm run format:check` — 2102504
+- [x] 3.4 Build passes: `npm run build` — 2102504
+- [x] 3.5 Integration lane still green: `npm run test:integration` — 2102504
 
 #### Manual
 
-- [x] 3.6 Seller sees the winning amount, or the relist message when there were no bids
-- [x] 3.7 Winner is told they won, with their amount
-- [x] 3.8 Loser is told they did not win, with no amount anywhere in the rendered HTML
-- [x] 3.9 An uninvolved signed-in user sees only that the auction ended
-- [x] 3.10 A countdown watched through zero updates itself to the outcome
-- [x] 3.11 "Recently closed" lists only auctions the viewer bid on or sold
-- [x] 3.12 A closed auction leaves the open grid on `/auctions`
+- [x] 3.6 Seller sees the winning amount, or the relist message when there were no bids — 2102504
+- [x] 3.7 Winner is told they won, with their amount — 2102504
+- [x] 3.8 Loser is told they did not win, with no amount anywhere in the rendered HTML — 2102504
+- [x] 3.9 An uninvolved signed-in user sees only that the auction ended — 2102504
+- [x] 3.10 A countdown watched through zero updates itself to the outcome — 2102504
+- [x] 3.11 "Recently closed" lists only auctions the viewer bid on or sold — 2102504
+- [x] 3.12 A closed auction leaves the open grid on `/auctions` — 2102504
