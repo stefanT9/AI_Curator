@@ -567,16 +567,17 @@ the operator query in the manual criteria exists to catch.
 #### Automated
 
 - [x] 2.1 `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm run test` · `npm run build` all pass — 55965d9
-- [x] 2.2 `npm run test:integration` still passes — 55965d9
+- [x] 2.2 `npm run test:integration` still passes — 55965d9 (against migrations through `20260913120100` only; see 2.12)
 - [x] 2.3 `npm run test:smoke` sends a real close-outcome email and it arrives — 55965d9
 - [x] 2.4 With `EMAIL_DRAIN_SECRET` unset, `npm run build` passes — 55965d9
-- [x] 2.5 `supabase db reset` applies both migrations and registers exactly two cron jobs — 55965d9
+- [x] 2.5 `supabase db reset` applies all five of this change's migrations and registers exactly two cron jobs — observed 2026-09-12 after the impl review: `schema_migrations` tops out at `20260913120500`, `claim_pending_emails` carries `attempts < 3`, `mark_email_sent` knows `deferred`, the pending index carries the narrowed predicate, and `cron.job` holds exactly `close-due-auctions` and `drain-email-outbox`
+- [x] 2.12 `npm run test:integration` passes against the full migration set — 93 passed, `email-outbox.int.ts` at 19 including the rewritten ceiling spec and the three added for `20260913120400` (deferred, unknown status, replay guard)
 
 #### Manual
 
-- [x] 2.6 A local auction closes and four emails are attempted within ~2 minutes with no manual step — 55965d9
-- [x] 2.7 `net._http_response` shows the drain POST returning 200 — 55965d9
-- [x] 2.8 Wrong bearer token returns 401; right token on an empty outbox returns zeroes — 55965d9
+- [ ] 2.6 A local auction closes and four emails are attempted within ~2 minutes with no manual step — reopened by the impl review: observed against the pre-split wiring, where the cron job presented `email_drain_secret` and the route checked `EMAIL_DRAIN_SECRET`. `20260913120300` moved the header onto `email_drain_trigger_token` / `EMAIL_DRAIN_TRIGGER_TOKEN`, so the shipped path has not delivered a message yet
+- [ ] 2.7 `net._http_response` shows the drain POST returning 200 — reopened by the impl review: observed against the pre-split wiring, where the cron job presented `email_drain_secret` and the route checked `EMAIL_DRAIN_SECRET`. `20260913120300` moved the header onto `email_drain_trigger_token` / `EMAIL_DRAIN_TRIGGER_TOKEN`, so the shipped path has not delivered a message yet
+- [ ] 2.8 Wrong bearer token returns 401; right token on an empty outbox returns zeroes — reopened by the impl review: observed against the pre-split wiring, where the cron job presented `email_drain_secret` and the route checked `EMAIL_DRAIN_SECRET`. `20260913120300` moved the header onto `email_drain_trigger_token` / `EMAIL_DRAIN_TRIGGER_TOKEN`, so the shipped path has not delivered a message yet
 - [x] 2.9 The pending-rows operator query returns nothing after a healthy run — 55965d9
 - [x] 2.10 The retry ceiling is raised above one attempt only after a single-attempt drain is proven — 55965d9
 - [x] 2.11 A real `auction_won` email names the seller's address; a real `auction_lost` email names no address and no amount — 55965d9
