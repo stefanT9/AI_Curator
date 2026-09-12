@@ -25,9 +25,15 @@ import * as route from "@/app/api/email/drain/route";
  * `pg_net` files every response in `net._http_response`.
  */
 
-const SECRET = "drain-secret-for-tests";
+/**
+ * The header token, which is deliberately NOT `EMAIL_DRAIN_SECRET`: it rides in
+ * a header and so lands in `net.http_request_queue`, which `PUBLIC` can read.
+ * The secret that gates an address never reaches this route at all —
+ * `drainOutbox` reads it itself. See 20260913120300.
+ */
+const TRIGGER_TOKEN = "drain-trigger-token-for-tests";
 
-const SUMMARY = { claimed: 4, sent: 3, failed: 1 };
+const SUMMARY = { claimed: 4, sent: 3, failed: 1, deferred: 0 };
 
 const post = (init: RequestInit = {}) =>
   route.POST(
@@ -40,12 +46,20 @@ const post = (init: RequestInit = {}) =>
 const authorized = (init: RequestInit = {}) =>
   post({
     ...init,
-    headers: { authorization: `Bearer ${SECRET}`, ...(init.headers ?? {}) },
+    headers: {
+      authorization: `Bearer ${TRIGGER_TOKEN}`,
+      ...(init.headers ?? {}),
+    },
   });
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.stubEnv("EMAIL_DRAIN_SECRET", SECRET);
+  vi.stubEnv("EMAIL_DRAIN_TRIGGER_TOKEN", TRIGGER_TOKEN);
+  // Stubbed rather than inherited: the handler now checks these instead of
+  // asserting them with `!`, so a machine without a .env.local would otherwise
+  // see every case in this file answer 503.
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://stub.supabase.test");
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_stub");
   createSupabaseClient.mockReturnValue({ rpc: vi.fn() });
   drainOutbox.mockResolvedValue(SUMMARY);
 });
@@ -55,8 +69,8 @@ afterEach(() => {
 });
 
 describe("POST /api/email/drain", () => {
-  it("answers 503 when the secret is unset, and drains nothing", async () => {
-    vi.stubEnv("EMAIL_DRAIN_SECRET", "");
+  it("answers 503 when the trigger token is unset, and drains nothing", async () => {
+    vi.stubEnv("EMAIL_DRAIN_TRIGGER_TOKEN", "");
 
     const response = await authorized();
 
@@ -68,15 +82,18 @@ describe("POST /api/email/drain", () => {
 
   it.each([
     ["no Authorization header at all", {}],
-    ["a bare token with no scheme", { authorization: SECRET }],
-    ["the wrong scheme", { authorization: `Basic ${SECRET}` }],
+    ["a bare token with no scheme", { authorization: TRIGGER_TOKEN }],
+    ["the wrong scheme", { authorization: `Basic ${TRIGGER_TOKEN}` }],
     ["an empty bearer token", { authorization: "Bearer " }],
     ["the wrong secret", { authorization: "Bearer not-the-secret" }],
     [
       "a prefix of the real secret",
-      { authorization: `Bearer ${SECRET.slice(0, 8)}` },
+      { authorization: `Bearer ${TRIGGER_TOKEN.slice(0, 8)}` },
     ],
-    ["the real secret with padding", { authorization: `Bearer ${SECRET}xxxx` }],
+    [
+      "the real token with padding",
+      { authorization: `Bearer ${TRIGGER_TOKEN}xxxx` },
+    ],
   ])("answers 401 to %s", async (_case, headers) => {
     const response = await post({ headers: headers as HeadersInit });
 
@@ -146,7 +163,56 @@ describe("POST /api/email/drain", () => {
 
   it("exposes no verb but POST", async () => {
     // Next answers 405 for any method a route file does not export, so the
-    // absence is the whole of the method check.
-    expect(Object.keys(route)).toEqual(["POST"]);
+    // absence is the whole of the method check. Asserted against the verb list
+    // rather than against every export, because route segment config
+    // (`maxDuration`) lives in the same namespace and is not a verb.
+    const VERBS = ["GET", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"];
+    expect(Object.keys(route).filter((key) => VERBS.includes(key))).toEqual([]);
+    expect(route.POST).toBeTypeOf("function");
+  });
+
+  it.each(["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"])(
+    "answers 503 rather than throwing when %s is missing",
+    async (name) => {
+      vi.stubEnv(name, "");
+
+      const response = await authorized();
+
+      // The only two values in the handler that could throw out of it. An
+      // uncontrolled 500 is the one response shape here that tells an operator
+      // reading `net._http_response` nothing at all.
+      expect(response.status).toBe(503);
+      expect(drainOutbox).not.toHaveBeenCalled();
+    },
+  );
+
+  it("answers 502 when the claim was refused, so the failure is not a quiet minute", async () => {
+    // `verify_drain_secret` raises `EML00`/`EML01` rather than returning false
+    // so an operator can tell "never configured" from "drifted apart".
+    // `net._http_response` keeps the status code, so answering 200 here would
+    // discard that distinction at the last hop.
+    drainOutbox.mockResolvedValue({
+      claimed: 0,
+      sent: 0,
+      failed: 0,
+      deferred: 0,
+      claimError: "EML01",
+    });
+
+    const response = await authorized();
+
+    expect(response.status).toBe(502);
+    // A code, never a message: this body is stored in `net._http_response`.
+    await expect(response.json()).resolves.toMatchObject({
+      claimError: "EML01",
+    });
+  });
+
+  it("declares a maxDuration the batch size can finish inside", async () => {
+    // `DEFAULT_LIMIT` of 5 against `send.ts`'s 8s ceiling is ~40s of worst-case
+    // sequential sends. Pinned because raising either number alone is the
+    // mistake: `attempts` is spent for the whole batch at claim time, so a run
+    // the platform kills partway retires rows it never tried.
+    expect(route.maxDuration).toBe(60);
   });
 });
