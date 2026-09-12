@@ -58,7 +58,7 @@ nothing to bid on, and nothing to close until an auction exists.
 | F-02 | `outbound-email-foundation`          | (foundation) the product can send one transactional message, through a single gated path   | —             | §Constraints, §Guardrails, FR-005     | ready    |
 | S-01 | `list-artwork-for-auction`           | list their own artwork for auction, cancel it while untouched, and see it in one place      | —             | US-01, FR-001, FR-002, FR-006, FR-014 | done     |
 | S-02 | `sealed-bidding`                     | place a bid nobody else can see, on anything but their own auction                         | S-01          | US-01, FR-007, FR-002                 | done     |
-| S-03 | `timed-auction-close`                | watch an auction reach its stated end time and close itself, with the highest bid winning   | S-02          | US-01, FR-008, §Guardrails, §Constraints | proposed |
+| S-03 | `timed-auction-close`                | watch an auction reach its stated end time and close itself, with the highest bid winning   | S-02          | US-01, FR-008, §Guardrails, §Constraints | done |
 | S-04 | `close-outcomes-and-contact-exchange` | learn they won and get the seller's details — or learn they did not, and get nothing        | S-03, F-02    | US-01, FR-009, FR-010, §Access Control | proposed |
 | S-05 | `auction-notifications-for-likers`   | hear that a piece they liked is up for auction, and turn those messages off for good        | S-01, F-02    | US-01, FR-003, FR-005, §Guardrails    | proposed |
 | S-06 | `taste-matched-auction-targeting`    | hear about an auction matching their taste even if they never saw that piece                | S-05, F-01    | US-01, FR-004, §Business Logic, §Success Criteria | proposed |
@@ -161,7 +161,7 @@ places, which is why F-01 exists.
 - **Unknowns:**
   - What is "close enough" to the stated end time before a collector is misled — seconds, or minutes? §Guardrails states the property without a bound. — Owner: user. Block: no.
 - **Risk:** The first time-triggered behavior the product has ever had; the baseline confirms no scheduling exists, so the trigger is stood up here rather than in a foundation — exactly one must-have slice needs it, and introducing it at the point of first use is cheaper than a scheduling layer nobody else calls. Named in Open Question 5 as one of the two largest sources of estimate risk, which under `top_blocker: time` is the reason it sits mid-chain: if the budget gives out here, S-01 and S-02 have already shipped as coherent capabilities. Two failure shapes to plan against, both from §Guardrails: a countdown that reaches zero with nothing happening, and a piece still open well past its advertised close.
-- **Status:** proposed
+- **Status:** done
 
 ### S-04: The winner and the seller get each other's details
 
@@ -258,3 +258,4 @@ item above is archived.)
 
 - **S-01: An artist can list one of their own artworks for auction with a starting price and a preset duration, cancel it while no one has bid, and any authenticated user can browse open auctions in a dedicated section showing the artwork, the starting price, and the time remaining.** — Archived 2026-09-11 → `context/archive/2026-09-11-list-artwork-for-auction/`. Lesson: —.
 - **S-02: An authenticated user can place a sealed bid at or above the starting price on any auction except one they are the seller of, can raise their own bid, and no surface anywhere exposes the standing high bid, the bid count, or who has bid.** — Archived 2026-09-12 → `context/archive/2026-09-11-sealed-bidding/`. Lesson: —.
+- **S-03: An auction stops accepting bids at its stated end time without anyone intervening, the highest sealed bid standing at that moment is the winner, an earlier bid beats a later one at the same amount, and the auction shows as closed.** — Archived 2026-09-12 → `context/archive/2026-09-12-timed-auction-close/`. Lesson: —.
