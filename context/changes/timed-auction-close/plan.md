@@ -541,33 +541,33 @@ via `.github/workflows/migrations.yml`.
 
 #### Automated
 
-- [x] 1.1 Migrations apply cleanly from scratch: `npx supabase db reset`
-- [x] 1.2 Types regenerate with the three new columns: `npm run db:types:local`
-- [x] 1.3 Type checking passes: `npm run typecheck`
-- [x] 1.4 Existing default suite still passes: `npm run test`
-- [x] 1.5 Linting and formatting pass: `npm run lint` · `npm run format:check`
-- [x] 1.6 Build passes: `npm run build`
+- [x] 1.1 Migrations apply cleanly from scratch: `npx supabase db reset` — f28643a
+- [x] 1.2 Types regenerate with the three new columns: `npm run db:types:local` — f28643a
+- [x] 1.3 Type checking passes: `npm run typecheck` — f28643a
+- [x] 1.4 Existing default suite still passes: `npm run test` — f28643a
+- [x] 1.5 Linting and formatting pass: `npm run lint` · `npm run format:check` — f28643a
+- [x] 1.6 Build passes: `npm run build` — f28643a
 
 #### Manual
 
-- [x] 1.7 `cron.job` holds one `close-due-auctions` row after a reset
-- [x] 1.8 A past-dated auction closes within ~60s with the correct winner and amount
-- [x] 1.9 `close_due_auctions` is refused when called as `authenticated`
+- [x] 1.7 `cron.job` holds one `close-due-auctions` row after a reset — f28643a
+- [x] 1.8 A past-dated auction closes within ~60s with the correct winner and amount — f28643a
+- [x] 1.9 `close_due_auctions` is refused when called as `authenticated` — f28643a
 
 ### Phase 2: Real-boundary proof
 
 #### Automated
 
-- [ ] 2.1 The new close spec passes: `npm run test:integration`
-- [ ] 2.2 The rest of the integration lane still passes in the same run
-- [ ] 2.3 Type checking passes with the new devDependencies: `npm run typecheck`
-- [ ] 2.4 Linting and formatting pass: `npm run lint` · `npm run format:check`
-- [ ] 2.5 Default suite and build unaffected: `npm run test` · `npm run build`
+- [x] 2.1 The new close spec passes: `npm run test:integration`
+- [x] 2.2 The rest of the integration lane still passes in the same run
+- [x] 2.3 Type checking passes with the new devDependencies: `npm run typecheck`
+- [x] 2.4 Linting and formatting pass: `npm run lint` · `npm run format:check`
+- [x] 2.5 Default suite and build unaffected: `npm run test` · `npm run build`
 
 #### Manual
 
-- [ ] 2.6 Each close assertion was observed red before it was made green
-- [ ] 2.7 The lane still refuses a non-loopback `DB_URL`
+- [x] 2.6 Each close assertion was observed red before it was made green
+- [x] 2.7 The lane still refuses a non-loopback `DB_URL`
 
 ### Phase 3: The outcome surfaces
 

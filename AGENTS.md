@@ -88,6 +88,7 @@ Three lanes, each with its own Vitest config and its own file glob so one can ne
     --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY > .env.test.local
   ```
 - No service-role key. Fixtures run under the same RLS a real user has. Mint **one test user per file** — `[auth.rate_limit] sign_in_sign_ups` is 30 per 5 minutes per IP.
+- One exception, and it stays one: `auction-close.int.ts` opens a direct postgres connection (`DB_URL`, from the same file) via `requireLocalDatabaseUrl`, because `close_due_auctions` is granted to no role a Supabase client can authenticate as — that revoke is the access control. Use it only to drive something deliberately ungranted, never to sidestep RLS in a fixture; the same loopback guard applies.
 
 **Live smoke checks — `npm run test:smoke`** (`vitest.smoke.config.mts`, `test/smoke/**/*.live.ts`). Opt-in, never in CI.
 

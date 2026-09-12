@@ -1,5 +1,5 @@
 /**
- * The two rails every integration spec runs on.
+ * The rails every integration spec runs on.
  *
  * This lane creates users and uploads objects. `.env.local` in this repo
  * points at the linked project, so a lane that picked it up would sign real
@@ -103,6 +103,54 @@ export const requireRunningStack = async (url: string): Promise<void> => {
         `/auth/v1/health. Restart it and regenerate the env file:\n${SETUP_COMMANDS}`,
     );
   }
+};
+
+/**
+ * Read and vet a direct postgres connection string for the lane.
+ *
+ * `close_due_auctions` is granted to nobody — that omission is the access
+ * control the migration deliberately relies on, so no Supabase client can
+ * reach it and the close can only be driven from a superuser connection.
+ * `supabase status -o env` already emits one as `DB_URL`, so this is an
+ * accessor over the lane's existing env file, not a new workflow.
+ *
+ * The loopback guard is the *same* one `requireLocalStack` applies, not a
+ * weaker one. This connection bypasses RLS entirely and owns every function
+ * in the schema; pointing it at anything but a local stack is strictly more
+ * dangerous than pointing an anon client there, so it gets at least the same
+ * check.
+ */
+export const requireLocalDatabaseUrl = (): string => {
+  const url = process.env.DB_URL;
+
+  if (!url) {
+    throw new Error(
+      "The close spec needs DB_URL — a direct postgres connection to the " +
+        "local stack — because `close_due_auctions` is granted to no role a " +
+        "Supabase client can authenticate as. Regenerate .env.test.local " +
+        `yourself:\n${SETUP_COMMANDS}`,
+    );
+  }
+
+  let hostname: string;
+  try {
+    hostname = new URL(url).hostname;
+  } catch {
+    throw new Error(
+      `DB_URL is not a URL: ${url}. The integration lane only runs against a ` +
+        `local stack:\n${SETUP_COMMANDS}`,
+    );
+  }
+
+  if (!LOCAL_HOSTNAMES.includes(hostname)) {
+    throw new Error(
+      `Refusing to open a direct postgres connection to "${hostname}". This ` +
+        "connection bypasses RLS and can close live auctions, so it only " +
+        `runs against a local stack (127.0.0.1 or localhost):\n${SETUP_COMMANDS}`,
+    );
+  }
+
+  return url;
 };
 
 /** Both rails, in the order a `beforeAll` wants them. */
