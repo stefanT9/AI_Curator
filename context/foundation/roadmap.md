@@ -55,7 +55,7 @@ nothing to bid on, and nothing to close until an auction exists.
 | ID   | Change ID                            | Outcome (user can …)                                                                      | Prerequisites | PRD refs                              | Status   |
 | ---- | ------------------------------------ | ----------------------------------------------------------------------------------------- | ------------- | ------------------------------------- | -------- |
 | F-01 | `shared-taste-definition`            | (foundation) taste means one thing, readable in both directions                            | —             | §Constraints, §Open Questions, FR-004, FR-013 | ready    |
-| F-02 | `outbound-email-foundation`          | (foundation) the product can send one transactional message, through a single gated path   | —             | §Constraints, §Guardrails, FR-005     | ready    |
+| F-02 | `outbound-email-foundation`          | (foundation) the product can send one transactional message, through a single gated path   | —             | §Constraints, §Guardrails, FR-005     | done     |
 | S-01 | `list-artwork-for-auction`           | list their own artwork for auction, cancel it while untouched, and see it in one place      | —             | US-01, FR-001, FR-002, FR-006, FR-014 | done     |
 | S-02 | `sealed-bidding`                     | place a bid nobody else can see, on anything but their own auction                         | S-01          | US-01, FR-007, FR-002                 | done     |
 | S-03 | `timed-auction-close`                | watch an auction reach its stated end time and close itself, with the highest bid winning   | S-02          | US-01, FR-008, §Guardrails, §Constraints | done |
@@ -121,7 +121,7 @@ places, which is why F-01 exists.
 - **Unknowns:**
   - Which sending identity/domain does the product send from, given auth email already flows through Supabase? — Owner: user. Block: no.
 - **Risk:** Deliberately minimal — one provider, one path, no templating system, no retry infrastructure — because `main_goal: low-complexity` and `top_blocker: time` both argue against building messaging infrastructure ahead of the two features that use it. The real risk it guards against is the reverse: letting each notification slice grow its own send path, after which the "off means off" guardrail has three places to fail instead of one. Observability being `partial` in the baseline is why "a failure is visible" is part of the outcome rather than assumed.
-- **Status:** ready
+- **Status:** done
 
 ## Slices
 
@@ -259,3 +259,4 @@ item above is archived.)
 - **S-01: An artist can list one of their own artworks for auction with a starting price and a preset duration, cancel it while no one has bid, and any authenticated user can browse open auctions in a dedicated section showing the artwork, the starting price, and the time remaining.** — Archived 2026-09-11 → `context/archive/2026-09-11-list-artwork-for-auction/`. Lesson: —.
 - **S-02: An authenticated user can place a sealed bid at or above the starting price on any auction except one they are the seller of, can raise their own bid, and no surface anywhere exposes the standing high bid, the bid count, or who has bid.** — Archived 2026-09-12 → `context/archive/2026-09-11-sealed-bidding/`. Lesson: —.
 - **S-03: An auction stops accepting bids at its stated end time without anyone intervening, the highest sealed bid standing at that moment is the winner, an earlier bid beats a later one at the same amount, and the auction shows as closed.** — Archived 2026-09-12 → `context/archive/2026-09-12-timed-auction-close/`. Lesson: —.
+- **F-02: (foundation) a single send path exists that delivers one transactional message to one address, with every caller routed through the same choke point and a failure to send visible rather than silent.** — Archived 2026-09-12 → `context/archive/2026-09-12-outbound-email-foundation/`. Lesson: —.
