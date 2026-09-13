@@ -1,10 +1,10 @@
 ---
 change_id: course-completion
 title: Course-completion evidence — the missing E2E test, a real README, and the delivery story
-status: implemented
+status: archived
 created: 2026-09-13
 updated: 2026-09-13
-archived_at: null
+archived_at: 2026-09-13T13:25:45Z
 ---
 
 ## Notes
