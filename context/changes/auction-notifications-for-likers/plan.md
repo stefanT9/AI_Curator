@@ -527,16 +527,16 @@ replanted, plus a fourth if the Phase 4 token decision puts the signing secret i
 
 #### Automated
 
-- [x] 4.1 Migration applies cleanly: `npx supabase db reset`
-- [x] 4.2 Types regenerated: `npm run db:types:local`
-- [x] 4.3 Integration lane proves the full recipient matrix — one row per liker, seller excluded, opted-out collector gets no row, absent-row collector gets one, non-liker excluded, no-liker artwork enqueues nothing: `npm run test:integration`
-- [x] 4.4 Integration lane proves the drain sends these rows and records `kind = 'auction_opened'` in `email_sends`
-- [x] 4.5 Default lane and the full gate pass: `npm run test` · `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm run build`
+- [x] 4.1 Migration applies cleanly: `npx supabase db reset` — 5f082b1
+- [x] 4.2 Types regenerated: `npm run db:types:local` — 5f082b1
+- [x] 4.3 Integration lane proves the full recipient matrix — one row per liker, seller excluded, opted-out collector gets no row, absent-row collector gets one, non-liker excluded, no-liker artwork enqueues nothing: `npm run test:integration` — 5f082b1
+- [x] 4.4 Integration lane proves the drain sends these rows and records `kind = 'auction_opened'` in `email_sends` — 5f082b1
+- [x] 4.5 Default lane and the full gate pass: `npm run test` · `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm run build` — 5f082b1
 
 #### Manual
 
-- [x] 4.6 Listing a piece a second account liked produces a pending row, and the drain sends it — skipped, not manually verified
-- [x] 4.7 The received mail renders correctly and its unsubscribe link turns the preference off — skipped, not manually verified
-- [x] 4.8 After unsubscribing, listing another liked piece produces no row for that collector — skipped, not manually verified
-- [x] 4.9 Re-subscribing restores it — skipped, not manually verified
-- [x] 4.10 Discovery is untouched: swiping, liking and the liked-artworks view behave exactly as before — skipped, not manually verified
+- [x] 4.6 Listing a piece a second account liked produces a pending row, and the drain sends it — 5f082b1 (skipped, not manually verified)
+- [x] 4.7 The received mail renders correctly and its unsubscribe link turns the preference off — 5f082b1 (skipped, not manually verified)
+- [x] 4.8 After unsubscribing, listing another liked piece produces no row for that collector — 5f082b1 (skipped, not manually verified)
+- [x] 4.9 Re-subscribing restores it — 5f082b1 (skipped, not manually verified)
+- [x] 4.10 Discovery is untouched: swiping, liking and the liked-artworks view behave exactly as before — 5f082b1 (skipped, not manually verified)
