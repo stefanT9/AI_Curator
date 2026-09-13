@@ -554,19 +554,19 @@ by instruction, so the original commitments survive the edit.
 
 #### Automated
 
-- [x] 1.1 `npx playwright test --list` resolves the config and reports zero tests without erroring
-- [x] 1.2 Guard fires against a non-loopback `NEXT_PUBLIC_SUPABASE_URL`, exiting non-zero with the local-stack message
-- [x] 1.3 `npm run format:check` passes
-- [x] 1.4 `npm run lint` passes
-- [x] 1.5 `npm run typecheck` passes
-- [x] 1.6 `npm run test` passes with an unchanged file count
-- [x] 1.7 `npm run build` passes
+- [x] 1.1 `npx playwright test --list` resolves the config and reports zero tests without erroring — 98f4697
+- [x] 1.2 Guard fires against a non-loopback `NEXT_PUBLIC_SUPABASE_URL`, exiting non-zero with the local-stack message — 98f4697
+- [x] 1.3 `npm run format:check` passes — 98f4697
+- [x] 1.4 `npm run lint` passes — 98f4697
+- [x] 1.5 `npm run typecheck` passes — 98f4697
+- [x] 1.6 `npm run test` passes with an unchanged file count — 98f4697
+- [x] 1.7 `npm run build` passes — 98f4697
 
 #### Manual
 
-- [x] 1.8 The `webServer` builds and serves at `http://127.0.0.1:3000`
-- [x] 1.9 The served app talks to the local stack, confirmed via Supabase Studio at `127.0.0.1:54323`
-- [x] 1.10 `/10x-e2e course-completion phase 2` gets past its Setup gate
+- [x] 1.8 The `webServer` builds and serves at `http://127.0.0.1:3000` — 98f4697
+- [x] 1.9 The served app talks to the local stack, confirmed via Supabase Studio at `127.0.0.1:54323` — 98f4697
+- [x] 1.10 `/10x-e2e course-completion phase 2` gets past its Setup gate — 98f4697
 
 ### Phase 2: The taste-loop test
 
