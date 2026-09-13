@@ -32,6 +32,13 @@ const accepted = { data: { id: "re_abc123" }, error: null };
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubEnv("RESEND_API_KEY", "re_test_key");
+  // `sendEmail` reads `process.env.EMAIL_FROM || DEFAULT_FROM`, so the
+  // default-sender case below asserts the fallback only while nothing ambient
+  // supplies one. CI has none; a developer shell that has sourced `.env.local`
+  // does, and the assertion then fails on an environment difference rather than
+  // on anything the code did. Cleared here, and stubbed per-test where the
+  // override itself is the subject.
+  vi.stubEnv("EMAIL_FROM", "");
 });
 
 afterEach(() => {

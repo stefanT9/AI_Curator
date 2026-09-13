@@ -52,3 +52,9 @@ test/smoke/.last-close-emails.json
 # `npm run db:seed:fetch`, ~260 MB. The durable artifact is the manifest,
 # `supabase/seed-assets/corpus.json`, which is tracked.
 /supabase/seed-assets/00000000-0000-4000-8000-000000000001/
+
+# Playwright output (test/e2e), regenerated on each run. Traces and
+# screenshots are retained on failure only — see playwright.config.ts.
+/test-results/
+/playwright-report/
+/blob-report/

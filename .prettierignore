@@ -24,3 +24,8 @@ supabase/.temp/
 
 # 10x workflow docs — owned by the /10x-* skills
 context/
+
+# Playwright output — regenerated on each `npm run test:e2e`
+test-results/
+playwright-report/
+blob-report/

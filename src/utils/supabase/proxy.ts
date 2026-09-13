@@ -6,11 +6,22 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 /** Reachable signed out. Everything else redirects to /login. */
-const PUBLIC_PATHS = ["/", "/login"];
+const PUBLIC_PATHS = ["/", "/login", "/unsubscribe"];
 
 /** Pointless once signed in — bounce these to the app. */
 const SIGNED_OUT_ONLY_PATHS = ["/login", "/signup"];
 
+/**
+ * `/unsubscribe` is public because asking someone to sign in before they can
+ * stop receiving mail is not an off switch — FR-005 requires the link in a
+ * notification to work straight from the inbox. It covers the Server Action's
+ * POST as well as the page's GET: an action posts back to the route it was
+ * rendered on, so a non-public `/unsubscribe` would 307 the submit to /login
+ * with the method preserved and the switch would never flip.
+ *
+ * The route is safe to expose because it authenticates its own caller — the
+ * HMAC token is the credential, and the page itself only renders.
+ */
 const isPublic = (pathname: string) =>
   PUBLIC_PATHS.includes(pathname) ||
   // Covers /signup and /signup/check-email, which is reached while the new

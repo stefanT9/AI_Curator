@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
-import { requireProfile } from "@/lib/auth/dal";
+import { requireProfile, requireUser } from "@/lib/auth/dal";
 import { createClient } from "@/utils/supabase/server";
 
 export type ProfileFormState =
@@ -101,4 +101,77 @@ export async function updateDisplayName(
   revalidatePath(`/artist/${profile.id}`);
 
   return { success: true };
+}
+
+export type NotificationPreferenceFormState =
+  | {
+      errors?: { auctionEmailsEnabled?: string[] };
+      message?: string;
+      /** The value that is now stored, so the form can render the new state. */
+      enabled?: boolean;
+    }
+  | undefined;
+
+/**
+ * The desired state travels explicitly, as the string "true" or "false".
+ *
+ * An unchecked checkbox sends no field at all, which is indistinguishable from
+ * a malformed body — so "absent" would have to mean "off", and Zod would have
+ * nothing left to reject. A hidden field carrying the target value keeps the
+ * boundary real: anything that is not one of these two is a bad request rather
+ * than a silent opt-out.
+ */
+const NotificationPreferenceSchema = z.object({
+  auctionEmailsEnabled: z.enum(["true", "false"], {
+    error: "That isn't a valid notification setting.",
+  }),
+});
+
+/**
+ * FR-005's off switch, from the account page.
+ *
+ * Every export of a `"use server"` module is a public endpoint, so the user id
+ * comes from the verified session and is never accepted from the caller — a
+ * user-id parameter here would let anyone mute anyone. RLS enforces the same
+ * thing a second time: the insert and update policies on
+ * `notification_preferences` both check `auth.uid() = user_id`.
+ *
+ * Upsert rather than update, because absent-means-enabled leaves most users
+ * with no row until the first time they touch this.
+ */
+export async function updateNotificationPreference(
+  _state: NotificationPreferenceFormState,
+  formData: FormData,
+): Promise<NotificationPreferenceFormState> {
+  const user = await requireUser();
+
+  const validatedFields = NotificationPreferenceSchema.safeParse({
+    auctionEmailsEnabled: formData.get("auctionEmailsEnabled"),
+  });
+
+  if (!validatedFields.success) {
+    return { errors: z.flattenError(validatedFields.error).fieldErrors };
+  }
+
+  const enabled = validatedFields.data.auctionEmailsEnabled === "true";
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("notification_preferences").upsert(
+    {
+      user_id: user.id,
+      auction_emails_enabled: enabled,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" },
+  );
+
+  if (error) {
+    return {
+      message: `Could not save your notification setting: ${error.message}`,
+    };
+  }
+
+  revalidatePath("/account");
+
+  return { enabled };
 }

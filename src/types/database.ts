@@ -318,6 +318,32 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          auction_emails_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auction_emails_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auction_emails_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -400,6 +426,10 @@ export type Database = {
         }
         Returns: string
       }
+      set_auction_emails_enabled: {
+        Args: { p_enabled: boolean; p_secret: string; p_user_id: string }
+        Returns: undefined
+      }
       swipe_deck: {
         Args: { p_limit?: number }
         Returns: {
@@ -420,6 +450,10 @@ export type Database = {
         }
       }
       verify_drain_secret: { Args: { p_secret: string }; Returns: boolean }
+      verify_unsubscribe_secret: {
+        Args: { p_secret: string }
+        Returns: boolean
+      }
     }
     Enums: {
       user_role: "collector" | "artist"
