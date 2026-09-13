@@ -44,5 +44,17 @@ export default defineConfig({
     // Without this the hook times out first and every test in the file is
     // reported as skipped, which hides the real cause.
     hookTimeout: 30_000,
+    // One file at a time. Unlike the mocked lane, every file here shares a
+    // single Postgres, so a file's fixtures are visible to — and deletable
+    // out from under — its siblings. `swipe-deck.int.ts` depends on that
+    // directly: it neutralises the *whole* artworks catalogue to isolate its
+    // ordering assertions, so a sibling's `afterAll` cascade landing between
+    // that select and the interactions insert breaks
+    // `interactions_artwork_id_fkey` and fails the file in setup. Observed
+    // when S-02's bids spec became the sixth file; it is timing-dependent,
+    // not specific to that pair. Serialising costs about two seconds on a
+    // lane that is opt-in and local, and is what makes "one shared database"
+    // a sound assumption rather than a race every new file re-rolls.
+    fileParallelism: false,
   },
 });

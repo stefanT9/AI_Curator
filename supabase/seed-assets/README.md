@@ -53,6 +53,59 @@ The directory is named after the seeded artist's UUID, so each JPEG uploads to
 exactly the `image_path` its seed row references. The whole `supabase storage`
 command group is gated behind `--experimental` and refuses to run without it.
 
+## Per reset: the email drain's vault entries
+
+`supabase db reset` clears Supabase Vault along with everything else, so the
+three entries the email drain reads have to be planted again afterwards. Without
+them the per-minute drain job matches no rows and silently posts nothing —
+auctions still close, `email_outbox` still fills, and no mail ever leaves. The
+only symptom is pending rows.
+
+```bash
+npx supabase db reset   # or npm run db:reset
+
+# Two DIFFERENT random values — do not reuse one for both. Generate each with:
+#   openssl rand -hex 32
+psql "$(npx supabase status -o env | grep DB_URL | cut -d= -f2- | tr -d '"')" <<'SQL'
+select vault.create_secret('<the same value as EMAIL_DRAIN_TRIGGER_TOKEN>', 'email_drain_trigger_token');
+select vault.create_secret('<the same value as EMAIL_DRAIN_SECRET>', 'email_drain_secret');
+select vault.create_secret('http://host.docker.internal:3000/api/email/drain', 'email_drain_url');
+SQL
+```
+
+The two secrets are deliberately different values.
+`email_drain_trigger_token` rides in the cron job's `Authorization` header, so
+`pg_net` writes it into `net.http_request_queue` — a table whose ACL grants
+`PUBLIC` every privilege, and which this project cannot revoke because the
+grantor is `supabase_admin` and migrations run as `postgres`. Assume anyone with
+an account can read it; all it buys them is a drain that sends already-queued
+mail. `email_drain_secret` is what the definer functions check before handing
+back an address, and it never travels over the wire at all. See
+`20260913120300_split_drain_trigger_token.sql`.
+
+The URL is reached **from inside the Postgres container**, so `localhost` is the
+container, not your machine — use `host.docker.internal` for a `next dev` /
+`next start` server on the host. On a hosted project it is the deployed origin
+plus `/api/email/drain`.
+
+The app's copies are `EMAIL_DRAIN_TRIGGER_TOKEN` and `EMAIL_DRAIN_SECRET` in
+`.env.local` (and in Vercel for a deployed environment). Nothing checks that any
+of them agree; when the trigger token drifts the drain POST comes back 401, and
+when the secret drifts the route answers 200 with zeroes while the functions
+raise `EML01`. Both show up in `net._http_response`:
+
+```sql
+select status_code, created from net._http_response order by created desc limit 5;
+
+-- The operator's "did a message get stuck" query:
+select id, kind, status, attempts, last_error, created_at
+  from public.email_outbox
+ where status = 'pending' and created_at < now() - interval '15 minutes';
+```
+
+Both are read over a direct connection on purpose: `email_outbox` has RLS
+enabled with no policies at all, and that absence is its access control.
+
 ## Changing the corpus
 
 **Edit the manifest, never `seed.sql`.** Everything in `seed.sql` below

@@ -10,6 +10,8 @@ import type { Database } from "@/types/database";
 export type UserRole = Database["public"]["Enums"]["user_role"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
+export type Auction = Database["public"]["Tables"]["auctions"]["Row"];
+export type Bid = Database["public"]["Tables"]["bids"]["Row"];
 
 export type InteractionAction = "like" | "skip";
 
@@ -27,6 +29,11 @@ export type ArtistSummary = {
 /** An artwork with its attribution resolved, which is how the UI wants it. */
 export type ArtworkWithArtist = Artwork & {
   artist: ArtistSummary | null;
+};
+
+/** An auction with its artwork (and that artwork's attribution) resolved, for the browse surface. */
+export type AuctionWithArtwork = Auction & {
+  artwork: ArtworkWithArtist;
 };
 
 export const artistLabel = (artist: ArtistSummary | null | undefined) =>
