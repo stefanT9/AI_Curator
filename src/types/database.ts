@@ -426,6 +426,10 @@ export type Database = {
         }
         Returns: string
       }
+      set_auction_emails_enabled: {
+        Args: { p_enabled: boolean; p_secret: string; p_user_id: string }
+        Returns: undefined
+      }
       swipe_deck: {
         Args: { p_limit?: number }
         Returns: {
@@ -446,6 +450,10 @@ export type Database = {
         }
       }
       verify_drain_secret: { Args: { p_secret: string }; Returns: boolean }
+      verify_unsubscribe_secret: {
+        Args: { p_secret: string }
+        Returns: boolean
+      }
     }
     Enums: {
       user_role: "collector" | "artist"

@@ -482,31 +482,31 @@ replanted, plus a fourth if the Phase 4 token decision puts the signing secret i
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npx supabase db reset`
-- [x] 1.2 Types regenerated and committed: `npm run db:types:local`
-- [x] 1.3 Default lane passes, including new validation tests for the action: `npm run test`
-- [x] 1.4 Integration lane proves own-row isolation between two users: `npm run test:integration`
-- [x] 1.5 Format, lint, typecheck and build pass
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset` — 4f37c2c
+- [x] 1.2 Types regenerated and committed: `npm run db:types:local` — 4f37c2c
+- [x] 1.3 Default lane passes, including new validation tests for the action: `npm run test` — 4f37c2c
+- [x] 1.4 Integration lane proves own-row isolation between two users: `npm run test:integration` — 4f37c2c
+- [x] 1.5 Format, lint, typecheck and build pass — 4f37c2c
 
 #### Manual
 
-- [x] 1.6 The account page shows the toggle, defaulted on, for a user with no preference row
-- [x] 1.7 Turning it off and reloading shows it off; turning it back on persists too
+- [x] 1.6 The account page shows the toggle, defaulted on, for a user with no preference row — 4f37c2c
+- [x] 1.7 Turning it off and reloading shows it off; turning it back on persists too — 4f37c2c
 
 ### Phase 2: Unsubscribe without a session
 
 #### Automated
 
-- [ ] 2.1 Default lane covers token round-trip, tamper, wrong purpose, and fail-closed: `npm run test`
-- [ ] 2.2 Default lane asserts the GET performs no mutation
-- [ ] 2.3 Integration lane proves the POST flips the row and the definer function refuses an invalid token: `npm run test:integration`
-- [ ] 2.4 Format, lint, typecheck and build pass
+- [x] 2.1 Default lane covers token round-trip, tamper, wrong purpose, and fail-closed: `npm run test`
+- [x] 2.2 Default lane asserts the GET performs no mutation
+- [x] 2.3 Integration lane proves the POST flips the row and the definer function refuses an invalid token: `npm run test:integration`
+- [x] 2.4 Format, lint, typecheck and build pass
 
 #### Manual
 
-- [ ] 2.5 A valid unsubscribe URL signed out renders the confirm page and changes nothing
-- [ ] 2.6 Pressing the button turns the preference off, visible on the account page
-- [ ] 2.7 A tampered token shows the neutral failure page
+- [x] 2.5 A valid unsubscribe URL signed out renders the confirm page and changes nothing
+- [x] 2.6 Pressing the button turns the preference off, visible on the account page
+- [x] 2.7 A tampered token shows the neutral failure page
 
 ### Phase 3: The fifth outbox kind
 

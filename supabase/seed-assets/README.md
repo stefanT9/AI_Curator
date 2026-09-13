@@ -53,13 +53,19 @@ The directory is named after the seeded artist's UUID, so each JPEG uploads to
 exactly the `image_path` its seed row references. The whole `supabase storage`
 command group is gated behind `--experimental` and refuses to run without it.
 
-## Per reset: the email drain's vault entries
+## Per reset: the vault entries
 
 `supabase db reset` clears Supabase Vault along with everything else, so the
-three entries the email drain reads have to be planted again afterwards. Without
-them the per-minute drain job matches no rows and silently posts nothing —
-auctions still close, `email_outbox` still fills, and no mail ever leaves. The
-only symptom is pending rows.
+**four** entries planted here have to be planted again afterwards. Three are the
+email drain's: without them the per-minute drain job matches no rows and
+silently posts nothing — auctions still close, `email_outbox` still fills, and
+no mail ever leaves. The only symptom is pending rows.
+
+The fourth, `unsubscribe_rpc_secret`, gates `set_auction_emails_enabled`, the
+write behind the unsubscribe link in every auction notification (S-05). Without
+it the link renders its confirm page normally and the button fails — the
+function raises `UNS00` rather than returning false, precisely so this is
+distinguishable from a value that has drifted (`UNS01`).
 
 ```bash
 npx supabase db reset   # or npm run db:reset
@@ -70,8 +76,43 @@ psql "$(npx supabase status -o env | grep DB_URL | cut -d= -f2- | tr -d '"')" <<
 select vault.create_secret('<the same value as EMAIL_DRAIN_TRIGGER_TOKEN>', 'email_drain_trigger_token');
 select vault.create_secret('<the same value as EMAIL_DRAIN_SECRET>', 'email_drain_secret');
 select vault.create_secret('http://host.docker.internal:3000/api/email/drain', 'email_drain_url');
+
+-- S-05. A third random value, distinct from both of the above and from
+-- UNSUBSCRIBE_TOKEN_SECRET, which never goes in the vault at all.
+select vault.create_secret('<the same value as UNSUBSCRIBE_RPC_SECRET>', 'unsubscribe_rpc_secret');
 SQL
 ```
+
+**Plant these before running `npm run test:integration`, not after.** Two specs
+read-or-plant the entry they need — `email-outbox.int.ts` for
+`email_drain_secret` and `unsubscribe.int.ts` for `unsubscribe_rpc_secret` — so
+running the lane against a freshly reset stack fills those two names with
+_random_ values. The lane then passes, because it uses whatever it finds; but
+the running app keeps reading `.env.local`, the two no longer agree, and the
+only symptom is a drain that posts nothing and an unsubscribe button that fails.
+Re-creating the entry afterwards raises `duplicate key value violates unique
+constraint "secrets_name_idx"` — `vault.create_secret` does not overwrite. To
+repair it, update in place instead:
+
+```bash
+DBURL=$(npx supabase status -o env | grep '^DB_URL' | cut -d= -f2- | tr -d '"')
+set -a; . ./.env.local; set +a
+psql "$DBURL" <<SQL
+select vault.update_secret(id, '$EMAIL_DRAIN_SECRET') from vault.secrets where name = 'email_drain_secret';
+select vault.update_secret(id, '$UNSUBSCRIBE_RPC_SECRET') from vault.secrets where name = 'unsubscribe_rpc_secret';
+SQL
+```
+
+Substituting from `.env.local` rather than retyping is the point: a placeholder
+pasted verbatim is accepted happily by `create_secret` and fails only much
+later, at the one moment you are trying to verify something else.
+
+`unsubscribe_rpc_secret` is the weaker half of the unsubscribe pair by design.
+On its own it cannot name a user: the caller must _also_ present a token that
+verifies against `UNSUBSCRIBE_TOKEN_SECRET`, which stays in the Node process and
+is never sent to Postgres, never put in the vault, and never travels in a
+header, a body or a URL. Only the signature over it travels. See
+`20260913130100_add_unsubscribe_write.sql`.
 
 The two secrets are deliberately different values.
 `email_drain_trigger_token` rides in the cron job's `Authorization` header, so
