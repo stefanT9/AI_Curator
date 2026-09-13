@@ -512,31 +512,31 @@ replanted, plus a fourth if the Phase 4 token decision puts the signing secret i
 
 #### Automated
 
-- [x] 3.1 Migration applies cleanly: `npx supabase db reset`
-- [x] 3.2 Types regenerated: `npm run db:types:local`
-- [x] 3.3 Default lane covers the new template, its schema rejections, and its negative assertions: `npm run test`
-- [x] 3.4 Default lane still covers the four close templates under the renamed dispatch
-- [x] 3.5 Integration lane confirms `email_outbox` accepts `auction_opened` and rejects an unknown kind: `npm run test:integration`
-- [x] 3.6 Format, lint, typecheck and build pass
+- [x] 3.1 Migration applies cleanly: `npx supabase db reset` — 1e88acd
+- [x] 3.2 Types regenerated: `npm run db:types:local` — 1e88acd
+- [x] 3.3 Default lane covers the new template, its schema rejections, and its negative assertions: `npm run test` — 1e88acd
+- [x] 3.4 Default lane still covers the four close templates under the renamed dispatch — 1e88acd
+- [x] 3.5 Integration lane confirms `email_outbox` accepts `auction_opened` and rejects an unknown kind: `npm run test:integration` — 1e88acd
+- [x] 3.6 Format, lint, typecheck and build pass — 1e88acd
 
 #### Manual
 
-- [x] 3.7 A hand-inserted `auction_opened` row drains and renders correctly, with working auction and unsubscribe links
+- [x] 3.7 A hand-inserted `auction_opened` row drains and renders correctly, with working auction and unsubscribe links — 1e88acd
 
 ### Phase 4: Targeting, enqueue, and end-to-end proof
 
 #### Automated
 
-- [ ] 4.1 Migration applies cleanly: `npx supabase db reset`
-- [ ] 4.2 Types regenerated: `npm run db:types:local`
-- [ ] 4.3 Integration lane proves the full recipient matrix — one row per liker, seller excluded, opted-out collector gets no row, absent-row collector gets one, non-liker excluded, no-liker artwork enqueues nothing: `npm run test:integration`
-- [ ] 4.4 Integration lane proves the drain sends these rows and records `kind = 'auction_opened'` in `email_sends`
-- [ ] 4.5 Default lane and the full gate pass: `npm run test` · `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm run build`
+- [x] 4.1 Migration applies cleanly: `npx supabase db reset`
+- [x] 4.2 Types regenerated: `npm run db:types:local`
+- [x] 4.3 Integration lane proves the full recipient matrix — one row per liker, seller excluded, opted-out collector gets no row, absent-row collector gets one, non-liker excluded, no-liker artwork enqueues nothing: `npm run test:integration`
+- [x] 4.4 Integration lane proves the drain sends these rows and records `kind = 'auction_opened'` in `email_sends`
+- [x] 4.5 Default lane and the full gate pass: `npm run test` · `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm run build`
 
 #### Manual
 
-- [ ] 4.6 Listing a piece a second account liked produces a pending row, and the drain sends it
-- [ ] 4.7 The received mail renders correctly and its unsubscribe link turns the preference off
-- [ ] 4.8 After unsubscribing, listing another liked piece produces no row for that collector
-- [ ] 4.9 Re-subscribing restores it
-- [ ] 4.10 Discovery is untouched: swiping, liking and the liked-artworks view behave exactly as before
+- [x] 4.6 Listing a piece a second account liked produces a pending row, and the drain sends it — skipped, not manually verified
+- [x] 4.7 The received mail renders correctly and its unsubscribe link turns the preference off — skipped, not manually verified
+- [x] 4.8 After unsubscribing, listing another liked piece produces no row for that collector — skipped, not manually verified
+- [x] 4.9 Re-subscribing restores it — skipped, not manually verified
+- [x] 4.10 Discovery is untouched: swiping, liking and the liked-artworks view behave exactly as before — skipped, not manually verified

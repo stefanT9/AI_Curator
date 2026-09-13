@@ -83,11 +83,11 @@ select vault.create_secret('<the same value as UNSUBSCRIBE_RPC_SECRET>', 'unsubs
 SQL
 ```
 
-**Plant these before running `npm run test:integration`, not after.** Two specs
-read-or-plant the entry they need — `email-outbox.int.ts` for
-`email_drain_secret` and `unsubscribe.int.ts` for `unsubscribe_rpc_secret` — so
-running the lane against a freshly reset stack fills those two names with
-_random_ values. The lane then passes, because it uses whatever it finds; but
+**Plant these before running `npm run test:integration`, not after.** Three
+specs read-or-plant the entry they need — `email-outbox.int.ts` and
+`auction-opened-emails.int.ts` for `email_drain_secret`, `unsubscribe.int.ts`
+for `unsubscribe_rpc_secret` — so running the lane against a freshly reset stack
+fills those two names with _random_ values. The lane then passes, because it uses whatever it finds; but
 the running app keeps reading `.env.local`, the two no longer agree, and the
 only symptom is a drain that posts nothing and an unsubscribe button that fails.
 Re-creating the entry afterwards raises `duplicate key value violates unique
