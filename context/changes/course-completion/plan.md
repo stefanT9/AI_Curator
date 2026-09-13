@@ -572,30 +572,30 @@ by instruction, so the original commitments survive the edit.
 
 #### Automated
 
-- [x] 2.1 `npm run test:e2e` passes against a freshly reset local stack
-- [x] 2.2 The test passes twice in a row without a reset in between
-- [x] 2.3 `npm run format:check`, `npm run lint`, `npm run typecheck` pass
-- [x] 2.4 `npm run test` and `npm run test:integration` are both still green
+- [x] 2.1 `npm run test:e2e` passes against a freshly reset local stack — bca0cdc
+- [x] 2.2 The test passes twice in a row without a reset in between — bca0cdc
+- [x] 2.3 `npm run format:check`, `npm run lint`, `npm run typecheck` pass — bca0cdc
+- [x] 2.4 `npm run test` and `npm run test:integration` are both still green — bca0cdc
 
 #### Manual
 
-- [x] 2.5 Break-verification: neutralising the tag-overlap ordering in `swipe_deck` turns the test red
-- [x] 2.6 The test is reviewed against the five agent E2E anti-patterns
-- [x] 2.7 No `waitForTimeout` and no CSS-selector locators in the spec
+- [x] 2.5 Break-verification: neutralising the tag-overlap ordering in `swipe_deck` turns the test red — bca0cdc
+- [x] 2.6 The test is reviewed against the five agent E2E anti-patterns — bca0cdc
+- [x] 2.7 No `waitForTimeout` and no CSS-selector locators in the spec — bca0cdc
 
 ### Phase 3: The README
 
 #### Automated
 
-- [ ] 3.1 `npm run format:check` passes
+- [x] 3.1 `npm run format:check` passes
 - [ ] 3.2 Every relative link in the README resolves to an existing path
-- [ ] 3.3 No occurrence of "create-next-app", "bootstrapped with", or "app/page.tsx" remains
+- [x] 3.3 No occurrence of "create-next-app", "bootstrapped with", or "app/page.tsx" remains
 
 #### Manual
 
-- [ ] 3.4 The mermaid diagram renders on GitHub
-- [ ] 3.5 Following Getting started on a clean clone produces a running app
-- [ ] 3.6 A first-time reader can state what ArtSwipe does after the first screen
+- [x] 3.4 The mermaid diagram renders on GitHub
+- [x] 3.5 Following Getting started on a clean clone produces a running app
+- [x] 3.6 A first-time reader can state what ArtSwipe does after the first screen
 
 ### Phase 4: The delivery story
 
