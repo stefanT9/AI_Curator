@@ -46,3 +46,40 @@ mechanism — see its plan's Phase 3 amendment.
 schema does not, a hand-edited URL still reaches `getStarterDeck` with an empty term — which is
 fine (it returns no rows) but means the guarantee is UI-only. Decide whether the gate should also
 be data-driven or whether UI-only is sufficient.
+
+### Correction, 2026-09-13
+
+The note above says "Today 17 of 20 terms are empty". That was true when it was written
+(2026-09-10, during `real-artwork-corpus` Phase 1) and is no longer: the corpus grew to 1000
+pieces and enrichment ran over part of it. Counted against `supabase/seed-assets/corpus.json`
+on 2026-09-13, **13 of 20 style terms are populated and 7 are empty**:
+
+| populated                                | count |
+| ---------------------------------------- | ----- |
+| figurative                               | 88    |
+| realism                                  | 55    |
+| illustrative                             | 39    |
+| geometric, folk art                      | 17 each |
+| abstract                                 | 15    |
+| art nouveau                              | 10    |
+| expressionist, gestural                  | 5 each |
+| impressionist                            | 4     |
+| minimalist                               | 3     |
+| surrealist, street art                   | 1 each |
+
+Empty: hyperrealism, cubist, pop art, art deco, brutalist, naive, psychedelic.
+
+Only 196 of the 1000 corpus rows carry enrichment tags, which is where essentially every style
+tag comes from — so the unevenness is a property of enrichment coverage, not of the corpus size.
+
+**The defect is unchanged in kind.** A collector can still pick a term with nothing behind it and
+land on the exhaustion path with no likes, indistinguishable from a broken flow; and the
+"brand-new production deployment" case in the note above is untouched by any of this. Only the
+count moved.
+
+The `course-completion` change routed around this rather than fixing it: `test/e2e/helpers.ts`
+pins `POPULATED_STYLE_TERMS = ["figurative", "realism"]` so the browser lane and the README
+screenshot capture cannot land on the exhaustion path. If this change lands and the picker only
+ever offers populated terms, that constant can go.
+
+This change stays **open and unplanned**.

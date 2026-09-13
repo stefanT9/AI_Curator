@@ -686,28 +686,28 @@ by instruction, so the original commitments survive the edit.
 
 #### Automated
 
-- [ ] 5.1 `npm run format:check` passes
-- [ ] 5.2 `PROJECT_PLAN.md` has no `embedding vector` reference and its structure block matches the real `src/` tree
-- [ ] 5.3 The certification table has six rows and no row reads as unmet
-- [ ] 5.4 Full gate green: `format:check` · `lint` · `typecheck` · `test` · `build`
+- [x] 5.1 `npm run format:check` passes
+- [x] 5.2 `PROJECT_PLAN.md` has no `embedding vector` reference and its structure block matches the real `src/` tree
+- [x] 5.3 The certification table has six rows and no row reads as unmet
+- [x] 5.4 Full gate green: `format:check` · `lint` · `typecheck` · `test` · `build`
 
 #### Manual
 
-- [ ] 5.5 The decision log still contains the four original 2026-09-09 rows verbatim
-- [ ] 5.6 `PROJECT_PLAN.md`, `README.md` and `docs/delivery-story.md` read without contradiction
-- [ ] 5.7 `data-driven-picker` is still `status: new` — corrected, not closed
+- [x] 5.5 The decision log still contains the four original 2026-09-09 rows verbatim
+- [x] 5.6 `PROJECT_PLAN.md`, `README.md` and `docs/delivery-story.md` read without contradiction
+- [x] 5.7 `data-driven-picker` is still `status: new` — corrected, not closed
 
 ### Phase 6: The screenshot tour
 
 #### Automated
 
-- [x] 6.1 `npm run docs:screenshots` passes and writes ten PNGs into `docs/screenshots/`
-- [x] 6.2 `npx playwright test --list` still reports exactly one test
-- [x] 6.3 Every relative link and image path in `README.md` resolves
-- [x] 6.4 `npm run format:check` · `npm run lint` · `npm run typecheck` pass
+- [x] 6.1 `npm run docs:screenshots` passes and writes ten PNGs into `docs/screenshots/` — a11fcac
+- [x] 6.2 `npx playwright test --list` still reports exactly one test — a11fcac
+- [x] 6.3 Every relative link and image path in `README.md` resolves — a11fcac
+- [x] 6.4 `npm run format:check` · `npm run lint` · `npm run typecheck` pass — a11fcac
 
 #### Manual
 
-- [x] 6.5 The shots render on GitHub and show each run's own piece
-- [x] 6.6 No screenshot advertises a currently degraded feature
-- [x] 6.7 `npm run test` and the browser lane are unaffected
+- [x] 6.5 The shots render on GitHub and show each run's own piece — a11fcac
+- [x] 6.6 No screenshot advertises a currently degraded feature — a11fcac
+- [x] 6.7 `npm run test` and the browser lane are unaffected — a11fcac
