@@ -318,6 +318,32 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          auction_emails_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auction_emails_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auction_emails_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
