@@ -686,16 +686,16 @@ by instruction, so the original commitments survive the edit.
 
 #### Automated
 
-- [x] 5.1 `npm run format:check` passes
-- [x] 5.2 `PROJECT_PLAN.md` has no `embedding vector` reference and its structure block matches the real `src/` tree
-- [x] 5.3 The certification table has six rows and no row reads as unmet
-- [x] 5.4 Full gate green: `format:check` · `lint` · `typecheck` · `test` · `build`
+- [x] 5.1 `npm run format:check` passes — a42e8e7
+- [x] 5.2 `PROJECT_PLAN.md` has no `embedding vector` reference and its structure block matches the real `src/` tree — a42e8e7
+- [x] 5.3 The certification table has six rows and no row reads as unmet — a42e8e7
+- [x] 5.4 Full gate green: `format:check` · `lint` · `typecheck` · `test` · `build` — a42e8e7
 
 #### Manual
 
-- [x] 5.5 The decision log still contains the four original 2026-09-09 rows verbatim
-- [x] 5.6 `PROJECT_PLAN.md`, `README.md` and `docs/delivery-story.md` read without contradiction
-- [x] 5.7 `data-driven-picker` is still `status: new` — corrected, not closed
+- [x] 5.5 The decision log still contains the four original 2026-09-09 rows verbatim — a42e8e7
+- [x] 5.6 `PROJECT_PLAN.md`, `README.md` and `docs/delivery-story.md` read without contradiction — a42e8e7
+- [x] 5.7 `data-driven-picker` is still `status: new` — corrected, not closed — a42e8e7
 
 ### Phase 6: The screenshot tour
 
