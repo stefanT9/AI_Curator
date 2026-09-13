@@ -587,29 +587,29 @@ by instruction, so the original commitments survive the edit.
 
 #### Automated
 
-- [x] 3.1 `npm run format:check` passes
-- [ ] 3.2 Every relative link in the README resolves to an existing path
-- [x] 3.3 No occurrence of "create-next-app", "bootstrapped with", or "app/page.tsx" remains
+- [x] 3.1 `npm run format:check` passes — cdf8316
+- [x] 3.2 Every relative link in the README resolves to an existing path
+- [x] 3.3 No occurrence of "create-next-app", "bootstrapped with", or "app/page.tsx" remains — cdf8316
 
 #### Manual
 
-- [x] 3.4 The mermaid diagram renders on GitHub
-- [x] 3.5 Following Getting started on a clean clone produces a running app
-- [x] 3.6 A first-time reader can state what ArtSwipe does after the first screen
+- [x] 3.4 The mermaid diagram renders on GitHub — cdf8316
+- [x] 3.5 Following Getting started on a clean clone produces a running app — cdf8316
+- [x] 3.6 A first-time reader can state what ArtSwipe does after the first screen — cdf8316
 
 ### Phase 4: The delivery story
 
 #### Automated
 
-- [ ] 4.1 `npm run format:check` passes
-- [ ] 4.2 Every change id named in the document resolves to a directory under `context/archive/`
-- [ ] 4.3 Every relative link resolves
+- [x] 4.1 `npm run format:check` passes
+- [x] 4.2 Every change id named in the document resolves to a directory under `context/archive/`
+- [x] 4.3 Every relative link resolves
 
 #### Manual
 
-- [ ] 4.4 The change table has one row per archived change — 14 rows, none invented, none missed
-- [ ] 4.5 Each of the three lessons is traceable to the incident described
-- [ ] 4.6 A reader unfamiliar with the project can follow the arc without opening `context/`
+- [x] 4.4 The change table has one row per archived change — 14 rows, none invented, none missed
+- [x] 4.5 Each of the three lessons is traceable to the incident described
+- [x] 4.6 A reader unfamiliar with the project can follow the arc without opening `context/`
 
 ### Phase 5: Reconcile the founding documents
 
