@@ -29,5 +29,5 @@ export type { EmailLedgerClient, SendLedgerEntry } from "./record";
 export { drainOutbox } from "./outbox";
 export type { DrainSummary, OutboxDrainClient } from "./outbox";
 
-export { composeCloseEmail } from "./templates";
-export type { ComposedMessage, OutboxKind } from "./templates";
+export { composeOutboxEmail } from "./templates";
+export type { ComposedMessage, OutboxKind, OutboxLinks } from "./templates";

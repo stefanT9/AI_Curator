@@ -740,3 +740,71 @@ describe("the drain's two operations", () => {
     ).toBe("pending");
   });
 });
+
+/**
+ * S-05 Phase 3: the fifth kind, at the one boundary that can refuse it.
+ *
+ * `email_outbox.kind` is a check constraint, and a check constraint is exactly
+ * the kind of claim the default lane cannot make — `src/types/database.ts`
+ * types the column `string` and would agree with any value a mock was handed.
+ * The constraint and the compose dispatch in `src/lib/email/templates.ts` are
+ * two halves of one list; a row this schema admits but that build cannot render
+ * is retired as `unrenderable`, and a row the schema rejects never exists at
+ * all. Both halves are asserted, here and in `test/lib/email-templates.test.ts`.
+ *
+ * Written over the direct connection because there is no other way in: RLS is
+ * on with no insert policy, and `claim_pending_emails` only takes rows out.
+ * Each row is removed again so nothing is left for a later drain to claim.
+ */
+describe("the kind constraint", () => {
+  const insertKind = async (kind: string): Promise<string> => {
+    const { rows } = await pool.query<{ id: string }>(
+      `insert into public.email_outbox (auction_id, recipient_email, kind, payload)
+       values ($1, $2, $3, $4::jsonb)
+       returning id`,
+      [
+        auctionId("noBids"),
+        "liker@example.test",
+        kind,
+        JSON.stringify({ artwork_title: "Harbour at Dusk" }),
+      ],
+    );
+
+    return rows[0].id;
+  };
+
+  it("admits an auction_opened row", async () => {
+    const id = await insertKind("auction_opened");
+
+    const { rows } = await pool.query<{ kind: string; status: string }>(
+      "select kind, status from public.email_outbox where id = $1",
+      [id],
+    );
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].kind).toBe("auction_opened");
+    // Pending like any other row: the drain is kind-agnostic, and S-05 adds no
+    // second bridge.
+    expect(rows[0].status).toBe("pending");
+
+    await pool.query("delete from public.email_outbox where id = $1", [id]);
+  });
+
+  it("still refuses a kind nothing can render", async () => {
+    await expect(insertKind("auction_relisted")).rejects.toMatchObject({
+      code: "23514",
+    });
+  });
+
+  it("still admits the four close kinds", async () => {
+    for (const kind of [
+      "auction_won",
+      "auction_sold",
+      "auction_lost",
+      "auction_unsold",
+    ]) {
+      const id = await insertKind(kind);
+      await pool.query("delete from public.email_outbox where id = $1", [id]);
+    }
+  });
+});

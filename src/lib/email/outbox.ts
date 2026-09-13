@@ -2,8 +2,9 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
+import { outboxLinks } from "./links";
 import { sendEmail, type SendFailure } from "./send";
-import { composeCloseEmail } from "./templates";
+import { composeOutboxEmail } from "./templates";
 
 /**
  * The drain: claim a batch of queued messages, compose them, send them, report
@@ -192,7 +193,7 @@ export async function drainOutbox(
   // function's own ceiling.
   for (const row of data) {
     try {
-      const message = composeCloseEmail(row.kind, row.payload);
+      const message = composeOutboxEmail(row.kind, row.payload, outboxLinks);
 
       if (!message) {
         await markOutcome(supabase, secret, row.id, {

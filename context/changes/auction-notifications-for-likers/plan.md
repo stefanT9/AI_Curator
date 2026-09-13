@@ -497,31 +497,31 @@ replanted, plus a fourth if the Phase 4 token decision puts the signing secret i
 
 #### Automated
 
-- [x] 2.1 Default lane covers token round-trip, tamper, wrong purpose, and fail-closed: `npm run test`
-- [x] 2.2 Default lane asserts the GET performs no mutation
-- [x] 2.3 Integration lane proves the POST flips the row and the definer function refuses an invalid token: `npm run test:integration`
-- [x] 2.4 Format, lint, typecheck and build pass
+- [x] 2.1 Default lane covers token round-trip, tamper, wrong purpose, and fail-closed: `npm run test` — 1e53f84
+- [x] 2.2 Default lane asserts the GET performs no mutation — 1e53f84
+- [x] 2.3 Integration lane proves the POST flips the row and the definer function refuses an invalid token: `npm run test:integration` — 1e53f84
+- [x] 2.4 Format, lint, typecheck and build pass — 1e53f84
 
 #### Manual
 
-- [x] 2.5 A valid unsubscribe URL signed out renders the confirm page and changes nothing
-- [x] 2.6 Pressing the button turns the preference off, visible on the account page
-- [x] 2.7 A tampered token shows the neutral failure page
+- [x] 2.5 A valid unsubscribe URL signed out renders the confirm page and changes nothing — 1e53f84
+- [x] 2.6 Pressing the button turns the preference off, visible on the account page — 1e53f84
+- [x] 2.7 A tampered token shows the neutral failure page — 1e53f84
 
 ### Phase 3: The fifth outbox kind
 
 #### Automated
 
-- [ ] 3.1 Migration applies cleanly: `npx supabase db reset`
-- [ ] 3.2 Types regenerated: `npm run db:types:local`
-- [ ] 3.3 Default lane covers the new template, its schema rejections, and its negative assertions: `npm run test`
-- [ ] 3.4 Default lane still covers the four close templates under the renamed dispatch
-- [ ] 3.5 Integration lane confirms `email_outbox` accepts `auction_opened` and rejects an unknown kind: `npm run test:integration`
-- [ ] 3.6 Format, lint, typecheck and build pass
+- [x] 3.1 Migration applies cleanly: `npx supabase db reset`
+- [x] 3.2 Types regenerated: `npm run db:types:local`
+- [x] 3.3 Default lane covers the new template, its schema rejections, and its negative assertions: `npm run test`
+- [x] 3.4 Default lane still covers the four close templates under the renamed dispatch
+- [x] 3.5 Integration lane confirms `email_outbox` accepts `auction_opened` and rejects an unknown kind: `npm run test:integration`
+- [x] 3.6 Format, lint, typecheck and build pass
 
 #### Manual
 
-- [ ] 3.7 A hand-inserted `auction_opened` row drains and renders correctly, with working auction and unsubscribe links
+- [x] 3.7 A hand-inserted `auction_opened` row drains and renders correctly, with working auction and unsubscribe links
 
 ### Phase 4: Targeting, enqueue, and end-to-end proof
 
