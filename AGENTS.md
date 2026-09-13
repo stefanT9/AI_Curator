@@ -124,6 +124,16 @@ Four lanes, each with its own config and its own file glob so one can never pick
 - **`storageState` is deliberately absent.** The only risk in scope begins at a signed-out signup page, so a pre-authenticated fixture would be scaffolding nothing uses. Add one when a risk needs it, not before.
 - The onboarding picker offers seven style terms with no artworks behind them (the open `data-driven-picker` change). Specs pin `POPULATED_STYLE_TERMS` from `test/e2e/helpers.ts`; any other term lands on the exhaustion path and fails red for the wrong reason.
 
+### The screenshot capture is not a fifth lane
+
+`npm run docs:screenshots` (`playwright.screenshots.config.ts`, `test/screenshots/**/*.shot.ts`) drives the real app and writes the README's images into `docs/screenshots/`. **It asserts nothing about the product** — every `expect` in it is a wait condition — so it is documentation tooling that happens to use Playwright, not a test lane, and a failing shot is never a product regression.
+
+- It has its own config and its own `.shot.ts` glob for the same reason the four lanes do: `npm run test:e2e` must keep running exactly one test, the one risk it exists for. Never add a `.spec.ts` under `test/screenshots/`, and never add a shot to `test/e2e/`.
+- Same prerequisites as the browser lane — local stack, `.env.test.local`, seeded corpus, `npx playwright install chromium` — plus the same loopback guard, reused from `test/integration/setup.ts`, and the same production-build `webServer`.
+- **The capture is additive**: each run leaves a collector, an artist, an artwork and an auction behind. Every step therefore locates its own artwork by title rather than by `.first()`, or a second run photographs the previous run's piece. Run `npm run db:reset` first when the shots need to be clean.
+- It generates a throwaway `UNSUBSCRIBE_TOKEN_SECRET` per run rather than reading the developer's own, and lifts only `OPENROUTER_API_KEY` out of `.env.local` **by name** — never `loadEnvFile`, which would drag that file's `NEXT_PUBLIC_SUPABASE_*` (pointing at the linked project) in behind it.
+- It runs under `--conditions=react-server` so it can import `src/lib/email/unsubscribe.ts` — the one implementation of the token format — instead of restating its HMAC.
+
 ### Verify before calling a change done
 
 Run and pass all of: `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm run test` · `npm run build`.

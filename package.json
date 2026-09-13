@@ -14,6 +14,7 @@
     "test:smoke": "node --env-file-if-exists=.env.local ./node_modules/vitest/vitest.mjs run --config vitest.smoke.config.mts",
     "test:integration": "node --env-file-if-exists=.env.test.local ./node_modules/vitest/vitest.mjs run --config vitest.integration.config.mts",
     "test:e2e": "playwright test",
+    "docs:screenshots": "NODE_OPTIONS=--conditions=react-server playwright test --config playwright.screenshots.config.ts",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

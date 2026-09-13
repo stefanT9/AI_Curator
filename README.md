@@ -38,6 +38,78 @@ directly.
 
 ---
 
+## Both loops, in the app
+
+Captured by driving the real application — real signup, real RLS, real Storage,
+real `swipe_deck`, real auction. Nothing here is a mockup; `npm run docs:screenshots`
+regenerates the whole set (see [Testing](#testing)).
+
+### The collector loop
+
+**1. Pick two to four styles.** The first thing a new collector is asked — a
+question answerable without seeing any art.
+
+![Onboarding style picker](docs/screenshots/01-onboarding-picker.png)
+
+**2. The starter deck those styles produced.** Five likes end the flow and hand
+off to `/discover`.
+
+![Starter deck](docs/screenshots/02-starter-deck.png)
+
+**3. The payoff.** This deck is ordered by tag overlap with what was just liked
+— the one property [`test/e2e/taste-loop.spec.ts`](test/e2e/taste-loop.spec.ts)
+exists to prove.
+
+![Ranked discover deck](docs/screenshots/03-discover-ranked.png)
+
+**4. What the collector kept**, which is also the input the ranking reads.
+
+![Liked pieces](docs/screenshots/04-liked.png)
+
+**5. The account page**, including the auction-notification switch — a like was
+never consent to be emailed.
+
+![Account and notifications](docs/screenshots/05-account-notifications.png)
+
+### The auction loop
+
+**6. The artist studio.** Any collector can become an artist from their account
+page.
+
+![Artist studio](docs/screenshots/06-studio.png)
+
+**7. Listing a piece**: a starting price and one of three preset durations, both
+mirrored from `create_auction`'s own checks so the form promises exactly what
+the database will accept.
+
+![Auction listing form](docs/screenshots/07-auction-listing.png)
+
+**8. Open auctions.** A card may say an auction has bids; it never says what
+they are.
+
+![Open auctions](docs/screenshots/08-auctions-browse.png)
+
+**9. A sealed bid**, placed by a second collector. No other bidder's amount
+appears on this page for anyone — the seller included.
+
+![Sealed bid form](docs/screenshots/09-auction-sealed-bid.png)
+
+**10. The off switch**, opened straight from an inbox with no session. The GET
+only renders; only the POST mutates.
+
+![Unsubscribe page](docs/screenshots/10-unsubscribe.png)
+
+> **Note.** There is deliberately no screenshot of AI enrichment filling the
+> upload form. As of 2026-09-13 OpenRouter's free vision roster answers in
+> 26–70s against a 25s budget and the pinned lead model rejects the request
+> outright, so the form renders a timeout instead of a suggestion. A screenshot
+> of that documents an outage, not a feature. Measurements and the fix are
+> tracked in [`context/changes/ai-enrichment-budget/`](context/changes/ai-enrichment-budget/).
+> Everything else in the product is unaffected — enrichment is optional by
+> design and never blocks an upload.
+
+---
+
 ## Architecture
 
 ```mermaid
@@ -175,6 +247,18 @@ The E2E lane additionally needs `npx playwright install chromium` once, a seeded
 corpus, and patience: its `webServer` runs a full `npm run build` before the
 first test, because headless Chromium does not hydrate `next dev` pages
 reliably here.
+
+**`npm run docs:screenshots` is not a fifth lane.** It drives the same real app
+through the same real flows to regenerate the images above, and asserts nothing
+about the product — every wait in it exists to hold the shutter, not to check a
+property. It has its own config and its own `.shot.ts` glob precisely so
+`npm run test:e2e` keeps running exactly one test. It is additive (each run
+leaves a collector, an artist, an artwork and an auction behind), so reset first
+when the shots need to be clean:
+
+```bash
+npm run db:reset && npm run docs:screenshots
+```
 
 Before calling any change done, run the same gate CI runs:
 

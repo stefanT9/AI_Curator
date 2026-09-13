@@ -496,6 +496,77 @@ corpus grew and enrichment ran after that note was written. The change stays ope
 
 ---
 
+---
+
+## Phase 6: The screenshot tour
+
+> **Added 2026-09-13, mid-implementation, at the owner's request** — after Phase 4 landed and
+> before Phase 5 runs, so that Phase 5's reconciliation reads the final README. The original
+> five-phase plan had no screenshots in it; this section records what was actually built rather
+> than leaving it to appear unexplained in the diff.
+
+### Overview
+
+Ten screenshots of the real app, captured by driving it, and a README section built around them.
+Documentation tooling that happens to use Playwright — not a fifth test lane.
+
+### Changes Required:
+
+#### 1. The capture lane
+
+**Files**: `playwright.screenshots.config.ts` (new), `test/screenshots/tour.shot.ts` (new),
+`package.json`
+
+**Intent**: Regenerate the README's images from the real product on demand.
+
+**Contract**: Its own config and its own `**/*.shot.ts` glob — disjoint from all four test globs,
+so `npm run test:e2e` keeps running exactly one test. Reuses `requireLocalStack` and the browser
+lane's `globalSetup` rather than restating either. Same production-build `webServer`, same
+build-time env hazard, same reasoning. `npm run docs:screenshots` runs it under
+`--conditions=react-server` so the unsubscribe shot can import the real token minter instead of
+restating its HMAC. A throwaway `UNSUBSCRIBE_TOKEN_SECRET` per run; `OPENROUTER_API_KEY` lifted
+from `.env.local` by name only, never by `loadEnvFile`.
+
+Nothing in the file asserts a product property — every `expect` is a wait condition.
+
+#### 2. The README section, and the rulebook
+
+**Files**: `README.md`, `AGENTS.md`
+
+**Contract**: A "Both loops, in the app" section between the prose loops and Architecture, ten
+captioned images, grouped collector-then-auction. `AGENTS.md` gains a subsection stating that the
+capture is **not** a lane, that it is additive, and why it never uses `.first()`.
+
+#### 3. The enrichment shot that is deliberately absent
+
+**File**: `context/changes/ai-enrichment-budget/change.md` (new)
+
+**Intent**: The obvious eleventh shot — AI enrichment filling the upload form — cannot be taken
+truthfully. OpenRouter's free vision roster now answers in 26–70s against a 25s budget, and the
+pinned lead model rejects the request outright, so the form renders a timeout. Rather than
+photograph an outage or quietly fake it, the shot is dropped, the README says why, and the
+regression is opened as its own change with the measurements attached.
+
+**Contract**: `src/lib/ai/` is **not** touched by this change. The fix is a budget-per-caller
+decision with test implications and belongs to a planned change of its own.
+
+### Success Criteria:
+
+#### Automated Verification:
+
+- `npm run docs:screenshots` passes and writes ten PNGs into `docs/screenshots/`
+- `npx playwright test --list` still reports exactly one test — the capture is invisible to the browser lane
+- Every relative link and image path in `README.md` resolves
+- `npm run format:check` · `npm run lint` · `npm run typecheck` pass
+
+#### Manual Verification:
+
+- The shots render on GitHub and show the piece each run creates, not a previous run's
+- No screenshot advertises a feature that is currently degraded
+- `npm run test` and the browser lane are unaffected
+
+---
+
 ## Testing Strategy
 
 ### Unit Tests:
@@ -588,7 +659,7 @@ by instruction, so the original commitments survive the edit.
 #### Automated
 
 - [x] 3.1 `npm run format:check` passes — cdf8316
-- [x] 3.2 Every relative link in the README resolves to an existing path
+- [x] 3.2 Every relative link in the README resolves to an existing path — 02593bb
 - [x] 3.3 No occurrence of "create-next-app", "bootstrapped with", or "app/page.tsx" remains — cdf8316
 
 #### Manual
@@ -601,15 +672,15 @@ by instruction, so the original commitments survive the edit.
 
 #### Automated
 
-- [x] 4.1 `npm run format:check` passes
-- [x] 4.2 Every change id named in the document resolves to a directory under `context/archive/`
-- [x] 4.3 Every relative link resolves
+- [x] 4.1 `npm run format:check` passes — 02593bb
+- [x] 4.2 Every change id named in the document resolves to a directory under `context/archive/` — 02593bb
+- [x] 4.3 Every relative link resolves — 02593bb
 
 #### Manual
 
-- [x] 4.4 The change table has one row per archived change — 14 rows, none invented, none missed
-- [x] 4.5 Each of the three lessons is traceable to the incident described
-- [x] 4.6 A reader unfamiliar with the project can follow the arc without opening `context/`
+- [x] 4.4 The change table has one row per archived change — 14 rows, none invented, none missed — 02593bb
+- [x] 4.5 Each of the three lessons is traceable to the incident described — 02593bb
+- [x] 4.6 A reader unfamiliar with the project can follow the arc without opening `context/` — 02593bb
 
 ### Phase 5: Reconcile the founding documents
 
@@ -625,3 +696,18 @@ by instruction, so the original commitments survive the edit.
 - [ ] 5.5 The decision log still contains the four original 2026-09-09 rows verbatim
 - [ ] 5.6 `PROJECT_PLAN.md`, `README.md` and `docs/delivery-story.md` read without contradiction
 - [ ] 5.7 `data-driven-picker` is still `status: new` — corrected, not closed
+
+### Phase 6: The screenshot tour
+
+#### Automated
+
+- [x] 6.1 `npm run docs:screenshots` passes and writes ten PNGs into `docs/screenshots/`
+- [x] 6.2 `npx playwright test --list` still reports exactly one test
+- [x] 6.3 Every relative link and image path in `README.md` resolves
+- [x] 6.4 `npm run format:check` · `npm run lint` · `npm run typecheck` pass
+
+#### Manual
+
+- [x] 6.5 The shots render on GitHub and show each run's own piece
+- [x] 6.6 No screenshot advertises a currently degraded feature
+- [x] 6.7 `npm run test` and the browser lane are unaffected
