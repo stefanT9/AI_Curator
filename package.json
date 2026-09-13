@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "test:smoke": "node --env-file-if-exists=.env.local ./node_modules/vitest/vitest.mjs run --config vitest.smoke.config.mts",
     "test:integration": "node --env-file-if-exists=.env.test.local ./node_modules/vitest/vitest.mjs run --config vitest.integration.config.mts",
+    "test:e2e": "playwright test",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -44,6 +45,7 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^26.5.0",
     "@types/pg": "^8.23.1",

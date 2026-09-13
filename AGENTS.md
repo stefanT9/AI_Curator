@@ -88,7 +88,7 @@ Node is pinned in `.nvmrc` / `engines` (currently 24 LTS — `nvm use` picks it 
 
 ### Tests
 
-Three lanes, each with its own Vitest config and its own file glob so one can never pick up another's specs. Only the first runs in CI.
+Four lanes, each with its own config and its own file glob so one can never pick up another's specs. Only the first runs in CI.
 
 **Default suite — `npm run test`** (`vitest.config.mts`, `test/**/*.test.ts`, Node environment, no jsdom; `npm run test:watch` while iterating).
 
@@ -112,6 +112,17 @@ Three lanes, each with its own Vitest config and its own file glob so one can ne
 **Live smoke checks — `npm run test:smoke`** (`vitest.smoke.config.mts`, `test/smoke/**/*.live.ts`). Opt-in, never in CI.
 
 - Calls a real external provider (currently OpenRouter, via `.env.local`). For manually confirming an integration works end to end, not for assertions anyone else has to keep green.
+
+**Browser lane — `npm run test:e2e`** (`playwright.config.ts`, `test/e2e/**/*.spec.ts`). Opt-in, local only, never in CI.
+
+- The only lane that drives a real browser against a real server. It exists for one risk — `context/foundation/test-plan.md` Risk #7: _a collector completes onboarding and likes pieces, but the deck that follows is not ordered toward what they liked_ — which spans auth, the proxy, RLS, the `swipe_deck` RPC and the rendered deck at once. No other lane spans all five. **One risk, one test**; a second browser test needs a risk of its own.
+- **The server must be a production build.** `webServer` runs `npm run build && npm run start`, not `next dev` — headless Chromium does not hydrate `next dev` pages reliably here and fails silently when it doesn't, which reads as a bad selector rather than a bad server.
+- **`NEXT_PUBLIC_*` are inlined at build time, and `.env.local` points at production.** This is the hazard the config is shaped around. Both commands run inside the same `webServer` invocation with the same `env` block, because overriding the URL and key for `start` alone would still serve a client bundle built against `.env.local` — the linked project — and the browser would sign real accounts up there. Never split the build out of `webServer`, and never set `reuseExistingServer`.
+- Credentials come from `.env.test.local`, the same file the integration lane uses, loaded by `process.loadEnvFile` inside the config (the Playwright CLI is not `node`, so the `--env-file-if-exists` flag the Vitest scripts use has nowhere to go). `test/e2e/global-setup.ts` reuses `requireLocalRunningStack` from `test/integration/setup.ts` rather than restating it — the cross-lane import is deliberate, because two definitions of "is this local?" is one more than this codebase should hold.
+- Prerequisites beyond the integration lane's: `npx playwright install chromium` once (deliberately not a `postinstall` hook — CI must never download a browser it does not use), a seeded corpus (`npm run db:seed:fetch` once, then `npm run db:reset`), and the patience for a cold `next build`.
+- `workers: 1`. One shared Postgres, same reasoning as `fileParallelism: false` in the integration lane — and `[auth.rate_limit] sign_in_sign_ups` (30 per 5 minutes per IP) is shared with it too.
+- **`storageState` is deliberately absent.** The only risk in scope begins at a signed-out signup page, so a pre-authenticated fixture would be scaffolding nothing uses. Add one when a risk needs it, not before.
+- The onboarding picker offers seven style terms with no artworks behind them (the open `data-driven-picker` change). Specs pin `POPULATED_STYLE_TERMS` from `test/e2e/helpers.ts`; any other term lands on the exhaustion path and fails red for the wrong reason.
 
 ### Verify before calling a change done
 

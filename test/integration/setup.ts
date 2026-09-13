@@ -1,7 +1,9 @@
 /**
- * The rails every integration spec runs on.
+ * The rails every real-stack spec runs on — the integration lane, and the
+ * browser lane under `test/e2e/`, which imports these rather than restating
+ * them (`playwright.config.ts`, `test/e2e/global-setup.ts`).
  *
- * This lane creates users and uploads objects. `.env.local` in this repo
+ * These lanes create users and upload objects. `.env.local` in this repo
  * points at the linked project, so a lane that picked it up would sign real
  * accounts up on production. `requireLocalStack` makes that impossible: the
  * URL's hostname must be loopback or the suite throws before any client is
@@ -35,7 +37,7 @@ export const requireLocalStack = (): LocalStack => {
 
   if (!url || !anonKey) {
     throw new Error(
-      "The integration lane needs NEXT_PUBLIC_SUPABASE_URL and " +
+      "This lane needs NEXT_PUBLIC_SUPABASE_URL and " +
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY from a local stack. Generate " +
         `.env.test.local yourself:\n${SETUP_COMMANDS}`,
     );
@@ -46,15 +48,15 @@ export const requireLocalStack = (): LocalStack => {
     hostname = new URL(url).hostname;
   } catch {
     throw new Error(
-      `NEXT_PUBLIC_SUPABASE_URL is not a URL: ${url}. The integration lane ` +
-        `only runs against a local stack:\n${SETUP_COMMANDS}`,
+      `NEXT_PUBLIC_SUPABASE_URL is not a URL: ${url}. This lane only runs ` +
+        `against a local stack:\n${SETUP_COMMANDS}`,
     );
   }
 
   if (!LOCAL_HOSTNAMES.includes(hostname)) {
     throw new Error(
-      `Refusing to run the integration lane against "${hostname}". This lane ` +
-        "signs up users and uploads objects, so it only runs against a local " +
+      `Refusing to run against "${hostname}". This lane signs up users and ` +
+        "uploads objects, so it only runs against a local " +
         `stack (127.0.0.1 or localhost). Regenerate .env.test.local:\n${SETUP_COMMANDS}`,
     );
   }
@@ -137,8 +139,8 @@ export const requireLocalDatabaseUrl = (): string => {
     hostname = new URL(url).hostname;
   } catch {
     throw new Error(
-      `DB_URL is not a URL: ${url}. The integration lane only runs against a ` +
-        `local stack:\n${SETUP_COMMANDS}`,
+      `DB_URL is not a URL: ${url}. This lane only runs against a local ` +
+        `stack:\n${SETUP_COMMANDS}`,
     );
   }
 
